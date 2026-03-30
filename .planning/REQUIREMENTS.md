@@ -103,7 +103,7 @@ Explicitly excluded. Documented to prevent scope creep.
 | Pobieranie ebookow ze strony | Ebooki dostarczane wylacznie na email |
 | System komentarzy | Za duzo moderacji, nie kluczowe w v1 |
 | Blog (nie-przepisowy) | Skupienie na przepisach, nie ogolnym blogu |
-| Video z przepisami | Koszty storage/bandwidth, odk\u0142adamy |
+| Video z przepisami | Koszty storage/bandwidth, odkladamy |
 | Stripe | Uzytkownik wybral Przelewy24 |
 
 ## Traceability
@@ -112,45 +112,45 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | - | Pending |
-| FOUND-02 | - | Pending |
-| FOUND-03 | - | Pending |
-| FOUND-04 | - | Pending |
-| FOUND-05 | - | Pending |
-| LAND-01 | - | Pending |
-| LAND-02 | - | Pending |
-| LAND-03 | - | Pending |
-| PRZE-01 | - | Pending |
-| PRZE-02 | - | Pending |
-| PRZE-03 | - | Pending |
-| PRZE-04 | - | Pending |
-| PRZE-05 | - | Pending |
-| PRZE-06 | - | Pending |
-| SHOP-01 | - | Pending |
-| SHOP-02 | - | Pending |
-| SHOP-03 | - | Pending |
-| SHOP-04 | - | Pending |
-| SHOP-05 | - | Pending |
-| SHOP-06 | - | Pending |
-| PAY-01 | - | Pending |
-| PAY-02 | - | Pending |
-| PAY-03 | - | Pending |
-| PAY-04 | - | Pending |
-| PAY-05 | - | Pending |
-| PAY-06 | - | Pending |
-| NEWS-01 | - | Pending |
-| NEWS-02 | - | Pending |
-| NEWS-03 | - | Pending |
-| LEGAL-01 | - | Pending |
-| LEGAL-02 | - | Pending |
-| LEGAL-03 | - | Pending |
-| LEGAL-04 | - | Pending |
+| FOUND-01 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Pending |
+| LAND-01 | Phase 2 | Pending |
+| LAND-02 | Phase 2 | Pending |
+| LAND-03 | Phase 2 | Pending |
+| PRZE-01 | Phase 3 | Pending |
+| PRZE-02 | Phase 3 | Pending |
+| PRZE-03 | Phase 3 | Pending |
+| PRZE-04 | Phase 3 | Pending |
+| PRZE-05 | Phase 3 | Pending |
+| PRZE-06 | Phase 3 | Pending |
+| SHOP-01 | Phase 4 | Pending |
+| SHOP-02 | Phase 4 | Pending |
+| SHOP-03 | Phase 4 | Pending |
+| SHOP-04 | Phase 4 | Pending |
+| SHOP-05 | Phase 4 | Pending |
+| SHOP-06 | Phase 4 | Pending |
+| PAY-01 | Phase 5 | Pending |
+| PAY-02 | Phase 5 | Pending |
+| PAY-03 | Phase 5 | Pending |
+| PAY-04 | Phase 5 | Pending |
+| PAY-05 | Phase 5 | Pending |
+| PAY-06 | Phase 5 | Pending |
+| NEWS-01 | Phase 6 | Pending |
+| NEWS-02 | Phase 6 | Pending |
+| NEWS-03 | Phase 6 | Pending |
+| LEGAL-01 | Phase 2 | Pending |
+| LEGAL-02 | Phase 2 | Pending |
+| LEGAL-03 | Phase 1 | Pending |
+| LEGAL-04 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 33 total
-- Mapped to phases: 0
-- Unmapped: 33
+- Mapped to phases: 33
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-30*
-*Last updated: 2026-03-30 after initial definition*
+*Last updated: 2026-03-30 after roadmap creation*
