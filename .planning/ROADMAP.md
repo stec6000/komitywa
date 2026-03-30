@@ -31,12 +31,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Pages display correctly on mobile devices (responsive layout with Bootstrap 5)
   4. Static files (CSS, JS, images) load without errors on every page
   5. Cookie consent banner appears on first visit and respects user choice
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md — Environment config, static/media setup, core app with home route
+- [ ] 01-02-PLAN.md — Template hierarchy (base.html, navbar, footer) with Bootstrap 5 and brand CSS
+- [ ] 01-03-PLAN.md — RODO cookie consent banner with localStorage persistence
 
 ### Phase 2: Landing & Brand
 **Goal**: Visitors see a professional landing page that communicates the brand identity, tells the company story, and provides contact/pickup information alongside required legal pages
@@ -47,7 +47,7 @@ Plans:
   2. Visitor can read the company story on an "O nas" section or page
   3. Visitor can find the pickup address, opening hours, and location map on the contact page
   4. Visitor can access privacy policy and shop regulations from the footer
-**Plans**: TBD
+**Plans**: 3 plans
 **UI hint**: yes
 
 Plans:
@@ -65,7 +65,7 @@ Plans:
   3. Visitor can search recipes by title or ingredients and see matching results
   4. Recipe detail page includes structured Schema.org JSON-LD markup visible in page source
   5. Admin can create, edit, and delete recipes from the Django admin panel
-**Plans**: TBD
+**Plans**: 3 plans
 **UI hint**: yes
 
 Plans:
@@ -83,7 +83,7 @@ Plans:
   3. Visitor can add products to cart and see cart item count update
   4. Visitor can view cart contents, change quantities, and remove items
   5. Admin can add, edit, and hide products from the Django admin panel
-**Plans**: TBD
+**Plans**: 3 plans
 **UI hint**: yes
 
 Plans:
@@ -101,7 +101,7 @@ Plans:
   3. Customer sees an order confirmation page after successful payment
   4. Customer receives order confirmation email after payment
   5. Customer who purchased an ebook receives the PDF file via email
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
 - [ ] 05-01: TBD
@@ -116,7 +116,7 @@ Plans:
   1. Visitor can enter email in a footer signup form to subscribe to the newsletter
   2. Subscriber receives a confirmation email and must click to confirm (double opt-in)
   3. Subscriber can unsubscribe via a link in any newsletter email
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
 - [ ] 06-01: TBD
