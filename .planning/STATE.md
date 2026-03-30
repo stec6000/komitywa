@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-30)
 
 **Core value:** Klienci moga przegladac przepisy, kupowac ebooki i zamawiac gotowe weganskie produkty z odbiorem osobistym -- w jednym miejscu.
-**Current focus:** Phase 1: Foundation
+**Current focus:** Phase 01 — foundation
 
 ## Current Position
 
-Phase: 1 of 6 (Foundation)
-Plan: 1 of 3 in current phase
-Status: Ready to execute
+Phase: 01 (foundation) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 01
 Last activity: 2026-03-30
 
 Progress: [░░░░░░░░░░] 0%
