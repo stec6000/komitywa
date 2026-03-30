@@ -1,0 +1,156 @@
+# Requirements: Kuchenna Komitywa
+
+**Defined:** 2026-03-30
+**Core Value:** Klienci moga przegladac przepisy, kupowac ebooki i zamawiac gotowe weganskie produkty z odbiorem osobistym — w jednym miejscu.
+
+## v1 Requirements
+
+Requirements for initial release. Each maps to roadmap phases.
+
+### Foundation
+
+- [ ] **FOUND-01**: Aplikacja uzywa zmiennych srodowiskowych (.env) zamiast hardkodowanych sekretow
+- [ ] **FOUND-02**: Strona renderuje szablony Django z base.html (naglowek, stopka, nawigacja)
+- [ ] **FOUND-03**: Strona jest responsywna na urzadzeniach mobilnych (Bootstrap 5)
+- [ ] **FOUND-04**: Pliki statyczne (CSS, JS, obrazy) sa poprawnie serwowane
+- [ ] **FOUND-05**: Upload mediow (zdjecia, pliki) dziala poprawnie
+
+### Landing Page
+
+- [ ] **LAND-01**: Uzytkownik widzi sekcje hero z misja firmy i value proposition
+- [ ] **LAND-02**: Uzytkownik moze przeczytac historie firmy w sekcji "O nas"
+- [ ] **LAND-03**: Uzytkownik widzi informacje kontaktowe z adresem odbioru, godzinami i mapa
+
+### Przepisy
+
+- [ ] **PRZE-01**: Uzytkownik moze przegladac liste przepisow z miniaturkami
+- [ ] **PRZE-02**: Uzytkownik moze otworzyc pelny przepis ze zdjeciami, skladnikami, krokami i czasem przygotowania
+- [ ] **PRZE-03**: Uzytkownik moze filtrowac przepisy wedlug kategorii (sniadania, obiady, desery itp.)
+- [ ] **PRZE-04**: Uzytkownik moze wyszukiwac przepisy po tytule i skladnikach
+- [ ] **PRZE-05**: Strona przepisu zawiera Schema.org JSON-LD markup (rich snippets w Google)
+- [ ] **PRZE-06**: Admin moze dodawac, edytowac i usuwac przepisy z panelu administracyjnego
+
+### Sklep
+
+- [ ] **SHOP-01**: Uzytkownik moze przegladac katalog produktow z kategoriami (ebooki, dania w sloiku, ciasta)
+- [ ] **SHOP-02**: Uzytkownik moze otworzyc strone produktu ze zdjeciami, opisem i cena
+- [ ] **SHOP-03**: Uzytkownik moze dodac produkty do koszyka
+- [ ] **SHOP-04**: Uzytkownik moze przegladac i edytowac zawartosc koszyka (zmiana ilosci, usuwanie)
+- [ ] **SHOP-05**: Uzytkownik moze przejsc do zamowienia z formularzem danych (email, imie, dane odbioru)
+- [ ] **SHOP-06**: Admin moze zarzadzac produktami (dodawac, edytowac, ukrywac) z panelu
+
+### Platnosci
+
+- [ ] **PAY-01**: Uzytkownik moze zaplacic przez Przelewy24 (BLIK, przelewy, karty)
+- [ ] **PAY-02**: System weryfikuje platnosc przez webhook P24 z walidacja CRC
+- [ ] **PAY-03**: Uzytkownik widzi strone potwierdzenia zamowienia po platnosci
+- [ ] **PAY-04**: Uzytkownik otrzymuje email z potwierdzeniem zamowienia
+- [ ] **PAY-05**: Uzytkownik otrzymuje ebook (PDF) na email po zaplacie
+- [ ] **PAY-06**: Admin widzi zamowienia i ich statusy w panelu administracyjnym
+
+### Newsletter
+
+- [ ] **NEWS-01**: Uzytkownik moze zapisac sie na newsletter przez formularz w stopce strony
+- [ ] **NEWS-02**: Uzytkownik otrzymuje email z potwierdzeniem zapisu (double opt-in)
+- [ ] **NEWS-03**: Uzytkownik moze wypisac sie z newslettera
+
+### Legal / RODO
+
+- [ ] **LEGAL-01**: Strona posiada strone z polityka prywatnosci
+- [ ] **LEGAL-02**: Strona posiada regulamin sklepu
+- [ ] **LEGAL-03**: Strona wyswietla cookie consent banner
+- [ ] **LEGAL-04**: Formularz zamowienia zawiera checkboxy zgod (przetwarzanie danych, regulamin)
+
+## v2 Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### Przepisy
+
+- **PRZE-V2-01**: Widok do drukowania przepisu w czytelnym formacie
+- **PRZE-V2-02**: Udostepnianie przepisow na social media
+- **PRZE-V2-03**: Powiazane/sugerowane przepisy na stronie przepisu
+- **PRZE-V2-04**: Skalowanie ilosci skladnikow wg liczby porcji
+
+### Sklep
+
+- **SHOP-V2-01**: Historia zamowien dla zalogowanych uzytkownikow
+- **SHOP-V2-02**: Oceny i recenzje produktow
+- **SHOP-V2-03**: Karty produktow na landing page
+
+### Newsletter
+
+- **NEWS-V2-01**: Zarzadzanie kampaniami newsletterowymi z panelu admina
+- **NEWS-V2-02**: Segmentacja subskrybentow
+
+### Inne
+
+- **OTHER-V2-01**: Program lojalnosciowy
+- **OTHER-V2-02**: Wiele punktow odbioru
+
+## Out of Scope
+
+Explicitly excluded. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Wysylka kurierska | Tylko odbior osobisty w v1, uproszczenie logistyki |
+| Wersja angielska | Strona tylko po polsku |
+| React/Vue SPA | Decyzja: Django templates |
+| OAuth/social login | Email/haslo wystarczajace w v1 |
+| Aplikacja mobilna | Web-first |
+| Real-time chat | Nie potrzebny dla tego typu strony |
+| Pobieranie ebookow ze strony | Ebooki dostarczane wylacznie na email |
+| System komentarzy | Za duzo moderacji, nie kluczowe w v1 |
+| Blog (nie-przepisowy) | Skupienie na przepisach, nie ogolnym blogu |
+| Video z przepisami | Koszty storage/bandwidth, odk\u0142adamy |
+| Stripe | Uzytkownik wybral Przelewy24 |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| FOUND-01 | - | Pending |
+| FOUND-02 | - | Pending |
+| FOUND-03 | - | Pending |
+| FOUND-04 | - | Pending |
+| FOUND-05 | - | Pending |
+| LAND-01 | - | Pending |
+| LAND-02 | - | Pending |
+| LAND-03 | - | Pending |
+| PRZE-01 | - | Pending |
+| PRZE-02 | - | Pending |
+| PRZE-03 | - | Pending |
+| PRZE-04 | - | Pending |
+| PRZE-05 | - | Pending |
+| PRZE-06 | - | Pending |
+| SHOP-01 | - | Pending |
+| SHOP-02 | - | Pending |
+| SHOP-03 | - | Pending |
+| SHOP-04 | - | Pending |
+| SHOP-05 | - | Pending |
+| SHOP-06 | - | Pending |
+| PAY-01 | - | Pending |
+| PAY-02 | - | Pending |
+| PAY-03 | - | Pending |
+| PAY-04 | - | Pending |
+| PAY-05 | - | Pending |
+| PAY-06 | - | Pending |
+| NEWS-01 | - | Pending |
+| NEWS-02 | - | Pending |
+| NEWS-03 | - | Pending |
+| LEGAL-01 | - | Pending |
+| LEGAL-02 | - | Pending |
+| LEGAL-03 | - | Pending |
+| LEGAL-04 | - | Pending |
+
+**Coverage:**
+- v1 requirements: 33 total
+- Mapped to phases: 0
+- Unmapped: 33
+
+---
+*Requirements defined: 2026-03-30*
+*Last updated: 2026-03-30 after initial definition*
