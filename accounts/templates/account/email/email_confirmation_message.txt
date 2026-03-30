@@ -1,0 +1,6 @@
+Witaj {{ user.get_username }},
+
+Prosze potwierdzic adres email klikajac w link:
+{{ activate_url }}
+
+Jesli to nie Ty, zignoruj te wiadomosc.

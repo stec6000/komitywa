@@ -1,0 +1,8 @@
+django
+django-cors-headers
+djangorestframework
+django-allauth
+dj-rest-auth
+drf-spectacular
+requests
+python-dotenv
