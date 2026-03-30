@@ -9,11 +9,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Foundation
 
-- [ ] **FOUND-01**: Aplikacja uzywa zmiennych srodowiskowych (.env) zamiast hardkodowanych sekretow
+- [x] **FOUND-01**: Aplikacja uzywa zmiennych srodowiskowych (.env) zamiast hardkodowanych sekretow
 - [ ] **FOUND-02**: Strona renderuje szablony Django z base.html (naglowek, stopka, nawigacja)
 - [ ] **FOUND-03**: Strona jest responsywna na urzadzeniach mobilnych (Bootstrap 5)
-- [ ] **FOUND-04**: Pliki statyczne (CSS, JS, obrazy) sa poprawnie serwowane
-- [ ] **FOUND-05**: Upload mediow (zdjecia, pliki) dziala poprawnie
+- [x] **FOUND-04**: Pliki statyczne (CSS, JS, obrazy) sa poprawnie serwowane
+- [x] **FOUND-05**: Upload mediow (zdjecia, pliki) dziala poprawnie
 
 ### Landing Page
 
@@ -112,11 +112,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Pending |
 | FOUND-03 | Phase 1 | Pending |
-| FOUND-04 | Phase 1 | Pending |
-| FOUND-05 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Complete |
+| FOUND-05 | Phase 1 | Complete |
 | LAND-01 | Phase 2 | Pending |
 | LAND-02 | Phase 2 | Pending |
 | LAND-03 | Phase 2 | Pending |

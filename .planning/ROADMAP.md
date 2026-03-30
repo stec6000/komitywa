@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Environment config, static/media setup, core app with home route
+- [x] 01-01-PLAN.md — Environment config, static/media setup, core app with home route
 - [ ] 01-02-PLAN.md — Template hierarchy (base.html, navbar, footer) with Bootstrap 5 and brand CSS
 - [ ] 01-03-PLAN.md — RODO cookie consent banner with localStorage persistence
 
