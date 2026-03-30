@@ -1,0 +1,209 @@
+/* ===========================
+   Kuchenna Komitywa - Brand CSS
+   =========================== */
+
+:root {
+    /* Brand palette: warm greens + beiges (per D-09) */
+    --kk-sage: #9CAF88;
+    --kk-olive: #6B7F5E;
+    --kk-olive-dark: #4A5A40;
+    --kk-cream: #F5F0E8;
+    --kk-warm-white: #FDFBF7;
+    --kk-beige: #D4C5A9;
+    --kk-earth: #8B7355;
+    --kk-text: #3D3D3D;
+    --kk-text-light: #6B6B6B;
+
+    /* Typography (per D-10) */
+    --kk-font-heading: "Lora", serif;
+    --kk-font-body: "Nunito", sans-serif;
+}
+
+/* Base styles */
+body {
+    font-family: var(--kk-font-body);
+    color: var(--kk-text);
+    background-color: var(--kk-warm-white);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+h1, h2 {
+    font-family: var(--kk-font-heading);
+    color: var(--kk-olive-dark);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+h3, h4, h5, h6 {
+    font-family: var(--kk-font-heading);
+    color: var(--kk-olive-dark);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* Skip-to-content link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--kk-olive-dark);
+    color: white;
+    padding: 8px 16px;
+    z-index: 1100;
+    transition: top 0.2s;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* Navbar styles (per UI-SPEC Component 1) */
+.navbar {
+    background-color: var(--kk-cream);
+    border-bottom: 1px solid var(--kk-beige);
+    min-height: 56px;
+}
+
+.navbar-brand {
+    font-family: var(--kk-font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--kk-olive-dark) !important;
+}
+
+.navbar .nav-link {
+    font-family: var(--kk-font-body);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--kk-text);
+    transition: color 200ms ease;
+}
+
+.navbar .nav-link:hover {
+    color: var(--kk-olive);
+}
+
+.navbar .nav-link.active {
+    color: var(--kk-olive);
+    font-weight: 700;
+}
+
+.navbar .nav-link:focus-visible {
+    outline: 2px solid var(--kk-olive);
+    outline-offset: 2px;
+}
+
+/* Cart badge */
+.kk-badge {
+    background-color: var(--kk-olive) !important;
+    color: white;
+    font-size: 12px;
+}
+
+.kk-badge-dim {
+    opacity: 0.6;
+}
+
+/* Footer styles (per UI-SPEC Component 2) */
+.kk-footer {
+    background-color: var(--kk-cream);
+    border-top: 1px solid var(--kk-beige);
+    padding: 48px 0 24px 0;
+    color: var(--kk-text-light);
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Placeholder home page centering */
+.kk-placeholder {
+    min-height: calc(100vh - 56px - 96px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.kk-placeholder h1 {
+    font-family: var(--kk-font-heading);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--kk-olive-dark);
+}
+
+.kk-placeholder p {
+    font-size: 16px;
+    color: var(--kk-text-light);
+}
+
+/* Cookie consent banner (per D-05, D-06, D-07, LEGAL-03) */
+.cookie-banner {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--kk-olive-dark);
+    color: #ffffff;
+    font-family: var(--kk-font-body);
+    font-size: 14px;
+    z-index: 1050;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.cookie-banner p {
+    color: #ffffff;
+    margin-bottom: 0;
+}
+
+.cookie-btn-accept {
+    background-color: var(--kk-sage);
+    color: #ffffff;
+    border: none;
+    font-family: var(--kk-font-body);
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 6px 16px;
+}
+
+.cookie-btn-accept:hover {
+    background-color: var(--kk-olive);
+    color: #ffffff;
+}
+
+.cookie-btn-accept:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+.cookie-btn-accept:active {
+    background-color: var(--kk-olive-dark);
+}
+
+.cookie-btn-reject {
+    background-color: transparent;
+    color: #ffffff;
+    border: 1px solid #ffffff;
+    font-family: var(--kk-font-body);
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 6px 16px;
+}
+
+.cookie-btn-reject:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.cookie-btn-reject:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+.cookie-btn-reject:active {
+    background-color: rgba(255, 255, 255, 0.25);
+}
