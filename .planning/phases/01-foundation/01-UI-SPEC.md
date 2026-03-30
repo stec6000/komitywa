@@ -54,8 +54,8 @@ CSS implementation: Use Bootstrap spacing utilities (m-1 through m-5) mapped to 
 | Role | Size | Weight | Line Height | Font Family |
 |------|------|--------|-------------|-------------|
 | Body | 16px | 400 (regular) | 1.5 | Nunito, sans-serif |
-| Label / Small | 14px | 600 (semibold) | 1.4 | Nunito, sans-serif |
-| Heading (h3-h6) | 20px | 600 (semibold) | 1.2 | Lora, serif |
+| Label / Small | 14px | 700 (bold) | 1.4 | Nunito, sans-serif |
+| Heading (h3-h6) | 20px | 700 (bold) | 1.2 | Lora, serif |
 | Display (h1-h2) | 28px | 700 (bold) | 1.2 | Lora, serif |
 
 Source: CONTEXT.md D-10 (Claude's Discretion), RESEARCH.md (Lora + Nunito pairing for warm/natural kitchen vibe)
@@ -63,8 +63,8 @@ Source: CONTEXT.md D-10 (Claude's Discretion), RESEARCH.md (Lora + Nunito pairin
 **Font loading strategy:** Google Fonts CDN with `display=swap`. Preconnect to `fonts.googleapis.com` and `fonts.gstatic.com` in base.html `<head>`.
 
 **Weights loaded:**
-- Lora: 400, 600, 700
-- Nunito: 400, 600, 700
+- Lora: 400, 700
+- Nunito: 400, 700
 
 ---
 
@@ -109,11 +109,11 @@ This phase produces 4 template components. Each is described with its visual con
 | Height | Auto (content-driven), min 56px |
 | Position | Static (scrolls with page) |
 | Layout | Bootstrap `navbar navbar-expand-lg` |
-| Brand text | "Kuchenna Komitywa" in Lora 20px semibold, color --kk-olive-dark |
+| Brand text | "Kuchenna Komitywa" in Lora 20px bold, color --kk-olive-dark |
 | Nav links | Przepisy, Sklep, O nas, Kontakt — Nunito 16px regular, color --kk-text |
 | Nav link hover | Color transitions to --kk-olive, 200ms ease |
-| Active link | Color --kk-olive, font-weight 600 |
-| Cart icon | Bootstrap Icons `bi-cart3`, 20px, color --kk-text |
+| Active link | Color --kk-olive, font-weight 700 |
+| Cart icon | Bootstrap Icons `bi-cart3`, 20px, color --kk-text, wrapped in `<a aria-label="Koszyk">` |
 | Cart badge | Pill badge, background --kk-olive, color white, font-size 12px |
 | Mobile | Hamburger toggle at `lg` breakpoint (992px), Bootstrap collapse |
 | Border | 1px solid --kk-beige on bottom edge |
@@ -150,8 +150,8 @@ Source: CONTEXT.md D-01 through D-04, RESEARCH.md Pattern (hamburger chosen for 
 
 | Button | Label | Style |
 |--------|-------|-------|
-| Reject | "Odrzuc" | Outline white, 14px, Nunito semibold, border-radius 4px |
-| Accept | "Akceptuj" | Solid --kk-sage (#9CAF88), text white, 14px, Nunito semibold, border-radius 4px |
+| Reject | "Odrzuc" | Outline white, 14px, Nunito bold, border-radius 4px |
+| Accept | "Akceptuj" | Solid --kk-sage (#9CAF88), text white, 14px, Nunito bold, border-radius 4px |
 
 **Behavior:**
 - Appears on first visit (no `cookie_consent` key in localStorage)
@@ -206,7 +206,7 @@ Note: Polish diacritics (a with ogonek, etc.) must be used in actual implementat
 |-------|--------------|
 | Default | Color --kk-text, weight 400 |
 | Hover | Color --kk-olive, transition 200ms ease |
-| Active (current page) | Color --kk-olive, weight 600 |
+| Active (current page) | Color --kk-olive, weight 700 |
 | Focus | 2px outline --kk-olive, offset 2px |
 
 ### Buttons (Cookie Banner)
@@ -253,6 +253,7 @@ Container max-widths: Bootstrap defaults (540px, 720px, 960px, 1140px, 1320px)
 | Skip to content | Hidden "Przejdz do tresci" link before navbar, visible on focus |
 | ARIA landmarks | `<nav>`, `<main>`, `<footer>` semantic elements |
 | Cookie banner ARIA | `role="alert"`, `aria-live="polite"` on banner container |
+| Cart icon label | `aria-label="Koszyk"` on cart `<a>` element |
 | Color contrast | Body text (#3D3D3D on #FDFBF7) = ratio 10.5:1 (WCAG AAA). Cookie text (white on #4A5A40) = ratio 7.2:1 (WCAG AAA). |
 | Language | `<html lang="pl">` |
 
