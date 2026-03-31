@@ -51,9 +51,9 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md — Views/URLs/tests scaffold + full landing page (hero, features, about teaser, CTA) + CSS
+- [ ] 02-02-PLAN.md — O nas and Kontakt content pages + navbar link wiring
+- [ ] 02-03-PLAN.md — Privacy policy and regulations pages + footer link wiring
 
 ### Phase 3: Recipes
 **Goal**: Visitors can browse, search, and read vegan recipes with rich content, and the site generates structured data for Google rich snippets
