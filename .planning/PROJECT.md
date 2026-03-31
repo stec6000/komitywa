@@ -32,8 +32,8 @@ Klienci mogą przeglądać przepisy, kupować ebooki i zamawiać gotowe wegańsk
 - [ ] Koszyk zakupowy i proces zamówienia
 - [ ] Płatności online przez Przelewy24
 - [ ] Newsletter (zbieranie subskrypcji, zarządzanie)
-- [ ] Identyfikacja wizualna (logo, kolory, typografia, od zera)
-- [ ] Szablony Django (frontend na Django templates)
+- [ ] Identyfikacja wizualna (logo, kolory, typografia, od zera) — brand CSS established in Phase 1
+- [x] Szablony Django (frontend na Django templates) — Validated in Phase 1: Foundation
 
 ### Out of Scope
 
@@ -52,7 +52,7 @@ Klienci mogą przeglądać przepisy, kupować ebooki i zamawiać gotowe wegańsk
 - Istniejący backend Django 5.2 z systemem użytkowników (email-only, allauth + dj-rest-auth)
 - Obecna architektura to API-only (REST) — wymaga przebudowy na Django templates z widokami HTML
 - SQLite w dev, brak konfiguracji produkcyjnej
-- python-dotenv zainstalowany ale nieużywany — trzeba skonfigurować
+- django-environ configured for .env loading (replaced python-dotenv in Phase 1)
 - Brak CI/CD, Dockera, lintingu
 - Email templates już po polsku
 - CORS skonfigurowany dla localhost:3000 (frontend dev)
@@ -94,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-30 after initialization*
+*Last updated: 2026-03-31 after Phase 1 completion*
