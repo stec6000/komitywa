@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-31T06:37:32.457Z"
-last_activity: 2026-03-31
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-03-31T16:20:00.000Z"
+last_activity: 2026-03-31 -- 02-01 landing page + URL foundation complete
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 3
+  total_plans: 6
   completed_plans: 3
   percent: 0
 ---
@@ -21,30 +21,30 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-30)
 
 **Core value:** Klienci moga przegladac przepisy, kupowac ebooki i zamawiac gotowe weganskie produkty z odbiorem osobistym -- w jednym miejscu.
-**Current focus:** Phase 01 — foundation
+**Current focus:** Phase 02 — landing
 
 ## Current Position
 
-Phase: 02
-Plan: Not started
-Status: Executing Phase 01
-Last activity: 2026-03-31
+Phase: 02 (landing) — EXECUTING
+Plan: 2 of 3
+Status: Executing Phase 02
+Last activity: 2026-03-31 -- 02-01 landing page + URL foundation complete
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 10%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 15min
+- Total execution time: 0.25 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| Phase 02 P01 | 15m | 2 tasks | 11 files |
 
 **Recent Trend:**
 
@@ -65,6 +65,8 @@ Recent decisions affecting current work:
 - Roadmap: 6 phases derived from 7 requirement categories (Legal merged into relevant phases)
 - [Phase 01]: Replaced python-dotenv with django-environ for typed env var parsing
 - [Phase 01]: Fixed .gitignore with whitelist patterns for .env.example and media/.gitkeep
+- [Phase 02 P01]: Plain string href="/przepisy/" used for unregistered URLs to avoid NoReverseMatch (per UI-SPEC Pitfall 1)
+- [Phase 02 P01]: Navbar O nas/Kontakt links wired to real URLs in Task 1 (prerequisite for test scaffold)
 
 ### Pending Todos
 
@@ -77,6 +79,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T06:37:32.453Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-landing/02-CONTEXT.md
+Last session: 2026-03-31T16:20:00.000Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: .planning/phases/02-landing/02-02-PLAN.md

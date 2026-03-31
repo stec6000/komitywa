@@ -17,8 +17,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Landing Page
 
-- [ ] **LAND-01**: Uzytkownik widzi sekcje hero z misja firmy i value proposition
-- [ ] **LAND-02**: Uzytkownik moze przeczytac historie firmy w sekcji "O nas"
+- [x] **LAND-01**: Uzytkownik widzi sekcje hero z misja firmy i value proposition
+- [x] **LAND-02**: Uzytkownik moze przeczytac historie firmy w sekcji "O nas"
 - [ ] **LAND-03**: Uzytkownik widzi informacje kontaktowe z adresem odbioru, godzinami i mapa
 
 ### Przepisy
