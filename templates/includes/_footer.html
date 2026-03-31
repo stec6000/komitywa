@@ -1,10 +1,14 @@
-{# Footer - Copyright, brand info, and legal links (FOUND-02, Phase 2, UI-SPEC Component 2) #}
+{# Footer - Copyright, legal links (FOUND-02, LEGAL-01, LEGAL-02) #}
 <footer class="kk-footer">
     <div class="container">
-        <p class="mb-2">
-            <a href="/polityka-prywatnosci/" class="text-muted me-3">Polityka prywatności</a>
-            <a href="/regulamin/" class="text-muted">Regulamin</a>
-        </p>
-        <p class="mb-0">&copy; 2026 Kuchenna Komitywa. Wszelkie prawa zastrzeżone.</p>
+        <div class="row">
+            <div class="col-md-6 text-center text-md-start">
+                <p class="mb-0">&copy; 2026 Kuchenna Komitywa. Wszelkie prawa zastrzeżone.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
+                <a href="{% url 'privacy-policy' %}" class="kk-footer-link">Polityka prywatności</a>
+                <a href="{% url 'regulations' %}" class="kk-footer-link ms-3">Regulamin</a>
+            </div>
+        </div>
     </div>
 </footer>

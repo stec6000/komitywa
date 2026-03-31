@@ -114,7 +114,23 @@ h3, h4, h5, h6 {
     padding: 48px 0 24px 0;
     color: var(--kk-text-light);
     font-size: 14px;
-    text-align: center;
+}
+
+/* Footer legal links */
+.kk-footer-link {
+    color: var(--kk-text-light);
+    text-decoration: none;
+    transition: color 200ms ease;
+}
+
+.kk-footer-link:hover {
+    color: var(--kk-olive);
+    text-decoration: underline;
+}
+
+.kk-footer-link:focus-visible {
+    outline: 2px solid var(--kk-olive);
+    outline-offset: 2px;
 }
 
 /* Cookie consent banner (per D-05, D-06, D-07, LEGAL-03) */
