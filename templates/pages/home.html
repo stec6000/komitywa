@@ -1,10 +1,70 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Kuchenna Komitywa{% endblock %}
+{% block title %}Kuchenna Komitywa — Wegańska kuchnia z sercem{% endblock %}
 
 {% block content %}
-<div class="container kk-placeholder">
-    <h1>Kuchenna Komitywa</h1>
-    <p>Strona w budowie</p>
-</div>
+
+{# Hero section — split layout (D-01) #}
+<section class="kk-hero" aria-label="Powitanie">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1>Gotujemy z sercem</h1>
+                <p class="lead">Wegańska kuchnia stworzona z miłości do roślin i dobrego jedzenia. Odkryj nasze przepisy, zamów gotowe dania lub pobierz ebooka z ulubionymi recepturami.</p>
+                <a href="/przepisy/" class="kk-btn-primary">Zobacz przepisy</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'img/hero.jpg' %}" class="img-fluid rounded" alt="Kolorowe wegańskie danie na talerzu" width="1200" height="800">
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Feature cards section — 3 value propositions (D-04) #}
+<section class="kk-section-alt" aria-label="Dlaczego my">
+    <div class="container">
+        <h2 class="text-center mb-5">Dlaczego my?</h2>
+        <div class="row g-4">
+            <div class="col-md-4 text-center" style="padding: 32px;">
+                <i class="bi bi-flower1 kk-feature-icon"></i>
+                <h3 class="mt-3">100% Roślinne</h3>
+                <p>Wszystkie nasze dania są w pełni roślinne. Gotujemy z miłością do natury i zwierząt.</p>
+            </div>
+            <div class="col-md-4 text-center" style="padding: 32px;">
+                <i class="bi bi-geo-alt kk-feature-icon"></i>
+                <h3 class="mt-3">Lokalne Składniki</h3>
+                <p>Współpracujemy z lokalnymi rolnikami i dostawcami, by zapewnić najświeższe składniki.</p>
+            </div>
+            <div class="col-md-4 text-center" style="padding: 32px;">
+                <i class="bi bi-shop kk-feature-icon"></i>
+                <h3 class="mt-3">Odbiór Osobisty</h3>
+                <p>Zamów online i odbierz gotowe danie bezpośrednio od nas — świeże i pełne smaku.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# About teaser section (D-06) #}
+<section class="kk-section" aria-label="O nas">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <h2>Nasza historia</h2>
+                <p>Za Kuchenną Komitywą stoi pasja do roślinnej kuchni i wiara, że dobre jedzenie może zmienić świat. Zaczęłyśmy w domowej kuchni, a dziś dzielimy się naszymi przepisami z całym miastem.</p>
+                <a href="{% url 'about' %}" class="kk-link-arrow">Poznaj nas bliżej <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Secondary CTA section (D-03) #}
+<section class="kk-section-alt text-center" aria-label="Przepisy">
+    <div class="container">
+        <h2>Spróbuj naszych przepisów</h2>
+        <p class="text-muted">Setki sprawdzonych receptur roślinnych — od śniadania po deser.</p>
+        <a href="/przepisy/" class="kk-btn-primary">Zobacz przepisy</a>
+    </div>
+</section>
+
 {% endblock %}
