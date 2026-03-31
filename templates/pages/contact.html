@@ -3,9 +3,39 @@
 {% block title %}Kontakt — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
-<div class="container kk-section">
-    <h1>Kontakt</h1>
-    <p>ul. Kwiatowa 1, Warszawa</p>
-    <p>Godziny otwarcia: 10:00 – 18:00</p>
-</div>
+<section class="kk-section" aria-label="Kontakt">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1>Kontakt</h1>
+                <p>Masz pytania? Chcesz złożyć zamówienie na ciasto lub dowiedzieć się więcej o naszej ofercie? Skontaktuj się z nami!</p>
+
+                <div class="mt-4">
+                    <div class="mb-4">
+                        <div class="kk-contact-label mb-1">Adres</div>
+                        <div>ul. Kwiatowa 12</div>
+                        <div>00-001 Warszawa</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="kk-contact-label mb-1">Godziny odbioru</div>
+                        <div>Poniedziałek — Piątek: 10:00 — 18:00</div>
+                        <div>Sobota: 10:00 — 14:00</div>
+                        <div>Niedziela: nieczynne</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="kk-contact-label mb-1">Telefon</div>
+                        <div><a href="tel:+48123456789" class="text-decoration-none" style="color: var(--kk-text);">+48 123 456 789</a></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="kk-contact-label mb-1">Email</div>
+                        <div><a href="mailto:kontakt@kuchennakomitywa.pl" class="text-decoration-none" style="color: var(--kk-text);">kontakt@kuchennakomitywa.pl</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
