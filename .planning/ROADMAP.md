@@ -35,8 +35,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md — Environment config, static/media setup, core app with home route
-- [ ] 01-02-PLAN.md — Template hierarchy (base.html, navbar, footer) with Bootstrap 5 and brand CSS
-- [ ] 01-03-PLAN.md — RODO cookie consent banner with localStorage persistence
+- [x] 01-02-PLAN.md — Template hierarchy (base.html, navbar, footer) with Bootstrap 5 and brand CSS
+- [x] 01-03-PLAN.md — RODO cookie consent banner with localStorage persistence
 
 ### Phase 2: Landing & Brand
 **Goal**: Visitors see a professional landing page that communicates the brand identity, tells the company story, and provides contact/pickup information alongside required legal pages
