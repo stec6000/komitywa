@@ -25,7 +25,7 @@ Klienci mogą przeglądać przepisy, kupować ebooki i zamawiać gotowe wegańsk
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Landing page z informacjami o firmie
+- [x] Landing page z informacjami o firmie — Validated in Phase 2: Landing & Brand
 - [ ] Blog z przepisami (pełne przepisy, zdjęcia, kategorie, wyszukiwanie)
 - [ ] Sklep z ebookami (lista, szczegóły, zakup, dostawa PDF na email)
 - [ ] Sklep z produktami fizycznymi (dania w słoiku, ciasta, odbiór osobisty)
@@ -94,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-31 after Phase 1 completion*
+*Last updated: 2026-03-31 after Phase 2 completion — Landing & Brand live*
