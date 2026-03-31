@@ -52,7 +52,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Views/URLs/tests scaffold + full landing page (hero, features, about teaser, CTA) + CSS
-- [ ] 02-02-PLAN.md — O nas and Kontakt content pages + navbar link wiring
+- [x] 02-02-PLAN.md — O nas and Kontakt content pages + navbar link wiring
 - [ ] 02-03-PLAN.md — Privacy policy and regulations pages + footer link wiring
 
 ### Phase 3: Recipes
