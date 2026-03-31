@@ -52,8 +52,8 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Views/URLs/tests scaffold + full landing page (hero, features, about teaser, CTA) + CSS
-- [ ] 02-02-PLAN.md — O nas and Kontakt content pages + navbar link wiring
-- [ ] 02-03-PLAN.md — Privacy policy and regulations pages + footer link wiring
+- [x] 02-02-PLAN.md — O nas and Kontakt content pages + navbar link wiring
+- [x] 02-03-PLAN.md — Privacy policy and regulations pages + footer link wiring
 
 ### Phase 3: Recipes
 **Goal**: Visitors can browse, search, and read vegan recipes with rich content, and the site generates structured data for Google rich snippets
@@ -131,7 +131,7 @@ Note: Phase 3 (Recipes) and Phase 4 (Shop) both depend on Phase 2 but are indepe
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-03-31 |
-| 2. Landing & Brand | 1/3 | In progress | - |
+| 2. Landing & Brand | 3/3 | Complete | 2026-03-31 |
 | 3. Recipes | 0/3 | Not started | - |
 | 4. Shop | 0/3 | Not started | - |
 | 5. Payments & Orders | 0/3 | Not started | - |

@@ -56,8 +56,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Legal / RODO
 
-- [ ] **LEGAL-01**: Strona posiada strone z polityka prywatnosci
-- [ ] **LEGAL-02**: Strona posiada regulamin sklepu
+- [x] **LEGAL-01**: Strona posiada strone z polityka prywatnosci
+- [x] **LEGAL-02**: Strona posiada regulamin sklepu
 - [ ] **LEGAL-03**: Strona wyswietla cookie consent banner
 - [ ] **LEGAL-04**: Formularz zamowienia zawiera checkboxy zgod (przetwarzanie danych, regulamin)
 
@@ -141,8 +141,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | NEWS-01 | Phase 6 | Pending |
 | NEWS-02 | Phase 6 | Pending |
 | NEWS-03 | Phase 6 | Pending |
-| LEGAL-01 | Phase 2 | Pending |
-| LEGAL-02 | Phase 2 | Pending |
+| LEGAL-01 | Phase 2 | Complete |
+| LEGAL-02 | Phase 2 | Complete |
 | LEGAL-03 | Phase 1 | Pending |
 | LEGAL-04 | Phase 5 | Pending |
 
