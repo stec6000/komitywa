@@ -62,9 +62,13 @@ Carried forward from Phase 1 without changes:
 | Heading (h3-h6) | 20px | 700 (bold) | 1.2 | Lora, serif |
 | Display (h1-h2) | 28px | 700 (bold) | 1.2 | Lora, serif |
 
-Phase 2 additions:
-- Hero headline uses Display role (28px Lora bold). May increase to 36px for visual impact on the hero only -- implemented as a `.kk-hero h1` override, not a new typography tier.
-- Hero subtext (lead paragraph) uses Body role at 18px -- implemented as `.kk-hero .lead` override.
+**Type scale limit: 4 tiers.** The four sizes above (14, 16, 20, 28) are the only sizes in the type system. All text across every page and component MUST use one of these four sizes.
+
+**Scoped exception — Hero headline (`.kk-hero h1`):** Uses 36px Lora bold at line-height 1.2. This is a single one-off override scoped exclusively to the hero section headline. Justification: the hero is the primary brand moment on the site and the 28px Display tier does not deliver sufficient visual impact at the top of the page hierarchy. This override is implemented as `.kk-hero h1 { font-size: 36px; }` and MUST NOT be reused outside the hero section. On mobile (<768px), the hero headline falls back to 28px (the standard Display tier).
+
+Phase 2 role assignments:
+- Hero headline uses the scoped 36px exception (see above).
+- Hero subtext (lead paragraph) uses Body role (16px Nunito regular) at line-height 1.6 for visual looseness. Implemented as `.kk-hero .lead { line-height: 1.6; }` — no font-size override.
 - Feature card titles use Heading role (20px Lora bold).
 - Feature card descriptions use Body role (16px Nunito regular).
 - Legal page body text uses Body role (16px Nunito regular).
@@ -113,8 +117,8 @@ This phase produces 7 new template components/pages and modifies 2 existing part
 | Padding | 80px vertical desktop, 48px vertical mobile |
 | Layout | Bootstrap `row` — `col-lg-6` text left, `col-lg-6` image right |
 | Mobile | Stacks vertically (image below text) |
-| Headline | Lora 36px bold (`.kk-hero h1` override), color --kk-olive-dark |
-| Lead text | Nunito 18px regular (`.kk-hero .lead`), color --kk-text, line-height 1.6 |
+| Headline | Lora 36px bold (`.kk-hero h1` scoped exception), color --kk-olive-dark. Falls back to 28px on mobile. |
+| Lead text | Nunito 16px regular (`.kk-hero .lead`), color --kk-text, line-height 1.6 |
 | CTA button | See Button Styles below |
 | Image | Stock photo (vegan food), `img-fluid rounded`, max-height 480px, `alt` in Polish |
 | Image loading | No `loading="lazy"` (above fold) |
@@ -269,9 +273,9 @@ Source: RESEARCH.md Pattern 5
 | Property | Value |
 |----------|-------|
 | Color | --kk-olive |
-| Font | Nunito 16px semibold (600) or bold (700) |
+| Font | Nunito 16px bold (700) |
 | Text decoration | none |
-| Arrow | Append ` →` (Unicode arrow) or Bootstrap Icon `bi-arrow-right` |
+| Arrow | Append ` ->` (Unicode arrow) or Bootstrap Icon `bi-arrow-right` |
 | Hover | Color --kk-olive-dark, text-decoration underline |
 
 ---
@@ -315,7 +319,7 @@ All copy in Polish. Diacritics used in implementation (this spec uses ASCII for 
 |---------|------|
 | Heading | Nasza historia |
 | Body | Za Kuchenna Komitywa stoi pasja do roslinnej kuchni i wiara, ze dobre jedzenie moze zmienic swiat. Zaczelismy w domowej kuchni, a dzis dzielimy sie naszymi przepisami z calym miastem. |
-| Link | Poznaj nas blizej → |
+| Link | Poznaj nas blizej -> |
 
 ### Secondary CTA (Landing)
 
@@ -404,7 +408,7 @@ Content pages (O nas, Kontakt, Legal): Always single column, `col-lg-8 mx-auto` 
 | Requirement | Implementation |
 |-------------|----------------|
 | Semantic sections | `<section>` with descriptive `aria-label` for hero, features, about teaser, CTA |
-| Image alt text | All stock photos have descriptive Polish alt text (e.g., "Kolorowe wegańskie danie na talerzu") |
+| Image alt text | All stock photos have descriptive Polish alt text (e.g., "Kolorowe weganskie danie na talerzu") |
 | Heading hierarchy | Single `<h1>` per page, sections use `<h2>`, subsections use `<h3>` |
 | Link purpose | CTA links have descriptive text ("Zobacz przepisy"), not "Kliknij tutaj" |
 | Focus indicators | All interactive elements have visible focus (2px --kk-olive outline, offset 2px) |
@@ -456,13 +460,13 @@ Source: CONTEXT.md D-11, RESEARCH.md Pitfall 3
 | Class | Purpose | Key Properties |
 |-------|---------|----------------|
 | `.kk-hero` | Hero section container | padding 80px 0 (48px mobile) |
-| `.kk-hero h1` | Hero headline override | font-size 36px (28px mobile) |
-| `.kk-hero .lead` | Hero lead text | font-size 18px, line-height 1.6 |
+| `.kk-hero h1` | Hero headline scoped exception | font-size 36px (28px on mobile <768px) — single one-off, not reusable |
+| `.kk-hero .lead` | Hero lead text | line-height 1.6 (font-size inherits 16px Body) |
 | `.kk-section` | Standard content section | padding 80px 0 (48px mobile) |
 | `.kk-section-alt` | Alternating background section | padding 80px 0 (48px mobile), bg --kk-cream |
 | `.kk-btn-primary` | Primary CTA button | bg --kk-olive, text white, 12px 32px padding, 4px radius |
 | `.kk-feature-icon` | Feature card icon | font-size 48px, color --kk-olive |
-| `.kk-link-arrow` | Text link with arrow | color --kk-olive, no underline, hover underline |
+| `.kk-link-arrow` | Text link with arrow | color --kk-olive, font-weight 700, no underline, hover underline |
 | `.kk-contact-label` | Contact info label | 14px bold, color --kk-earth, uppercase, letter-spacing 1px |
 | `.kk-legal-warning` | Legal placeholder banner | bg #FFF3CD, border #FFECB5, 16px padding, 4px radius |
 
