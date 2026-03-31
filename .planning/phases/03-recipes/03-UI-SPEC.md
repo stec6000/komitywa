@@ -41,9 +41,9 @@ All values are multiples of 4. Reuses Phase 1/2 established scale.
 | xl | 32px | Filter bar margin-bottom, pagination margin-top |
 | 2xl | 48px | Section padding on mobile (`.kk-section` at ≤767px) |
 | 3xl | 64px | Not used in this phase |
-| section | 80px | `.kk-section` / `.kk-section-alt` desktop padding (inherited from Phase 2) |
 
 Exceptions:
+- 80px inherited from Phase 1 base token for `.kk-section` / `.kk-section-alt` desktop padding — not a new spacing token introduced in Phase 3, excluded from Phase 3 scale.
 - Recipe detail hero image: full-width, no horizontal padding (flush to container edge at all breakpoints)
 - Touch targets for filter pills: minimum 44px height on mobile (accessibility)
 - Card photo aspect ratio locked at 4:3 via CSS `padding-top: 75%` + `position: absolute` technique (not a spacing token)
@@ -59,8 +59,7 @@ Inherits the Phase 1 type scale exactly. No new sizes introduced.
 | Body | Nunito | 16px | 400 | 1.5 | Card description excerpt, ingredient list, step text |
 | Label / Small | Nunito | 14px | 400 | 1.4 | Category badge text, prep time label, pagination text, footer |
 | Heading (h3/h4) | Lora | 20px | 700 | 1.2 | Card title, recipe detail section headings (Składniki, Kroki) |
-| Heading (h1/h2) | Lora | 28px | 700 | 1.2 | Page title ("Przepisy"), recipe detail title |
-| Display (h1 hero) | Lora | 36px | 700 | 1.2 | Recipe detail hero title only (same as `.kk-hero h1`) |
+| Heading (h1/h2) | Lora | 28px | 700 | 1.2 | Page title ("Przepisy"), recipe detail title (all breakpoints) |
 
 Source: `static/css/main.css` lines 31–45 (h1/h2 at 28px, h3–h6 at 20px, body at 16px/1.5).
 
@@ -172,7 +171,7 @@ Constrained reading column, with a persistent meta sidebar on large screens.
     [.row]
       [.col-lg-8]  — main content
         [Hero image — full col width, 16:9 ratio, object-fit: cover, border-radius: 4px]
-        [h1 — recipe title, Lora 28px (mobile) / 36px (desktop)]
+        [h1 — recipe title, Lora 28px, weight 700]
         [Meta row: Category badge | bi-clock prep time | published date]
         [Intro paragraph — body text]
         [h2 "Składniki" — Lora 20px]
