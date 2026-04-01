@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ recipe.title }} -- Kuchenna Komitywa{% endblock %}
+{% block content %}
+<section class="kk-section">
+  <div class="container">
+    <h1>{{ recipe.title }}</h1>
+    <p>{{ recipe.description }}</p>
+  </div>
+</section>
+{% endblock %}

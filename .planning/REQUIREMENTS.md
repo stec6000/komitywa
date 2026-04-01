@@ -23,12 +23,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Przepisy
 
-- [ ] **PRZE-01**: Uzytkownik moze przegladac liste przepisow z miniaturkami
-- [ ] **PRZE-02**: Uzytkownik moze otworzyc pelny przepis ze zdjeciami, skladnikami, krokami i czasem przygotowania
+- [x] **PRZE-01**: Uzytkownik moze przegladac liste przepisow z miniaturkami
+- [x] **PRZE-02**: Uzytkownik moze otworzyc pelny przepis ze zdjeciami, skladnikami, krokami i czasem przygotowania
 - [ ] **PRZE-03**: Uzytkownik moze filtrowac przepisy wedlug kategorii (sniadania, obiady, desery itp.)
 - [ ] **PRZE-04**: Uzytkownik moze wyszukiwac przepisy po tytule i skladnikach
 - [ ] **PRZE-05**: Strona przepisu zawiera Schema.org JSON-LD markup (rich snippets w Google)
-- [ ] **PRZE-06**: Admin moze dodawac, edytowac i usuwac przepisy z panelu administracyjnego
+- [x] **PRZE-06**: Admin moze dodawac, edytowac i usuwac przepisy z panelu administracyjnego
 
 ### Sklep
 
@@ -120,12 +120,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LAND-01 | Phase 2 | Pending |
 | LAND-02 | Phase 2 | Pending |
 | LAND-03 | Phase 2 | Pending |
-| PRZE-01 | Phase 3 | Pending |
-| PRZE-02 | Phase 3 | Pending |
+| PRZE-01 | Phase 3 | Complete |
+| PRZE-02 | Phase 3 | Complete |
 | PRZE-03 | Phase 3 | Pending |
 | PRZE-04 | Phase 3 | Pending |
 | PRZE-05 | Phase 3 | Pending |
-| PRZE-06 | Phase 3 | Pending |
+| PRZE-06 | Phase 3 | Complete |
 | SHOP-01 | Phase 4 | Pending |
 | SHOP-02 | Phase 4 | Pending |
 | SHOP-03 | Phase 4 | Pending |
