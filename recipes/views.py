@@ -1,0 +1,19 @@
+from django.shortcuts import render, get_object_or_404
+
+from .models import Category, Recipe
+
+
+def recipe_list(request):
+    recipes = Recipe.objects.filter(is_published=True).select_related("category")
+    categories = Category.objects.all()
+    return render(request, "recipes/list.html", {
+        "page_obj": recipes,
+        "categories": categories,
+        "active_category": "",
+        "query": "",
+    })
+
+
+def recipe_detail(request, slug):
+    recipe = get_object_or_404(Recipe, slug=slug, is_published=True)
+    return render(request, "recipes/detail.html", {"recipe": recipe})
