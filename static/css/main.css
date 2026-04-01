@@ -328,3 +328,161 @@ h3, h4, h5, h6 {
     font-weight: 700;
     margin-bottom: 32px;
 }
+
+/* ===========================
+   Phase 3: Recipes
+   =========================== */
+
+/* Recipe card (UI-SPEC Component 1) */
+.kk-recipe-card {
+    border: 1px solid var(--kk-beige);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: box-shadow 200ms ease;
+    background-color: var(--kk-warm-white);
+}
+
+.kk-recipe-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Card image wrapper -- 4:3 aspect ratio (UI-SPEC: padding-top 75% trick) */
+.kk-recipe-card__img-wrapper {
+    position: relative;
+    padding-top: 75%;
+    overflow: hidden;
+}
+
+.kk-recipe-card__img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.kk-recipe-card__img-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--kk-cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    color: var(--kk-beige);
+}
+
+/* Category badge (UI-SPEC Component 6) */
+.kk-category-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background-color: var(--kk-sage);
+    color: #ffffff;
+    font-family: var(--kk-font-body);
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 4px 10px;
+}
+
+/* Prep time label */
+.kk-prep-time {
+    font-family: var(--kk-font-body);
+    font-size: 14px;
+    color: var(--kk-text-light);
+}
+
+.kk-prep-time .bi-clock {
+    color: var(--kk-olive);
+}
+
+/* Category filter bar (UI-SPEC Component 2) */
+.kk-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.kk-filter-pill {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--kk-beige);
+    background-color: var(--kk-cream);
+    color: var(--kk-text);
+    font-family: var(--kk-font-body);
+    font-size: 14px;
+    font-weight: 400;
+    text-decoration: none;
+    transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+    min-height: 44px;
+    line-height: 28px;
+}
+
+.kk-filter-pill:hover {
+    background-color: var(--kk-beige);
+    color: var(--kk-olive-dark);
+}
+
+.kk-filter-pill--active {
+    background-color: var(--kk-olive);
+    border-color: var(--kk-olive);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.kk-filter-pill--active:hover {
+    background-color: var(--kk-olive-dark);
+    border-color: var(--kk-olive-dark);
+    color: #ffffff;
+}
+
+.kk-filter-pill:focus-visible {
+    outline: 2px solid var(--kk-olive);
+    outline-offset: 2px;
+}
+
+/* Search bar (UI-SPEC Component 3) */
+.kk-search-bar .form-control {
+    border-color: var(--kk-beige);
+    border-radius: 4px;
+}
+
+.kk-search-bar .form-control:focus {
+    border-color: var(--kk-olive);
+    box-shadow: 0 0 0 3px rgba(107, 127, 94, 0.2);
+}
+
+/* Pagination (UI-SPEC Component 7) */
+.kk-pagination .page-link {
+    color: var(--kk-olive);
+}
+
+.kk-pagination .page-link:hover {
+    color: var(--kk-olive-dark);
+}
+
+.kk-pagination .page-item.active .page-link {
+    background-color: var(--kk-olive);
+    border-color: var(--kk-olive);
+    color: #ffffff;
+}
+
+.kk-pagination .page-link:focus-visible {
+    outline: 2px solid var(--kk-olive);
+    outline-offset: 2px;
+}
+
+@media (max-width: 767.98px) {
+    .kk-filter-bar {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        padding-bottom: 4px;
+    }
+}

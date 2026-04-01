@@ -1,14 +1,107 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Przepisy -- Kuchenna Komitywa{% endblock %}
 {% block content %}
 <section class="kk-section">
   <div class="container">
     <h1>Przepisy</h1>
-    {% for recipe in page_obj %}
-    <div>{{ recipe.title }}</div>
-    {% empty %}
-    <p>Brak przepisow.</p>
-    {% endfor %}
+    <p class="lead mb-4">Roslinne przepisy z naszej kuchni</p>
+
+    <form method="get" action="{% url 'recipes:list' %}" class="kk-search-bar mb-4">
+      {% if active_category %}
+      <input type="hidden" name="kategoria" value="{{ active_category }}">
+      {% endif %}
+      <label for="q" class="visually-hidden">Szukaj przepisow</label>
+      <div class="input-group">
+        <input type="search" id="q" name="q" value="{{ query }}" placeholder="Szukaj przepisow..." class="form-control">
+        <button type="submit" class="btn kk-btn-primary">Szukaj</button>
+      </div>
+    </form>
+
+    <div class="kk-filter-bar mb-4">
+      <a href="{% url 'recipes:list' %}"
+         class="kk-filter-pill {% if not active_category %}kk-filter-pill--active{% endif %}"
+         {% if not active_category %}aria-current="page"{% endif %}>
+        Wszystkie
+      </a>
+      {% for cat in categories %}
+      <a href="{% url 'recipes:list' %}?kategoria={{ cat.slug }}"
+         class="kk-filter-pill {% if active_category == cat.slug %}kk-filter-pill--active{% endif %}"
+         {% if active_category == cat.slug %}aria-current="page"{% endif %}>
+        {{ cat.name }}
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="row gy-4">
+      {% for recipe in page_obj %}
+      <div class="col-lg-4 col-md-6 col-12">
+        <div class="card h-100 kk-recipe-card">
+          <div class="kk-recipe-card__img-wrapper">
+            {% if recipe.image %}
+            <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="kk-recipe-card__img">
+            {% else %}
+            <div class="kk-recipe-card__img-placeholder">
+              <i class="bi bi-image" aria-hidden="true"></i>
+            </div>
+            {% endif %}
+            {% if recipe.category %}
+            <span class="kk-category-badge">{{ recipe.category.name }}</span>
+            {% endif %}
+          </div>
+          <div class="card-body d-flex flex-column">
+            <h3 class="card-title">{{ recipe.title }}</h3>
+            <p class="card-text flex-grow-1">{{ recipe.description|truncatechars:120 }}</p>
+            <div class="d-flex justify-content-between align-items-center mt-auto">
+              <span class="kk-prep-time"><i class="bi bi-clock" aria-hidden="true"></i> {{ recipe.prep_time }} min</span>
+              <a href="{% url 'recipes:detail' slug=recipe.slug %}" class="kk-link-arrow">Czytaj wiecej &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center py-5">
+        {% if query %}
+        <i class="bi bi-search d-block mb-3" style="font-size:64px;color:var(--kk-sage);" aria-hidden="true"></i>
+        <h2>Nic nie znaleziono</h2>
+        <p>Nie znalezlismy przepisow pasujacych do &bdquo;{{ query }}&rdquo;. Sprobuj innego slowa lub przejrzyj wszystkie przepisy.</p>
+        <a href="{% url 'recipes:list' %}" class="kk-link-arrow">Zobacz wszystkie przepisy &rarr;</a>
+        {% elif active_category %}
+        <i class="bi bi-journal-x d-block mb-3" style="font-size:64px;color:var(--kk-sage);" aria-hidden="true"></i>
+        <h2>Brak przepisow w tej kategorii</h2>
+        <p>Ta kategoria jest jeszcze pusta. Sprawdz inne kategorie lub wroc do wszystkich przepisow.</p>
+        <a href="{% url 'recipes:list' %}" class="kk-link-arrow">Wszystkie przepisy &rarr;</a>
+        {% else %}
+        <i class="bi bi-journal-x d-block mb-3" style="font-size:64px;color:var(--kk-sage);" aria-hidden="true"></i>
+        <h2>Brak przepisow</h2>
+        <p>Nie mamy jeszcze zadnych przepisow w tej kategorii. Wroc wkrotce -- wlasnie gotujemy cos nowego!</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Paginacja przepisow" class="mt-5">
+      <ul class="pagination justify-content-center kk-pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if active_category %}&kategoria={{ active_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}">&laquo;</a>
+        </li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}{% if active_category %}&kategoria={{ active_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}">{{ num }}</a>
+        </li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if active_category %}&kategoria={{ active_category }}{% endif %}{% if query %}&q={{ query }}{% endif %}">&raquo;</a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+
   </div>
 </section>
 {% endblock %}
