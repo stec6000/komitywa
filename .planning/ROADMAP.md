@@ -70,7 +70,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — Recipes app scaffold: models, admin, URLs, stub views, test scaffold
-- [ ] 03-02-PLAN.md — Recipe list page with card grid, category filter pills, search, pagination
+- [x] 03-02-PLAN.md — Recipe list page with card grid, category filter pills, search, pagination
 - [ ] 03-03-PLAN.md — Recipe detail page with Schema.org JSON-LD and navbar link wiring
 
 ### Phase 4: Shop
@@ -132,7 +132,7 @@ Note: Phase 3 (Recipes) and Phase 4 (Shop) both depend on Phase 2 but are indepe
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | Complete | 2026-03-31 |
 | 2. Landing & Brand | 3/3 | Complete | 2026-03-31 |
-| 3. Recipes | 1/3 | In Progress|  |
+| 3. Recipes | 2/3 | In Progress|  |
 | 4. Shop | 0/3 | Not started | - |
 | 5. Payments & Orders | 0/3 | Not started | - |
 | 6. Newsletter | 0/2 | Not started | - |
