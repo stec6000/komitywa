@@ -69,9 +69,9 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md — Recipes app scaffold: models, admin, URLs, stub views, test scaffold
+- [ ] 03-02-PLAN.md — Recipe list page with card grid, category filter pills, search, pagination
+- [ ] 03-03-PLAN.md — Recipe detail page with Schema.org JSON-LD and navbar link wiring
 
 ### Phase 4: Shop
 **Goal**: Visitors can browse a product catalog with categories, view product details, and manage a shopping cart
