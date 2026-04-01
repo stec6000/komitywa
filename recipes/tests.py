@@ -177,7 +177,7 @@ class TestRecipeSearch(TestCase):
         )
 
     def test_search_by_title(self):
-        response = self.client.get("/przepisy/?q=czekolada")
+        response = self.client.get("/przepisy/?q=tort")
         self.assertContains(response, "Tort czekoladowy")
 
     def test_search_by_ingredient(self):
