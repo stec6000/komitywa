@@ -94,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-31 after Phase 2 completion — Landing & Brand live*
+*Last updated: 2026-04-01 after Phase 3 completion — Recipes live (browse, search, filter, JSON-LD)*
