@@ -7,21 +7,22 @@ from shop.models import Order, Product, ProductCategory
 
 class TestProductCategory(TestCase):
     def test_create_category(self):
-        cat = ProductCategory.objects.create(name="Ebooki", slug="ebooki")
-        self.assertEqual(str(cat), "Ebooki")
-        self.assertEqual(cat.slug, "ebooki")
+        cat = ProductCategory.objects.create(name="Zupy", slug="zupy")
+        self.assertEqual(str(cat), "Zupy")
+        self.assertEqual(cat.slug, "zupy")
 
     def test_ordering(self):
-        ProductCategory.objects.create(name="Ciasta", slug="ciasta")
-        ProductCategory.objects.create(name="Ebooki", slug="ebooki")
+        ProductCategory.objects.all().delete()
+        ProductCategory.objects.create(name="Zupy", slug="zupy")
+        ProductCategory.objects.create(name="Desery", slug="desery")
         cats = list(ProductCategory.objects.values_list("name", flat=True))
-        self.assertEqual(cats, ["Ciasta", "Ebooki"])
+        self.assertEqual(cats, ["Desery", "Zupy"])
 
 
 class TestProduct(TestCase):
     def setUp(self):
-        self.category = ProductCategory.objects.create(
-            name="Ebooki", slug="ebooki"
+        self.category, _ = ProductCategory.objects.get_or_create(
+            slug="ebooki", defaults={"name": "Ebooki"}
         )
 
     def test_create_ebook_product(self):

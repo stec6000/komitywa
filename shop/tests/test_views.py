@@ -14,8 +14,8 @@ class TestProductList(TestCase):
 
 class TestProductDetail(TestCase):
     def setUp(self):
-        self.category = ProductCategory.objects.create(
-            name="Ebooki", slug="ebooki"
+        self.category, _ = ProductCategory.objects.get_or_create(
+            slug="ebooki", defaults={"name": "Ebooki"}
         )
         self.product = Product.objects.create(
             title="Testowy produkt",
