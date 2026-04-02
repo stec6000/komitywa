@@ -10,8 +10,8 @@ from shop.models import Product, ProductCategory
 class CartTestBase(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
-        self.category = ProductCategory.objects.create(
-            name="Ebooki", slug="ebooki"
+        self.category, _ = ProductCategory.objects.get_or_create(
+            slug="ebooki", defaults={"name": "Ebooki"}
         )
         self.ebook = Product.objects.create(
             title="Ebook testowy",
