@@ -1,0 +1,586 @@
+/* ===========================
+   Kuchenna Komitywa - Brand CSS
+   =========================== */
+
+:root {
+    /* Brand palette: warm greens + beiges (per D-09) */
+    --kk-sage: #9CAF88;
+    --kk-olive: #6B7F5E;
+    --kk-olive-dark: #4A5A40;
+    --kk-cream: #F5F0E8;
+    --kk-warm-white: #FDFBF7;
+    --kk-beige: #D4C5A9;
+    --kk-earth: #8B7355;
+    --kk-text: #3D3D3D;
+    --kk-text-light: #6B6B6B;
+
+    /* Typography (per D-10) */
+    --kk-font-heading: "Lora", serif;
+    --kk-font-body: "Nunito", sans-serif;
+}
+
+/* Base styles */
+body {
+    font-family: var(--kk-font-body);
+    color: var(--kk-text);
+    background-color: var(--kk-warm-white);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+h1, h2 {
+    font-family: var(--kk-font-heading);
+    color: var(--kk-olive-dark);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+h3, h4, h5, h6 {
+    font-family: var(--kk-font-heading);
+    color: var(--kk-olive-dark);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* Skip-to-content link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--kk-olive-dark);
+    color: white;
+    padding: 8px 16px;
+    z-index: 1100;
+    transition: top 0.2s;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* Navbar styles (per UI-SPEC Component 1) */
+.navbar {
+    background-color: var(--kk-cream);
+    border-bottom: 1px solid var(--kk-beige);
+    min-height: 56px;
+}
+
+.navbar-brand {
+    font-family: var(--kk-font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--kk-olive-dark) !important;
+}
+
+.navbar .nav-link {
+    font-family: var(--kk-font-body);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--kk-text);
+    transition: color 200ms ease;
+}
+
+.navbar .nav-link:hover {
+    color: var(--kk-olive);
+}
+
+.navbar .nav-link.active {
+    color: var(--kk-olive);
+    font-weight: 700;
+}
+
+.navbar .nav-link:focus-visible {
+    outline: 2px solid var(--kk-olive);
+    outline-offset: 2px;
+}
+
+/* Cart badge */
+.kk-badge {
+    background-color: var(--kk-olive) !important;
+    color: white;
+    font-size: 12px;
+}
+
+.kk-badge-dim {
+    opacity: 0.6;
+}
+
+/* Footer styles (per UI-SPEC Component 2) */
+.kk-footer {
+    background-color: var(--kk-cream);
+    border-top: 1px solid var(--kk-beige);
+    padding: 48px 0 24px 0;
+    color: var(--kk-text-light);
+    font-size: 14px;
+}
+
+/* Footer legal links */
+.kk-footer-link {
+    color: var(--kk-text-light);
+    text-decoration: none;
+    transition: color 200ms ease;
+}
+
+.kk-footer-link:hover {
+    color: var(--kk-olive);
+    text-decoration: underline;
+}
+
+.kk-footer-link:focus-visible {
+    outline: 2px solid var(--kk-olive);
+    outline-offset: 2px;
+}
+
+/* Cookie consent banner (per D-05, D-06, D-07, LEGAL-03) */
+.cookie-banner {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--kk-olive-dark);
+    color: #ffffff;
+    font-family: var(--kk-font-body);
+    font-size: 14px;
+    z-index: 1050;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.cookie-banner p {
+    color: #ffffff;
+    margin-bottom: 0;
+}
+
+.cookie-btn-accept {
+    background-color: var(--kk-sage);
+    color: #ffffff;
+    border: none;
+    font-family: var(--kk-font-body);
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 6px 16px;
+}
+
+.cookie-btn-accept:hover {
+    background-color: var(--kk-olive);
+    color: #ffffff;
+}
+
+.cookie-btn-accept:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+.cookie-btn-accept:active {
+    background-color: var(--kk-olive-dark);
+}
+
+.cookie-btn-reject {
+    background-color: transparent;
+    color: #ffffff;
+    border: 1px solid #ffffff;
+    font-family: var(--kk-font-body);
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 6px 16px;
+}
+
+.cookie-btn-reject:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.cookie-btn-reject:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+.cookie-btn-reject:active {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ===========================
+   Phase 2: Landing & Brand
+   =========================== */
+
+/* Standard section spacing */
+.kk-section {
+    padding: 80px 0;
+}
+
+.kk-section-alt {
+    padding: 80px 0;
+    background-color: var(--kk-cream);
+}
+
+@media (max-width: 767.98px) {
+    .kk-section,
+    .kk-section-alt {
+        padding: 48px 0;
+    }
+}
+
+/* Hero section */
+.kk-hero {
+    padding: 80px 0;
+    background-color: var(--kk-warm-white);
+}
+
+.kk-hero h1 {
+    font-size: 36px;
+}
+
+.kk-hero .lead {
+    line-height: 1.6;
+}
+
+.kk-hero img {
+    max-height: 480px;
+    object-fit: cover;
+    width: 100%;
+}
+
+@media (max-width: 767.98px) {
+    .kk-hero {
+        padding: 48px 0;
+    }
+
+    .kk-hero h1 {
+        font-size: 28px;
+    }
+
+    .kk-hero img {
+        max-height: 320px;
+        margin-top: 32px;
+    }
+}
+
+/* Primary CTA button */
+.kk-btn-primary {
+    background-color: var(--kk-olive);
+    color: #ffffff;
+    border: none;
+    font-family: var(--kk-font-body);
+    font-size: 16px;
+    font-weight: 700;
+    padding: 12px 32px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 200ms ease;
+}
+
+.kk-btn-primary:hover {
+    background-color: var(--kk-olive-dark);
+    color: #ffffff;
+}
+
+.kk-btn-primary:focus-visible {
+    outline: 2px solid var(--kk-olive);
+    outline-offset: 2px;
+}
+
+.kk-btn-primary:active {
+    background-color: var(--kk-olive-dark);
+}
+
+/* Feature card icons */
+.kk-feature-icon {
+    font-size: 48px;
+    color: var(--kk-olive);
+}
+
+/* Text link with arrow */
+.kk-link-arrow {
+    color: var(--kk-olive);
+    font-family: var(--kk-font-body);
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 200ms ease;
+}
+
+.kk-link-arrow:hover {
+    color: var(--kk-olive-dark);
+    text-decoration: underline;
+}
+
+/* Contact info labels */
+.kk-contact-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--kk-earth);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Legal placeholder warning banner */
+.kk-legal-warning {
+    background-color: #FFF3CD;
+    border: 1px solid #FFECB5;
+    padding: 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 32px;
+}
+
+/* ===========================
+   Phase 3: Recipes
+   =========================== */
+
+/* Recipe card (UI-SPEC Component 1) */
+.kk-recipe-card {
+    border: 1px solid var(--kk-beige);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: box-shadow 200ms ease;
+    background-color: var(--kk-warm-white);
+}
+
+.kk-recipe-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Card image wrapper -- 4:3 aspect ratio (UI-SPEC: padding-top 75% trick) */
+.kk-recipe-card__img-wrapper {
+    position: relative;
+    padding-top: 75%;
+    overflow: hidden;
+}
+
+.kk-recipe-card__img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.kk-recipe-card__img-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--kk-cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    color: var(--kk-beige);
+}
+
+/* Category badge (UI-SPEC Component 6) */
+.kk-category-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background-color: var(--kk-sage);
+    color: #ffffff;
+    font-family: var(--kk-font-body);
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 4px 10px;
+}
+
+/* Prep time label */
+.kk-prep-time {
+    font-family: var(--kk-font-body);
+    font-size: 14px;
+    color: var(--kk-text-light);
+}
+
+.kk-prep-time .bi-clock {
+    color: var(--kk-olive);
+}
+
+/* Category filter bar (UI-SPEC Component 2) */
+.kk-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.kk-filter-pill {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--kk-beige);
+    background-color: var(--kk-cream);
+    color: var(--kk-text);
+    font-family: var(--kk-font-body);
+    font-size: 14px;
+    font-weight: 400;
+    text-decoration: none;
+    transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+    min-height: 44px;
+    line-height: 28px;
+}
+
+.kk-filter-pill:hover {
+    background-color: var(--kk-beige);
+    color: var(--kk-olive-dark);
+}
+
+.kk-filter-pill--active {
+    background-color: var(--kk-olive);
+    border-color: var(--kk-olive);
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.kk-filter-pill--active:hover {
+    background-color: var(--kk-olive-dark);
+    border-color: var(--kk-olive-dark);
+    color: #ffffff;
+}
+
+.kk-filter-pill:focus-visible {
+    outline: 2px solid var(--kk-olive);
+    outline-offset: 2px;
+}
+
+/* Search bar (UI-SPEC Component 3) */
+.kk-search-bar .form-control {
+    border-color: var(--kk-beige);
+    border-radius: 4px;
+}
+
+.kk-search-bar .form-control:focus {
+    border-color: var(--kk-olive);
+    box-shadow: 0 0 0 3px rgba(107, 127, 94, 0.2);
+}
+
+/* Pagination (UI-SPEC Component 7) */
+.kk-pagination .page-link {
+    color: var(--kk-olive);
+}
+
+.kk-pagination .page-link:hover {
+    color: var(--kk-olive-dark);
+}
+
+.kk-pagination .page-item.active .page-link {
+    background-color: var(--kk-olive);
+    border-color: var(--kk-olive);
+    color: #ffffff;
+}
+
+.kk-pagination .page-link:focus-visible {
+    outline: 2px solid var(--kk-olive);
+    outline-offset: 2px;
+}
+
+@media (max-width: 767.98px) {
+    .kk-filter-bar {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        padding-bottom: 4px;
+    }
+}
+
+/* ===========================
+   Phase 4: Shop
+   =========================== */
+
+/* ===== Shop: Product Card (UI-SPEC Component 1) ===== */
+.kk-product-card {
+    border: 1px solid var(--kk-beige);
+    border-radius: 4px;
+    background: var(--kk-warm-white);
+    transition: box-shadow 200ms ease;
+    overflow: hidden;
+}
+.kk-product-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.kk-product-card__img-wrapper {
+    position: relative;
+    padding-top: 75%; /* 4:3 ratio */
+    overflow: hidden;
+    background: var(--kk-cream);
+}
+.kk-product-card__img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.kk-product-card__img-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--kk-cream);
+    color: var(--kk-beige);
+    font-size: 48px;
+}
+.kk-badge-digital {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--kk-sage);
+    color: #ffffff;
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 4px 10px;
+}
+
+/* ===== Shop: Price ===== */
+.kk-price {
+    font-family: "Nunito", sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--kk-olive-dark);
+}
+
+/* ===== Shop: Delivery Note ===== */
+.kk-delivery-note {
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+    color: var(--kk-text-light);
+}
+
+/* ===== Shop: Detail Sidebar ===== */
+.kk-detail-sidebar {
+    background: var(--kk-cream);
+    border-radius: 4px;
+    padding: 24px;
+}
+
+/* ===== Shop: Detail Hero Image ===== */
+.kk-detail-hero {
+    position: relative;
+    width: 100%;
+    max-height: 480px;
+    overflow: hidden;
+    border-radius: 4px;
+}
+.kk-detail-hero img {
+    width: 100%;
+    height: auto;
+    max-height: 480px;
+    object-fit: cover;
+}
+@media (max-width: 767px) {
+    .kk-detail-hero,
+    .kk-detail-hero img {
+        max-height: 280px;
+    }
+}
