@@ -38,9 +38,55 @@ class TestCartView(TestCase):
 
 
 class TestCheckout(TestCase):
-    def test_checkout_returns_200(self):
+    def setUp(self):
+        self.category, _ = ProductCategory.objects.get_or_create(
+            slug="ebooki", defaults={"name": "Ebooki"}
+        )
+        self.product = Product.objects.create(
+            title="Checkout produkt",
+            slug="checkout-produkt",
+            category=self.category,
+            type="physical",
+            description="Opis",
+            price=Decimal("29.99"),
+        )
+
+    def _add_to_cart(self):
+        """Add a product to cart via session."""
+        session = self.client.session
+        session["cart"] = {
+            str(self.product.id): {
+                "quantity": 1,
+                "price": str(self.product.price),
+            }
+        }
+        session.save()
+
+    def test_checkout_empty_cart_redirects(self):
+        response = self.client.get("/zamowienie/")
+        self.assertRedirects(response, "/koszyk/")
+
+    def test_checkout_with_cart_returns_200(self):
+        self._add_to_cart()
         response = self.client.get("/zamowienie/")
         self.assertEqual(response.status_code, 200)
+
+    def test_checkout_post_creates_order(self):
+        from shop.models import Order
+
+        self._add_to_cart()
+        response = self.client.post("/zamowienie/", {
+            "email": "test@example.com",
+            "name": "Jan Kowalski",
+            "pickup_date": "piatek 10 stycznia",
+            "consent_data": True,
+            "consent_terms": True,
+        })
+        self.assertRedirects(response, "/zamowienie/potwierdzenie/")
+        self.assertEqual(Order.objects.count(), 1)
+        order = Order.objects.first()
+        self.assertEqual(order.email, "test@example.com")
+        self.assertEqual(order.total, Decimal("29.99"))
 
     def test_checkout_confirm_returns_200(self):
         response = self.client.get("/zamowienie/potwierdzenie/")
