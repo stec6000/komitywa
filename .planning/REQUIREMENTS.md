@@ -33,8 +33,8 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Sklep
 
 - [x] **SHOP-01**: Uzytkownik moze przegladac katalog produktow z kategoriami (ebooki, dania w sloiku, ciasta)
-- [ ] **SHOP-02**: Uzytkownik moze otworzyc strone produktu ze zdjeciami, opisem i cena
-- [ ] **SHOP-03**: Uzytkownik moze dodac produkty do koszyka
+- [x] **SHOP-02**: Uzytkownik moze otworzyc strone produktu ze zdjeciami, opisem i cena
+- [x] **SHOP-03**: Uzytkownik moze dodac produkty do koszyka
 - [ ] **SHOP-04**: Uzytkownik moze przegladac i edytowac zawartosc koszyka (zmiana ilosci, usuwanie)
 - [ ] **SHOP-05**: Uzytkownik moze przejsc do zamowienia z formularzem danych (email, imie, dane odbioru)
 - [x] **SHOP-06**: Admin moze zarzadzac produktami (dodawac, edytowac, ukrywac) z panelu
@@ -127,8 +127,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRZE-05 | Phase 3 | Complete |
 | PRZE-06 | Phase 3 | Complete |
 | SHOP-01 | Phase 4 | Complete |
-| SHOP-02 | Phase 4 | Pending |
-| SHOP-03 | Phase 4 | Pending |
+| SHOP-02 | Phase 4 | Complete |
+| SHOP-03 | Phase 4 | Complete |
 | SHOP-04 | Phase 4 | Pending |
 | SHOP-05 | Phase 4 | Pending |
 | SHOP-06 | Phase 4 | Complete |

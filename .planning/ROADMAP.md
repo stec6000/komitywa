@@ -88,7 +88,7 @@ Plans:
 
 Plans:
 - [x] 04-01-PLAN.md — Shop app scaffold: models, admin, Cart class, context processor, forms, URLs, test scaffold
-- [ ] 04-02-PLAN.md — Product catalog page + product detail page + add-to-cart + shop CSS
+- [x] 04-02-PLAN.md — Product catalog page + product detail page + add-to-cart + shop CSS
 - [ ] 04-03-PLAN.md — Cart page + checkout form + confirmation page + navbar wiring
 
 ### Phase 5: Payments & Orders

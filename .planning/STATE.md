@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-01-PLAN.md
-last_updated: "2026-04-02T13:25:20.952Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-04-02T13:32:48.778Z"
 last_activity: 2026-04-02
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
   percent: 78
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-30)
 ## Current Position
 
 Phase: 04 (shop) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-02
 
@@ -57,6 +57,7 @@ Progress: [████████░░] 78%
 | Phase 03-recipes P02 | 3min | 2 tasks | 4 files |
 | Phase 03-recipes P03 | 1min | 2 tasks | 3 files |
 | Phase 04-shop P01 | 4min | 1 tasks | 22 files |
+| Phase 04-shop P02 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,7 @@ Recent decisions affecting current work:
 - [Phase 03-recipes]: Detail CSS in extra_css block to avoid Plan 02 main.css ownership conflict
 - [Phase 04-shop]: All shop URLs in single shop/urls.py with explicit path prefixes mounted at root to match UI-SPEC
 - [Phase 04-shop]: Tests use get_or_create for seeded categories to avoid migration data conflicts
+- [Phase 04-shop]: Moved shop templates from app-level to project-level directory to match recipes pattern
 
 ### Pending Todos
 
@@ -88,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T13:25:20.949Z
-Stopped at: Completed 04-01-PLAN.md
+Last session: 2026-04-02T13:32:48.775Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None
