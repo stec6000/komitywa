@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-04-01T08:06:13.930Z"
-last_activity: 2026-04-01
+status: executing
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-04-02T13:25:20.952Z"
+last_activity: 2026-04-02
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_plans: 12
+  completed_plans: 10
   percent: 78
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-30)
 
 **Core value:** Klienci moga przegladac przepisy, kupowac ebooki i zamawiac gotowe weganskie produkty z odbiorem osobistym -- w jednym miejscu.
-**Current focus:** Phase 02 — landing
+**Current focus:** Phase 04 — shop
 
 ## Current Position
 
-Phase: 04
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-01
+Phase: 04 (shop) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
+Last activity: 2026-04-02
 
 Progress: [████████░░] 78%
 
@@ -56,6 +56,7 @@ Progress: [████████░░] 78%
 | Phase 03-recipes P01 | 4m 2s | 2 tasks | 13 files |
 | Phase 03-recipes P02 | 3min | 2 tasks | 4 files |
 | Phase 03-recipes P03 | 1min | 2 tasks | 3 files |
+| Phase 04-shop P01 | 4min | 1 tasks | 22 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,8 @@ Recent decisions affecting current work:
 - [Phase 03-recipes]: Stub list view queries published recipes immediately so test assertions pass from wave 1
 - [Phase 03-recipes]: Fixed test_search_by_title search query from 'czekolada' to 'tort' (substring mismatch in test data)
 - [Phase 03-recipes]: Detail CSS in extra_css block to avoid Plan 02 main.css ownership conflict
+- [Phase 04-shop]: All shop URLs in single shop/urls.py with explicit path prefixes mounted at root to match UI-SPEC
+- [Phase 04-shop]: Tests use get_or_create for seeded categories to avoid migration data conflicts
 
 ### Pending Todos
 
@@ -85,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-01T08:01:51.896Z
-Stopped at: Completed 03-03-PLAN.md
+Last session: 2026-04-02T13:25:20.949Z
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None

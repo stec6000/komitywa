@@ -87,7 +87,7 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 04-01-PLAN.md — Shop app scaffold: models, admin, Cart class, context processor, forms, URLs, test scaffold
+- [x] 04-01-PLAN.md — Shop app scaffold: models, admin, Cart class, context processor, forms, URLs, test scaffold
 - [ ] 04-02-PLAN.md — Product catalog page + product detail page + add-to-cart + shop CSS
 - [ ] 04-03-PLAN.md — Cart page + checkout form + confirmation page + navbar wiring
 
@@ -133,6 +133,6 @@ Note: Phase 3 (Recipes) and Phase 4 (Shop) both depend on Phase 2 but are indepe
 | 1. Foundation | 3/3 | Complete | 2026-03-31 |
 | 2. Landing & Brand | 3/3 | Complete | 2026-03-31 |
 | 3. Recipes | 2/3 | In Progress|  |
-| 4. Shop | 0/3 | Not started | - |
+| 4. Shop | 1/3 | In Progress|  |
 | 5. Payments & Orders | 0/3 | Not started | - |
 | 6. Newsletter | 0/2 | Not started | - |
