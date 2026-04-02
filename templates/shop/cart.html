@@ -1,10 +1,86 @@
 {% extends "base.html" %}
+
 {% block title %}Koszyk -- Kuchenna Komitywa{% endblock %}
+
 {% block content %}
 <section class="kk-section">
   <div class="container">
     <h1>Twoj koszyk</h1>
-    <!-- Stub for Task 1 verification -->
+
+    {% if cart_items %}
+    <div class="row">
+      <div class="col-lg-8">
+        {% for item in cart_items %}
+        <div class="kk-cart-item">
+          {% if item.product.image %}
+          <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" class="kk-cart-item__img">
+          {% else %}
+          <div class="kk-cart-item__img-placeholder"><i class="bi bi-image" aria-hidden="true"></i></div>
+          {% endif %}
+
+          <div class="kk-cart-item__info">
+            <a href="{% url 'shop:detail' slug=item.product.slug %}" class="text-decoration-none">
+              <h3 class="mb-1" style="font-size:20px;">{{ item.product.title }}</h3>
+            </a>
+            <span class="kk-delivery-note">
+              {% if item.is_ebook %}Cyfrowy{% else %}Odbior osobisty{% endif %}
+            </span>
+          </div>
+
+          <div class="kk-cart-item__actions">
+            {% if not item.is_ebook %}
+            <form method="post" action="{% url 'shop:cart_update' product_id=item.product.id %}" class="d-flex align-items-center gap-1">
+              {% csrf_token %}
+              <button type="submit" name="quantity" value="{{ item.quantity|add:'-1' }}" class="kk-qty-btn" aria-label="Zmniejsz ilosc {{ item.product.title }}"{% if item.quantity <= 1 %} disabled{% endif %}>
+                <i class="bi bi-dash"></i>
+              </button>
+              <input type="text" value="{{ item.quantity }}" class="kk-qty-input" readonly aria-label="Ilosc produktu {{ item.product.title }}">
+              <button type="submit" name="quantity" value="{{ item.quantity|add:'1' }}" class="kk-qty-btn" aria-label="Zwieksz ilosc {{ item.product.title }}">
+                <i class="bi bi-plus"></i>
+              </button>
+            </form>
+            {% else %}
+            <span class="kk-qty-input" style="border:none;">1</span>
+            {% endif %}
+
+            <span class="kk-price">{{ item.line_total }} zl</span>
+
+            <form method="post" action="{% url 'shop:cart_remove' product_id=item.product.id %}">
+              {% csrf_token %}
+              <button type="submit" class="kk-cart-remove" aria-label="Usun {{ item.product.title }} z koszyka">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="col-lg-4">
+        <div class="kk-cart-summary mt-4 mt-lg-0">
+          <div class="d-flex justify-content-between mb-2">
+            <span>Suma czesciowa</span>
+            <span>{{ total }} zl</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between mb-3">
+            <strong>Do zaplaty</strong>
+            <span class="kk-price">{{ total }} zl</span>
+          </div>
+          <a href="{% url 'shop:checkout' %}" class="kk-btn-primary d-block text-center w-100 mb-3">Przejdz do zamowienia</a>
+          <a href="{% url 'shop:list' %}" class="kk-link-arrow">&larr; Kontynuuj zakupy</a>
+        </div>
+      </div>
+    </div>
+
+    {% else %}
+    <div class="text-center py-5">
+      <i class="bi bi-cart3 d-block mb-3" style="font-size:64px;color:var(--kk-sage);" aria-hidden="true"></i>
+      <h2>Twoj koszyk jest pusty</h2>
+      <p>Twoj koszyk jest pusty -- zapraszamy do sklepu!</p>
+      <a href="{% url 'shop:list' %}" class="kk-btn-primary">Przejdz do sklepu</a>
+    </div>
+    {% endif %}
   </div>
 </section>
 {% endblock %}

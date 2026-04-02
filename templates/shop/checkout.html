@@ -1,10 +1,54 @@
 {% extends "base.html" %}
+
 {% block title %}Zamowienie -- Kuchenna Komitywa{% endblock %}
+
 {% block content %}
 <section class="kk-section">
   <div class="container">
     <h1>Zamowienie</h1>
-    <!-- Stub for Task 1 verification -->
+    <div class="row">
+      <div class="col-lg-8">
+        <form method="post" class="kk-checkout-form">
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="mb-3{% if field.field.widget.input_type == 'checkbox' %} form-check{% endif %}">
+            {% if field.field.widget.input_type == 'checkbox' %}
+            {{ field }}
+            <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% else %}
+            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+            {{ field }}
+            {% endif %}
+            {% if field.help_text %}
+            <div class="form-text">{{ field.help_text }}</div>
+            {% endif %}
+            {% if field.errors %}
+            {% for error in field.errors %}
+            <div class="text-danger" style="font-size:14px;">{{ error }}</div>
+            {% endfor %}
+            {% endif %}
+          </div>
+          {% endfor %}
+          <button type="submit" class="kk-btn-primary w-100 mt-3">Przejdz do platnosci</button>
+        </form>
+      </div>
+      <div class="col-lg-4">
+        <div class="kk-order-summary mt-4 mt-lg-0">
+          <h3 class="mb-3">Podsumowanie zamowienia</h3>
+          {% for item in cart_items %}
+          <div class="d-flex justify-content-between mb-2">
+            <span>{{ item.product.title }} x {{ item.quantity }}</span>
+            <span>{{ item.line_total }} zl</span>
+          </div>
+          {% endfor %}
+          <hr>
+          <div class="d-flex justify-content-between">
+            <strong>Do zaplaty</strong>
+            <span class="kk-price">{{ total }} zl</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 {% endblock %}

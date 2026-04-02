@@ -584,3 +584,109 @@ h3, h4, h5, h6 {
         max-height: 280px;
     }
 }
+
+/* ===== Shop: Cart Page (UI-SPEC Component 6) ===== */
+.kk-cart-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--kk-beige);
+}
+.kk-cart-item__img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+.kk-cart-item__img-placeholder {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--kk-cream);
+    border-radius: 4px;
+    color: var(--kk-beige);
+    font-size: 24px;
+    flex-shrink: 0;
+}
+.kk-cart-item__info {
+    flex-grow: 1;
+}
+.kk-cart-item__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.kk-qty-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--kk-beige);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--kk-olive);
+    cursor: pointer;
+    transition: border-color 200ms ease, color 200ms ease;
+}
+.kk-qty-btn:hover {
+    border-color: var(--kk-olive);
+    color: var(--kk-olive-dark);
+}
+.kk-qty-btn:focus-visible {
+    outline: 2px solid var(--kk-olive);
+    outline-offset: 2px;
+}
+.kk-qty-input {
+    width: 48px;
+    text-align: center;
+    border: 1px solid var(--kk-beige);
+    border-radius: 4px;
+    font-family: "Nunito", sans-serif;
+    font-size: 16px;
+}
+.kk-cart-remove {
+    background: none;
+    border: none;
+    color: var(--kk-text-light);
+    cursor: pointer;
+    transition: color 200ms ease;
+    padding: 4px;
+}
+.kk-cart-remove:hover {
+    color: #DC3545;
+}
+.kk-cart-remove:focus-visible {
+    outline: 2px solid #DC3545;
+    outline-offset: 2px;
+}
+.kk-cart-summary {
+    background: var(--kk-cream);
+    border-radius: 4px;
+    padding: 24px;
+}
+
+/* ===== Shop: Checkout Form (UI-SPEC Component 7) ===== */
+.kk-checkout-form .form-control {
+    border-color: var(--kk-beige);
+}
+.kk-checkout-form .form-control:focus {
+    border-color: var(--kk-olive);
+    box-shadow: 0 0 0 3px rgba(107, 127, 94, 0.2);
+}
+.kk-checkout-form .form-check-input:checked {
+    background-color: var(--kk-olive);
+    border-color: var(--kk-olive);
+}
+.kk-checkout-form .form-check-input:focus {
+    box-shadow: 0 0 0 3px rgba(107, 127, 94, 0.2);
+}
+.kk-order-summary {
+    background: var(--kk-cream);
+    border-radius: 4px;
+    padding: 24px;
+}
