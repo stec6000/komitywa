@@ -87,9 +87,9 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
-- [ ] 04-03: TBD
+- [ ] 04-01-PLAN.md — Shop app scaffold: models, admin, Cart class, context processor, forms, URLs, test scaffold
+- [ ] 04-02-PLAN.md — Product catalog page + product detail page + add-to-cart + shop CSS
+- [ ] 04-03-PLAN.md — Cart page + checkout form + confirmation page + navbar wiring
 
 ### Phase 5: Payments & Orders
 **Goal**: Customers can complete purchases through Przelewy24, receive order confirmations, and get ebooks delivered to their email
