@@ -13,6 +13,7 @@ urlpatterns = [
     path("api/auth/registration/", include("dj_rest_auth.registration.urls")),
     path("przepisy/", include("recipes.urls", namespace="recipes")),
     path("", include("core.urls")),
+    path("", include("shop.urls")),
 ]
 
 if settings.DEBUG:
