@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Foundation** - Django template infrastructure, environment config, static/media setup, cookie consent
 - [ ] **Phase 2: Landing & Brand** - Landing page with brand identity, about/contact pages, legal pages
 - [ ] **Phase 3: Recipes** - Recipe blog with categories, search, SEO markup, and admin management
-- [ ] **Phase 4: Shop** - Product catalog, product pages, shopping cart, and admin management
+- [x] **Phase 4: Shop** - Product catalog, product pages, shopping cart, and admin management
 - [ ] **Phase 5: Payments & Orders** - Przelewy24 integration, checkout flow, order confirmation, ebook delivery
 - [ ] **Phase 6: Newsletter** - Newsletter signup, double opt-in, unsubscribe
 
