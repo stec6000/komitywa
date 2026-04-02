@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.title }} — Kuchenna Komitywa{% endblock %}
+
+{% block content %}
+<section class="kk-section">
+  <div class="container">
+    <div class="row gy-4">
+      <!-- Main column -->
+      <div class="col-lg-8">
+        {% if product.image %}
+        <div class="kk-detail-hero mb-4">
+          <img src="{{ product.image.url }}" alt="{{ product.title }}">
+        </div>
+        {% endif %}
+
+        <h1>{{ product.title }}</h1>
+
+        <!-- Meta row: category badge + digital badge -->
+        <div class="d-flex align-items-center gap-2 mb-3">
+          {% if product.category %}
+          <span class="kk-category-badge" style="position:static;">{{ product.category.name }}</span>
+          {% endif %}
+          {% if product.type == "ebook" %}
+          <span class="kk-badge-digital" style="position:static;">Cyfrowy</span>
+          {% endif %}
+        </div>
+
+        <p class="kk-price mb-3">{{ product.price }} zł</p>
+
+        <!-- Full description -->
+        <div class="mb-4">
+          {% if product.full_description %}
+          {{ product.full_description|linebreaks }}
+          {% else %}
+          {{ product.description|linebreaks }}
+          {% endif %}
+        </div>
+
+        <!-- Delivery note -->
+        <div class="kk-delivery-note mb-4">
+          {% if product.type == "ebook" %}
+          <i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>
+          Po zakupie ebook zostanie wysłany na Twój email.
+          {% else %}
+          <i class="bi bi-shop me-1" aria-hidden="true"></i>
+          Odbiór osobisty w naszej kuchni.
+          {% endif %}
+        </div>
+
+        <!-- Add to cart form (main column) -->
+        <form method="post" action="{% url 'shop:cart_add' product_id=product.id %}">
+          {% csrf_token %}
+          <button type="submit" class="kk-btn-primary">Dodaj do koszyka</button>
+        </form>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+        <div class="kk-detail-sidebar">
+          <p class="kk-price mb-3">{{ product.price }} zł</p>
+
+          <div class="kk-delivery-note mb-3">
+            {% if product.type == "ebook" %}
+            <i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>
+            Po zakupie ebook zostanie wysłany na Twój email.
+            {% else %}
+            <i class="bi bi-shop me-1" aria-hidden="true"></i>
+            Odbiór osobisty w naszej kuchni.
+            {% endif %}
+          </div>
+
+          <form method="post" action="{% url 'shop:cart_add' product_id=product.id %}">
+            {% csrf_token %}
+            <button type="submit" class="kk-btn-primary w-100 mb-3">Dodaj do koszyka</button>
+          </form>
+
+          <a href="{% url 'shop:list' %}" class="kk-link-arrow">&larr; Wróć do sklepu</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

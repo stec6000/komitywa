@@ -486,3 +486,101 @@ h3, h4, h5, h6 {
         padding-bottom: 4px;
     }
 }
+
+/* ===========================
+   Phase 4: Shop
+   =========================== */
+
+/* ===== Shop: Product Card (UI-SPEC Component 1) ===== */
+.kk-product-card {
+    border: 1px solid var(--kk-beige);
+    border-radius: 4px;
+    background: var(--kk-warm-white);
+    transition: box-shadow 200ms ease;
+    overflow: hidden;
+}
+.kk-product-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+.kk-product-card__img-wrapper {
+    position: relative;
+    padding-top: 75%; /* 4:3 ratio */
+    overflow: hidden;
+    background: var(--kk-cream);
+}
+.kk-product-card__img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.kk-product-card__img-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--kk-cream);
+    color: var(--kk-beige);
+    font-size: 48px;
+}
+.kk-badge-digital {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--kk-sage);
+    color: #ffffff;
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 4px 10px;
+}
+
+/* ===== Shop: Price ===== */
+.kk-price {
+    font-family: "Nunito", sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--kk-olive-dark);
+}
+
+/* ===== Shop: Delivery Note ===== */
+.kk-delivery-note {
+    font-family: "Nunito", sans-serif;
+    font-size: 14px;
+    color: var(--kk-text-light);
+}
+
+/* ===== Shop: Detail Sidebar ===== */
+.kk-detail-sidebar {
+    background: var(--kk-cream);
+    border-radius: 4px;
+    padding: 24px;
+}
+
+/* ===== Shop: Detail Hero Image ===== */
+.kk-detail-hero {
+    position: relative;
+    width: 100%;
+    max-height: 480px;
+    overflow: hidden;
+    border-radius: 4px;
+}
+.kk-detail-hero img {
+    width: 100%;
+    height: auto;
+    max-height: 480px;
+    object-fit: cover;
+}
+@media (max-width: 767px) {
+    .kk-detail-hero,
+    .kk-detail-hero img {
+        max-height: 280px;
+    }
+}
