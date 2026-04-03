@@ -1,14 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Potwierdzenie -- Kuchenna Komitywa{% endblock %}
+{% block title %}Potwierdzenie — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
 <section class="kk-section">
   <div class="container text-center py-5">
-    <i class="bi bi-check-circle d-block mb-3" style="font-size:64px;color:var(--kk-sage);" aria-hidden="true"></i>
-    <h1>Dziekujemy za zamowienie!</h1>
-    <p>Twoje zamowienie zostalo przyjete. Czekamy na polaczenie z systemem platnosci -- skontaktujemy sie wkrotce.</p>
-    <a href="{% url 'home' %}" class="kk-btn-primary">Wroc na strone glowna</a>
+    <p>Strona przeniesiona. <a href="{% url 'home' %}">Wróć na stronę główną</a>.</p>
   </div>
 </section>
 {% endblock %}
