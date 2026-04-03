@@ -1,4 +1,5 @@
 import os
+import shutil
 import tempfile
 from decimal import Decimal
 from unittest.mock import PropertyMock, patch
@@ -69,18 +70,16 @@ class TestOrderConfirmationEmail(TestCase):
         self.assertIn("zam\u00f3wieni", body)
 
 
-@override_settings(
-    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    DEFAULT_FROM_EMAIL="test@test.com",
-)
 class TestEbookDeliveryEmail(TestCase):
     def setUp(self):
+        self.tmp_dir = tempfile.mkdtemp()
         self.category, _ = ProductCategory.objects.get_or_create(
             slug="ebooki", defaults={"name": "Ebooki"}
         )
-        # Create a temp PDF file
-        self.tmp_dir = tempfile.mkdtemp()
-        self.pdf_path = os.path.join(self.tmp_dir, "test-ebook.pdf")
+        # Create ebook dir and PDF inside tmp media root
+        ebooks_dir = os.path.join(self.tmp_dir, "ebooks")
+        os.makedirs(ebooks_dir, exist_ok=True)
+        self.pdf_path = os.path.join(ebooks_dir, "test-ebook.pdf")
         with open(self.pdf_path, "wb") as f:
             f.write(b"%PDF-1.4 test content")
 
@@ -91,7 +90,7 @@ class TestEbookDeliveryEmail(TestCase):
             type="ebook",
             description="Opis ebooka",
             price=Decimal("39.99"),
-            ebook_file=self.pdf_path,
+            ebook_file="ebooks/test-ebook.pdf",
         )
         self.order = Order.objects.create(
             email="klient@example.com",
@@ -107,15 +106,24 @@ class TestEbookDeliveryEmail(TestCase):
         )
 
     def tearDown(self):
-        if os.path.exists(self.pdf_path):
-            os.remove(self.pdf_path)
         if os.path.exists(self.tmp_dir):
-            os.rmdir(self.tmp_dir)
+            shutil.rmtree(self.tmp_dir)
 
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="test@test.com",
+    )
     def test_sends_email_with_attachment(self):
         from shop.emails import send_ebook_delivery
 
-        send_ebook_delivery(self.order)
+        # Patch ebook_file.path to point to our real temp file
+        with patch.object(
+            type(self.product.ebook_file),
+            "path",
+            new_callable=PropertyMock,
+            return_value=self.pdf_path,
+        ):
+            send_ebook_delivery(self.order)
         self.assertEqual(len(mail.outbox), 1)
         self.assertTrue(len(mail.outbox[0].attachments) > 0)
 

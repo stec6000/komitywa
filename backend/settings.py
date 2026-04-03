@@ -188,6 +188,28 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Przelewy24
+P24_MERCHANT_ID = env.int("P24_MERCHANT_ID", default=0)
+P24_POS_ID = env.int("P24_POS_ID", default=0)
+P24_CRC_KEY = env("P24_CRC_KEY", default="")
+P24_API_KEY = env("P24_API_KEY", default="")
+P24_SANDBOX = env.bool("P24_SANDBOX", default=True)
+
+# Email
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND",
+    default="django.core.mail.backends.console.EmailBackend",
+)
+EMAIL_HOST = env("EMAIL_HOST", default="localhost")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = env(
+    "DEFAULT_FROM_EMAIL",
+    default="Kuchenna Komitywa <noreply@kuchennakomitywa.pl>",
+)
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

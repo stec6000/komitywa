@@ -49,6 +49,12 @@ class Product(models.Model):
         null=True,
         help_text="Zdjecie produktu",
     )
+    ebook_file = models.FileField(
+        upload_to="ebooks/",
+        blank=True,
+        null=True,
+        help_text="Plik PDF ebooka (tylko dla produktow typu ebook)",
+    )
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -85,6 +91,12 @@ class Order(models.Model):
     total = models.DecimalField(max_digits=10, decimal_places=2)
     cart_snapshot = models.JSONField(
         help_text="Kopia koszyka w momencie zamowienia"
+    )
+    p24_session_id = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        help_text="Identyfikator sesji Przelewy24",
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

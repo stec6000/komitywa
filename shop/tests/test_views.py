@@ -72,6 +72,8 @@ class TestCheckout(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_checkout_post_creates_order(self):
+        # TODO(05-02): After P24 integration, checkout POST will redirect
+        # to P24 payment URL instead of checkout_confirm. Update this test.
         from shop.models import Order
 
         self._add_to_cart()

@@ -45,8 +45,9 @@ class OrderAdmin(admin.ModelAdmin):
         "name",
         "status",
         "total",
+        "p24_session_id",
         "created_at",
     ]
     list_filter = ["status"]
     search_fields = ["email", "name"]
-    readonly_fields = ["cart_snapshot", "created_at"]
+    readonly_fields = ["cart_snapshot", "p24_session_id", "created_at"]
