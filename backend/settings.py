@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "core",
     "recipes",
     "shop",
+    "newsletter",
 ]
 
 MIDDLEWARE = [

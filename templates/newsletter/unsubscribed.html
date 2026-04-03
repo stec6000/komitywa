@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Wypisano z newslettera -- Kuchenna Komitywa{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center">
+    {% if already %}
+    <h2>Juz wczesniej sie wypisales/as</h2>
+    <p>Twoj adres email zostal juz wczesniej wypisany z newslettera.</p>
+    {% else %}
+    <h2>Wypisano z newslettera</h2>
+    <p>Zostales/as wypisany/a z naszego newslettera. Przykro nam, ze odchodzisz!</p>
+    {% endif %}
+    <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wroc na strone glowna</a>
+</div>
+{% endblock %}

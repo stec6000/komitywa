@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Link wygasl -- Kuchenna Komitywa{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center">
+    <h2>Link wygasl</h2>
+    <p>Link potwierdzajacy zapis do newslettera wygasl. Zapisz sie ponownie, aby otrzymac nowy link.</p>
+    <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wroc na strone glowna</a>
+</div>
+{% endblock %}
