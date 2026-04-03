@@ -84,7 +84,7 @@ def unsubscribe(request, token):
         return render(
             request,
             "newsletter/unsubscribed.html",
-            {"already": True},
+            {"already_unsubscribed": True},
         )
 
     subscriber.is_unsubscribed = True

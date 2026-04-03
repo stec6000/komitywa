@@ -3,9 +3,15 @@
 {% block title %}Link wygasl -- Kuchenna Komitywa{% endblock %}
 
 {% block content %}
-<div class="container py-5 text-center">
-    <h2>Link wygasl</h2>
-    <p>Link potwierdzajacy zapis do newslettera wygasl. Zapisz sie ponownie, aby otrzymac nowy link.</p>
-    <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wroc na strone glowna</a>
-</div>
+<section class="kk-section" aria-label="Link wygasl">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h1 style="font-family: var(--kk-font-heading);">Link wygasl</h1>
+                <p>Niestety, link potwierdzajacy stracil waznosc. Sprobuj zapisac sie ponownie.</p>
+                <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wroc do strony glownej</a>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
