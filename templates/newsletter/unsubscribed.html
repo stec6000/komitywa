@@ -3,14 +3,20 @@
 {% block title %}Wypisano z newslettera -- Kuchenna Komitywa{% endblock %}
 
 {% block content %}
-<div class="container py-5 text-center">
-    {% if already %}
-    <h2>Juz wczesniej sie wypisales/as</h2>
-    <p>Twoj adres email zostal juz wczesniej wypisany z newslettera.</p>
-    {% else %}
-    <h2>Wypisano z newslettera</h2>
-    <p>Zostales/as wypisany/a z naszego newslettera. Przykro nam, ze odchodzisz!</p>
-    {% endif %}
-    <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wroc na strone glowna</a>
-</div>
+<section class="kk-section" aria-label="Wypisano z newslettera">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                {% if already_unsubscribed %}
+                <h1 style="font-family: var(--kk-font-heading);">Juz wypisany/a</h1>
+                <p>Ten adres email zostal juz wczesniej wypisany z newslettera.</p>
+                {% else %}
+                <h1 style="font-family: var(--kk-font-heading);">Wypisano z newslettera</h1>
+                <p>Zostales/as wypisany/a z newslettera Kuchennej Komitywy. Szkoda, ze odchodzisz!</p>
+                {% endif %}
+                <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wroc do strony glownej</a>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

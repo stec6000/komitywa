@@ -3,9 +3,16 @@
 {% block title %}Sprawdz email -- Kuchenna Komitywa{% endblock %}
 
 {% block content %}
-<div class="container py-5 text-center">
-    <h2>Sprawdz swoja skrzynke email</h2>
-    <p>Wyslalismy Ci wiadomosc z linkiem potwierdzajacym zapis do newslettera.</p>
-    <p>Link jest wazny przez 24 godziny.</p>
-</div>
+<section class="kk-section" aria-label="Sprawdz email">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h1 style="font-family: var(--kk-font-heading);">Sprawdz swoja skrzynke email</h1>
+                <p>Wyslalismy link potwierdzajacy. Kliknij go, zeby dokonczyc zapis do newslettera.</p>
+                <p class="text-muted">Link jest wazny przez 24 godziny.</p>
+                <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wroc do strony glownej</a>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

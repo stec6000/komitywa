@@ -3,9 +3,16 @@
 {% block title %}Zapis potwierdzony -- Kuchenna Komitywa{% endblock %}
 
 {% block content %}
-<div class="container py-5 text-center">
-    <h2>Dziekujemy za potwierdzenie!</h2>
-    <p>Twoj adres email zostal potwierdzony. Od teraz bedziesz otrzymywac nasz newsletter.</p>
-    <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wroc na strone glowna</a>
-</div>
+<section class="kk-section" aria-label="Zapis potwierdzony">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <i class="bi bi-check-circle" style="font-size: 3rem; color: var(--kk-sage);"></i>
+                <h1 style="font-family: var(--kk-font-heading);">Zapis potwierdzony!</h1>
+                <p>Dziekujemy! Twoj zapis do newslettera Kuchennej Komitywy zostal potwierdzony.</p>
+                <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wroc do strony glownej</a>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
