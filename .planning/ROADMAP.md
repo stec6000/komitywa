@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Landing & Brand** - Landing page with brand identity, about/contact pages, legal pages
 - [ ] **Phase 3: Recipes** - Recipe blog with categories, search, SEO markup, and admin management
 - [x] **Phase 4: Shop** - Product catalog, product pages, shopping cart, and admin management
-- [ ] **Phase 5: Payments & Orders** - Przelewy24 integration, checkout flow, order confirmation, ebook delivery
+- [x] **Phase 5: Payments & Orders** - Przelewy24 integration, checkout flow, order confirmation, ebook delivery (completed 2026-04-03)
 - [ ] **Phase 6: Newsletter** - Newsletter signup, double opt-in, unsubscribe
 
 ## Phase Details
@@ -105,7 +105,7 @@ Plans:
 
 Plans:
 - [x] 05-01-PLAN.md — Models + P24 client + email module + settings/config + admin + tests
-- [ ] 05-02-PLAN.md — Checkout flow + webhook + return/cancel views + templates
+- [x] 05-02-PLAN.md — Checkout flow + webhook + return/cancel views + templates
 
 ### Phase 6: Newsletter
 **Goal**: Visitors can subscribe to the newsletter with RODO-compliant double opt-in and manage their subscription
@@ -133,5 +133,5 @@ Note: Phase 3 (Recipes) and Phase 4 (Shop) both depend on Phase 2 but are indepe
 | 2. Landing & Brand | 3/3 | Complete | 2026-03-31 |
 | 3. Recipes | 2/3 | In Progress|  |
 | 4. Shop | 1/3 | In Progress|  |
-| 5. Payments & Orders | 0/2 | Not started | - |
+| 5. Payments & Orders | 2/2 | Complete   | 2026-04-03 |
 | 6. Newsletter | 0/2 | Not started | - |

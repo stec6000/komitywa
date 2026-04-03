@@ -43,7 +43,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **PAY-01**: Uzytkownik moze zaplacic przez Przelewy24 (BLIK, przelewy, karty)
 - [x] **PAY-02**: System weryfikuje platnosc przez webhook P24 z walidacja CRC
-- [ ] **PAY-03**: Uzytkownik widzi strone potwierdzenia zamowienia po platnosci
+- [x] **PAY-03**: Uzytkownik widzi strone potwierdzenia zamowienia po platnosci
 - [x] **PAY-04**: Uzytkownik otrzymuje email z potwierdzeniem zamowienia
 - [x] **PAY-05**: Uzytkownik otrzymuje ebook (PDF) na email po zaplacie
 - [x] **PAY-06**: Admin widzi zamowienia i ich statusy w panelu administracyjnym
@@ -134,7 +134,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SHOP-06 | Phase 4 | Complete |
 | PAY-01 | Phase 5 | Complete |
 | PAY-02 | Phase 5 | Complete |
-| PAY-03 | Phase 5 | Pending |
+| PAY-03 | Phase 5 | Complete |
 | PAY-04 | Phase 5 | Complete |
 | PAY-05 | Phase 5 | Complete |
 | PAY-06 | Phase 5 | Complete |

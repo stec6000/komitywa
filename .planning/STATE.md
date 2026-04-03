@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-04-03T10:16:35.355Z"
-last_activity: 2026-04-03 -- Phase 05 execution started
+stopped_at: Completed 05-02-PLAN.md
+last_updated: "2026-04-03T10:22:53.644Z"
+last_activity: 2026-04-03
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 14
-  completed_plans: 13
+  completed_plans: 14
   percent: 78
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-30)
 ## Current Position
 
 Phase: 05 (payments) — EXECUTING
-Plan: 1 of 2
-Status: Plan 05-01 complete — ready for Wave 2
-Last activity: 2026-04-03 -- Plan 05-01 complete
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-03
 
 Progress: [████████░░] 78%
 
@@ -60,6 +60,7 @@ Progress: [████████░░] 78%
 | Phase 04-shop P02 | 3min | 2 tasks | 4 files |
 | Phase 04-shop P03 | 3min | 2 tasks | 7 files |
 | Phase 05-payments P01 | 4min | 1 tasks | 11 files |
+| Phase 05-payments P02 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -84,6 +85,8 @@ Recent decisions affecting current work:
 - [Phase 04-shop]: Checkout confirmation is placeholder for Phase 5 payment integration
 - [Phase 05-payments]: P24 sign uses SHA-384 on compact JSON per P24 REST API spec
 - [Phase 05-payments]: Ebook delivery gracefully logs attachment errors without raising (D-10 resilience)
+- [Phase 05-payments]: Checkout redirects to p24_cancel on P24 registration failure (restores cart, cancels order)
+- [Phase 05-payments]: Return page does NOT check order.status - shows pending message per D-05
 
 ### Pending Todos
 
@@ -96,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T10:16:35.352Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-04-03T10:22:53.641Z
+Stopped at: Completed 05-02-PLAN.md
 Resume file: None
