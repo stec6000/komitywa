@@ -115,11 +115,11 @@ Plans:
   1. Visitor can enter email in a footer signup form to subscribe to the newsletter
   2. Subscriber receives a confirmation email and must click to confirm (double opt-in)
   3. Subscriber can unsubscribe via a link in any newsletter email
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
-- [x] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md — Newsletter app scaffold: model, forms, emails, admin, URLs, views, tests, signup section in base.html
+- [ ] 06-02-PLAN.md — Newsletter page templates (check-email, confirmed, unsubscribed, link-expired) + human verification
 
 ## Progress
 
@@ -134,4 +134,4 @@ Note: Phase 3 (Recipes) and Phase 4 (Shop) both depend on Phase 2 but are indepe
 | 3. Recipes | 2/3 | In Progress|  |
 | 4. Shop | 1/3 | In Progress|  |
 | 5. Payments & Orders | 2/2 | Complete   | 2026-04-03 |
-| 6. Newsletter | 1/2 | In Progress|  |
+| 6. Newsletter | 0/2 | Not started | - |
