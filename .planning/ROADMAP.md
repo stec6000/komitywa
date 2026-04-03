@@ -101,12 +101,11 @@ Plans:
   3. Customer sees an order confirmation page after successful payment
   4. Customer receives order confirmation email after payment
   5. Customer who purchased an ebook receives the PDF file via email
-**Plans**: 3 plans
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
-- [ ] 05-03: TBD
+- [ ] 05-01-PLAN.md — Models + P24 client + email module + settings/config + admin + tests
+- [ ] 05-02-PLAN.md — Checkout flow + webhook + return/cancel views + templates
 
 ### Phase 6: Newsletter
 **Goal**: Visitors can subscribe to the newsletter with RODO-compliant double opt-in and manage their subscription
@@ -134,5 +133,5 @@ Note: Phase 3 (Recipes) and Phase 4 (Shop) both depend on Phase 2 but are indepe
 | 2. Landing & Brand | 3/3 | Complete | 2026-03-31 |
 | 3. Recipes | 2/3 | In Progress|  |
 | 4. Shop | 1/3 | In Progress|  |
-| 5. Payments & Orders | 0/3 | Not started | - |
+| 5. Payments & Orders | 0/2 | Not started | - |
 | 6. Newsletter | 0/2 | Not started | - |
