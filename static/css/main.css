@@ -690,3 +690,26 @@ h3, h4, h5, h6 {
     border-radius: 4px;
     padding: 24px;
 }
+
+/* Newsletter signup section */
+.kk-newsletter-section {
+    background-color: var(--kk-cream);
+    padding: 3rem 0;
+    text-align: center;
+}
+.kk-newsletter-section h3 {
+    font-family: var(--kk-font-heading);
+    color: var(--kk-olive-dark);
+    margin-bottom: 0.5rem;
+}
+.kk-newsletter-section p {
+    color: var(--kk-text-light);
+    margin-bottom: 1.5rem;
+}
+.kk-newsletter-section .form-check-label {
+    font-size: 0.875rem;
+}
+.kk-newsletter-section .form-check-label a {
+    color: var(--kk-olive);
+    text-decoration: underline;
+}
