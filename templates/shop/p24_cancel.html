@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Płatność anulowana — Kuchenna Komitywa{% endblock %}
+
+{% block content %}
+<section class="kk-section">
+  <div class="container text-center py-5" style="max-width:600px;">
+    <i class="bi bi-exclamation-triangle d-block mb-4" style="font-size:64px;color:#DC3545;" aria-hidden="true"></i>
+    <h1 style="color:#DC3545;">Płatność nie powiodła się</h1>
+    <p>Twoja płatność została anulowana lub nie powiodła się. Twój koszyk został przywrócony — możesz spróbować ponownie.</p>
+    <a href="{% url 'shop:checkout' %}" class="kk-btn-primary mt-4 d-inline-block">Spróbuj ponownie</a>
+    <a href="{% url 'shop:list' %}" class="kk-link-arrow d-block mt-3">← Wróć do sklepu</a>
+  </div>
+</section>
+{% endblock %}

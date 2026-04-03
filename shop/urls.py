@@ -30,4 +30,19 @@ urlpatterns = [
         views.checkout_confirm,
         name="checkout_confirm",
     ),
+    path(
+        "zamowienie/webhook/p24/",
+        views.p24_webhook,
+        name="p24_webhook",
+    ),
+    path(
+        "zamowienie/powrot/",
+        views.p24_return,
+        name="p24_return",
+    ),
+    path(
+        "zamowienie/anulowano/",
+        views.p24_cancel,
+        name="p24_cancel",
+    ),
 ]

@@ -1,12 +1,27 @@
+import json
+import logging
+import uuid
 from decimal import Decimal
 
+from django.conf import settings
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .cart import Cart
+from .emails import send_ebook_delivery, send_order_confirmation
 from .forms import CheckoutForm
 from .models import Order, Product, ProductCategory
+from .payment import (
+    calculate_sign,
+    get_payment_url,
+    register_transaction,
+    verify_transaction,
+)
+
+logger = logging.getLogger(__name__)
 
 
 def product_list(request):
@@ -115,7 +130,7 @@ def checkout(request):
                 }
                 for pid, item in cart.cart.items()
             }
-            Order.objects.create(
+            order = Order.objects.create(
                 email=form.cleaned_data["email"],
                 name=form.cleaned_data["name"],
                 phone=form.cleaned_data["phone"],
@@ -123,8 +138,36 @@ def checkout(request):
                 total=cart.get_total_price(),
                 cart_snapshot=cart_snapshot,
             )
+            # Generate unique P24 session ID (per Pitfall 4)
+            order.p24_session_id = (
+                f"order-{order.id}-{uuid.uuid4().hex[:8]}"
+            )
+            order.save(update_fields=["p24_session_id"])
+
             cart.clear()
-            return redirect("shop:checkout_confirm")
+
+            # Register transaction with P24
+            url_return = request.build_absolute_uri(
+                f"/zamowienie/powrot/?order_id={order.id}"
+            )
+            url_status = request.build_absolute_uri(
+                "/zamowienie/webhook/p24/"
+            )
+            try:
+                token = register_transaction(order, url_return, url_status)
+                payment_url = get_payment_url(token)
+                return redirect(payment_url)
+            except Exception as exc:
+                logger.error(
+                    "P24 registration failed for order %d: %s",
+                    order.id, exc,
+                )
+                # Restore cart on P24 registration failure
+                request.session["cart"] = order.cart_snapshot
+                request.session.modified = True
+                order.status = "cancelled"
+                order.save(update_fields=["status"])
+                return redirect("shop:p24_cancel")
     else:
         form = CheckoutForm()
 
@@ -155,4 +198,108 @@ def checkout(request):
 
 
 def checkout_confirm(request):
-    return render(request, "shop/checkout_confirm.html", {})
+    return redirect("home")
+
+
+@csrf_exempt
+@require_POST
+def p24_webhook(request):
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    session_id = data.get("sessionId", "")
+    order_id_p24 = data.get("orderId", 0)
+    amount = data.get("amount", 0)
+
+    # Verify webhook sign
+    received_sign = data.get("sign", "")
+    expected_sign = calculate_sign({
+        "merchantId": data.get("merchantId"),
+        "posId": data.get("posId"),
+        "sessionId": session_id,
+        "amount": amount,
+        "originAmount": data.get("originAmount"),
+        "currency": data.get("currency"),
+        "orderId": order_id_p24,
+        "methodId": data.get("methodId"),
+        "statement": data.get("statement"),
+        "crc": settings.P24_CRC_KEY,
+    })
+
+    if received_sign != expected_sign:
+        logger.warning(
+            "P24 webhook: invalid sign for session %s", session_id
+        )
+        return JsonResponse({"error": "Invalid sign"}, status=400)
+
+    # Find order
+    try:
+        order = Order.objects.get(p24_session_id=session_id)
+    except Order.DoesNotExist:
+        logger.error(
+            "P24 webhook: order not found for session %s", session_id
+        )
+        return JsonResponse({"error": "Order not found"}, status=404)
+
+    # Verify transaction with P24 API
+    try:
+        verified = verify_transaction(session_id, order_id_p24, amount)
+    except Exception as exc:
+        logger.error(
+            "P24 verify failed for order %d: %s", order.id, exc
+        )
+        return JsonResponse({"error": "Verification failed"}, status=500)
+
+    if verified:
+        order.status = "paid"
+        order.save(update_fields=["status"])
+
+        # Send emails (per D-10: log errors, don't crash)
+        try:
+            send_order_confirmation(order)
+        except Exception as exc:
+            logger.error(
+                "Failed to send confirmation email for order %d: %s",
+                order.id, exc,
+            )
+
+        try:
+            send_ebook_delivery(order)
+        except Exception as exc:
+            logger.error(
+                "Failed to send ebook email for order %d: %s",
+                order.id, exc,
+            )
+
+    return JsonResponse({"status": "ok"})
+
+
+def p24_return(request):
+    order_id = request.GET.get("order_id")
+    context = {}
+    if order_id:
+        try:
+            order = Order.objects.get(id=order_id)
+            context["order"] = order
+        except Order.DoesNotExist:
+            context["order_not_found"] = True
+    return render(request, "shop/p24_return.html", context)
+
+
+def p24_cancel(request):
+    order_id = request.GET.get("order_id")
+    if order_id:
+        try:
+            order = Order.objects.get(id=order_id)
+            # Restore cart from snapshot (per D-06)
+            request.session["cart"] = order.cart_snapshot
+            request.session.modified = True
+            # Mark order as cancelled
+            if order.status == "pending":
+                order.status = "cancelled"
+                order.save(update_fields=["status"])
+        except Order.DoesNotExist:
+            pass
+    return render(request, "shop/p24_cancel.html", {})

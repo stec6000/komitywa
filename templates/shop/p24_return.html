@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Potwierdzenie zamówienia — Kuchenna Komitywa{% endblock %}
+
+{% block content %}
+<section class="kk-section">
+  <div class="container text-center py-5" style="max-width:600px;">
+    {% if order_not_found %}
+    <i class="bi bi-exclamation-triangle d-block mb-4" style="font-size:64px;color:var(--kk-text-light);" aria-hidden="true"></i>
+    <h1 style="color:var(--kk-olive-dark);">Nie znaleziono zamówienia</h1>
+    <p>Nie mogliśmy znaleźć Twojego zamówienia. Jeśli dokonałeś płatności, potwierdzenie przyjdzie na email. W razie problemów skontaktuj się z nami.</p>
+    <a href="{% url 'home' %}" class="kk-btn-primary mt-4 d-inline-block">Wróć na stronę główną</a>
+    {% else %}
+    <i class="bi bi-hourglass-split d-block mb-4" style="font-size:64px;color:var(--kk-sage);" aria-hidden="true"></i>
+    <h1 style="color:var(--kk-olive-dark);">Dziękujemy za zamówienie!</h1>
+    <p>Potwierdzenie zostanie wysłane na Twój email. Jeśli nie otrzymasz wiadomości w ciągu kilku minut, sprawdź folder spam.</p>
+    {% if order %}
+    <p class="small" style="color:var(--kk-text-light);">Numer zamówienia: #{{ order.id }}</p>
+    {% endif %}
+    <a href="{% url 'home' %}" class="kk-btn-primary mt-4 d-inline-block">Wróć na stronę główną</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
