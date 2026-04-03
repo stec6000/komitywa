@@ -41,12 +41,12 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Platnosci
 
-- [ ] **PAY-01**: Uzytkownik moze zaplacic przez Przelewy24 (BLIK, przelewy, karty)
-- [ ] **PAY-02**: System weryfikuje platnosc przez webhook P24 z walidacja CRC
+- [x] **PAY-01**: Uzytkownik moze zaplacic przez Przelewy24 (BLIK, przelewy, karty)
+- [x] **PAY-02**: System weryfikuje platnosc przez webhook P24 z walidacja CRC
 - [ ] **PAY-03**: Uzytkownik widzi strone potwierdzenia zamowienia po platnosci
-- [ ] **PAY-04**: Uzytkownik otrzymuje email z potwierdzeniem zamowienia
-- [ ] **PAY-05**: Uzytkownik otrzymuje ebook (PDF) na email po zaplacie
-- [ ] **PAY-06**: Admin widzi zamowienia i ich statusy w panelu administracyjnym
+- [x] **PAY-04**: Uzytkownik otrzymuje email z potwierdzeniem zamowienia
+- [x] **PAY-05**: Uzytkownik otrzymuje ebook (PDF) na email po zaplacie
+- [x] **PAY-06**: Admin widzi zamowienia i ich statusy w panelu administracyjnym
 
 ### Newsletter
 
@@ -59,7 +59,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **LEGAL-01**: Strona posiada strone z polityka prywatnosci
 - [x] **LEGAL-02**: Strona posiada regulamin sklepu
 - [ ] **LEGAL-03**: Strona wyswietla cookie consent banner
-- [ ] **LEGAL-04**: Formularz zamowienia zawiera checkboxy zgod (przetwarzanie danych, regulamin)
+- [x] **LEGAL-04**: Formularz zamowienia zawiera checkboxy zgod (przetwarzanie danych, regulamin)
 
 ## v2 Requirements
 
@@ -132,19 +132,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SHOP-04 | Phase 4 | Complete |
 | SHOP-05 | Phase 4 | Complete |
 | SHOP-06 | Phase 4 | Complete |
-| PAY-01 | Phase 5 | Pending |
-| PAY-02 | Phase 5 | Pending |
+| PAY-01 | Phase 5 | Complete |
+| PAY-02 | Phase 5 | Complete |
 | PAY-03 | Phase 5 | Pending |
-| PAY-04 | Phase 5 | Pending |
-| PAY-05 | Phase 5 | Pending |
-| PAY-06 | Phase 5 | Pending |
+| PAY-04 | Phase 5 | Complete |
+| PAY-05 | Phase 5 | Complete |
+| PAY-06 | Phase 5 | Complete |
 | NEWS-01 | Phase 6 | Pending |
 | NEWS-02 | Phase 6 | Pending |
 | NEWS-03 | Phase 6 | Pending |
 | LEGAL-01 | Phase 2 | Complete |
 | LEGAL-02 | Phase 2 | Complete |
 | LEGAL-03 | Phase 1 | Pending |
-| LEGAL-04 | Phase 5 | Pending |
+| LEGAL-04 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 33 total

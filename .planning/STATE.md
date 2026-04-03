@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 04-03-PLAN.md
-last_updated: "2026-04-02T18:39:07.856Z"
-last_activity: 2026-04-02
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-04-03T10:16:35.355Z"
+last_activity: 2026-04-03
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
+  total_plans: 14
+  completed_plans: 13
   percent: 78
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-30)
 Phase: 04 (shop) — EXECUTING
 Plan: 3 of 3
 Status: Phase complete — ready for verification
-Last activity: 2026-04-02
+Last activity: 2026-04-03
 
 Progress: [████████░░] 78%
 
@@ -59,6 +59,7 @@ Progress: [████████░░] 78%
 | Phase 04-shop P01 | 4min | 1 tasks | 22 files |
 | Phase 04-shop P02 | 3min | 2 tasks | 4 files |
 | Phase 04-shop P03 | 3min | 2 tasks | 7 files |
+| Phase 05-payments P01 | 4min | 1 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,8 @@ Recent decisions affecting current work:
 - [Phase 04-shop]: Moved shop templates from app-level to project-level directory to match recipes pattern
 - [Phase 04-shop]: Quantity +/- buttons submit pre-computed value via submit button name=quantity pattern
 - [Phase 04-shop]: Checkout confirmation is placeholder for Phase 5 payment integration
+- [Phase 05-payments]: P24 sign uses SHA-384 on compact JSON per P24 REST API spec
+- [Phase 05-payments]: Ebook delivery gracefully logs attachment errors without raising (D-10 resilience)
 
 ### Pending Todos
 
@@ -93,6 +96,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-02T18:39:07.853Z
-Stopped at: Completed 04-03-PLAN.md
+Last session: 2026-04-03T10:16:35.352Z
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None

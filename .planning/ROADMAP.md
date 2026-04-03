@@ -104,7 +104,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Models + P24 client + email module + settings/config + admin + tests
+- [x] 05-01-PLAN.md — Models + P24 client + email module + settings/config + admin + tests
 - [ ] 05-02-PLAN.md — Checkout flow + webhook + return/cancel views + templates
 
 ### Phase 6: Newsletter
