@@ -50,9 +50,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Newsletter
 
-- [ ] **NEWS-01**: Uzytkownik moze zapisac sie na newsletter przez formularz w stopce strony
-- [ ] **NEWS-02**: Uzytkownik otrzymuje email z potwierdzeniem zapisu (double opt-in)
-- [ ] **NEWS-03**: Uzytkownik moze wypisac sie z newslettera
+- [x] **NEWS-01**: Uzytkownik moze zapisac sie na newsletter przez formularz w stopce strony
+- [x] **NEWS-02**: Uzytkownik otrzymuje email z potwierdzeniem zapisu (double opt-in)
+- [x] **NEWS-03**: Uzytkownik moze wypisac sie z newslettera
 
 ### Legal / RODO
 
@@ -138,9 +138,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PAY-04 | Phase 5 | Complete |
 | PAY-05 | Phase 5 | Complete |
 | PAY-06 | Phase 5 | Complete |
-| NEWS-01 | Phase 6 | Pending |
-| NEWS-02 | Phase 6 | Pending |
-| NEWS-03 | Phase 6 | Pending |
+| NEWS-01 | Phase 6 | Complete |
+| NEWS-02 | Phase 6 | Complete |
+| NEWS-03 | Phase 6 | Complete |
 | LEGAL-01 | Phase 2 | Complete |
 | LEGAL-02 | Phase 2 | Complete |
 | LEGAL-03 | Phase 1 | Pending |

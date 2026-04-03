@@ -118,7 +118,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: TBD
+- [x] 06-01: TBD
 - [ ] 06-02: TBD
 
 ## Progress
@@ -134,4 +134,4 @@ Note: Phase 3 (Recipes) and Phase 4 (Shop) both depend on Phase 2 but are indepe
 | 3. Recipes | 2/3 | In Progress|  |
 | 4. Shop | 1/3 | In Progress|  |
 | 5. Payments & Orders | 2/2 | Complete   | 2026-04-03 |
-| 6. Newsletter | 0/2 | Not started | - |
+| 6. Newsletter | 1/2 | In Progress|  |

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-04-03T10:22:53.644Z"
+status: verifying
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-04-03T20:36:38.978Z"
 last_activity: 2026-04-03
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 14
-  completed_plans: 14
+  total_plans: 16
+  completed_plans: 15
   percent: 78
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-03-30)
 
 Phase: 05 (payments) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-03
 
 Progress: [████████░░] 78%
@@ -61,6 +61,7 @@ Progress: [████████░░] 78%
 | Phase 04-shop P03 | 3min | 2 tasks | 7 files |
 | Phase 05-payments P01 | 4min | 1 tasks | 11 files |
 | Phase 05-payments P02 | 3min | 2 tasks | 6 files |
+| Phase 06-newsletter P01 | 3min | 2 tasks | 23 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,9 @@ Recent decisions affecting current work:
 - [Phase 05-payments]: Ebook delivery gracefully logs attachment errors without raising (D-10 resilience)
 - [Phase 05-payments]: Checkout redirects to p24_cancel on P24 registration failure (restores cart, cancels order)
 - [Phase 05-payments]: Return page does NOT check order.status - shows pending message per D-05
+- [Phase 06-newsletter]: Double opt-in with 24h token expiry for RODO compliance
+- [Phase 06-newsletter]: Unsubscribed users can re-subscribe by resetting confirmation state
+- [Phase 06-newsletter]: IntegrityError catch for race condition on duplicate email submissions
 
 ### Pending Todos
 
@@ -99,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-03T10:22:53.641Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-04-03T20:36:38.975Z
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None
