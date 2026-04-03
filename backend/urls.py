@@ -12,6 +12,7 @@ urlpatterns = [
     path("api/auth/", include("dj_rest_auth.urls")),
     path("api/auth/registration/", include("dj_rest_auth.registration.urls")),
     path("przepisy/", include("recipes.urls", namespace="recipes")),
+    path("", include("newsletter.urls")),
     path("", include("core.urls")),
     path("", include("shop.urls")),
 ]
