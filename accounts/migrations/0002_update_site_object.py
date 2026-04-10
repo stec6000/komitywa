@@ -12,7 +12,7 @@ def update_site(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ("accounts", "0001_initial"),
-        ("sites", "0002_alter_domain_unique"),
+        ("sites", "0001_initial"),
     ]
     operations = [
         migrations.RunPython(update_site, migrations.RunPython.noop),
