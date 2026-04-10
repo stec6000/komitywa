@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Wdrożenie Produkcyjne
 current_plan: 1
-status: verifying
-stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-04-10T15:37:27.295Z"
-last_activity: 2026-04-10
+status: executing
+stopped_at: Completed 08-02-PLAN.md — Phase 08 (Database & SSL) fully complete
+last_updated: "2026-04-10T15:34:36.414Z"
+last_activity: 2026-04-10 -- Phase 09 execution started
 progress:
   total_phases: 4
-  completed_phases: 1
-  total_plans: 4
+  completed_phases: 2
+  total_plans: 6
   completed_plans: 4
   percent: 100
 ---
@@ -22,14 +22,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-10)
 
 **Core value:** Klienci mogą przeglądać przepisy, kupować ebooki i zamawiać gotowe wegańskie produkty z odbiorem osobistym — w jednym miejscu.
-**Current focus:** Phase 08 — database-ssl
+**Current focus:** Phase 09 — email
 
 ## Current Position
 
-Phase: 08 (database-ssl) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-04-10
+Phase: 09 (email) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 09
+Last activity: 2026-04-10 -- Phase 09 execution started
 
 Progress: [██████████] 100%
 
@@ -38,7 +38,7 @@ Progress: [██████████] 100%
 **v1.1 Production Deployment** — In Progress
 
 - Phase 7: Server Foundation — COMPLETE (both plans done)
-- Phase 8: Database & SSL — Not started
+- Phase 8: Database & SSL — COMPLETE (both plans done)
 - Phase 9: Email — Not started
 - Phase 10: Payments & Verify — Not started
 
@@ -48,9 +48,9 @@ Previous:
 
 ## Current Phase
 
-**Phase:** 07-server-foundation
+**Phase:** 09-email (next)
 **Current Plan:** 1
-**Status:** Phase complete — ready for verification
+**Status:** Executing Phase 09
 
 🔄 **v1.1 Wdrożenie Produkcyjne — in progress**
 
@@ -77,9 +77,8 @@ v1.1 key decisions:
 - psycopg[binary] >=3.3 (not psycopg2) — Django 5.2 preference, binary needed on shared hosting
 - whitenoise for static file serving behind Passenger
 - P24 sandbox on production for now (prod credentials pending seller verification)
-- [Phase 08-database-ssl]: psycopg[binary] (not psycopg2) as PostgreSQL adapter -- Django 5.2 preferred, binary needed on shared hosting
-- [Phase 09]: ACCOUNT_EMAIL_VERIFICATION set to mandatory for ebook delivery reliability
-- [Phase 09]: Hardcoded brand name in email subjects instead of current_site.name
+- [Phase 08-database-ssl]: psycopg[binary] initially chosen, then replaced with psycopg2-binary -- no binary wheel for MyDevil platform
+- [Phase 08-database-ssl]: SECURE_SSL_REDIRECT=False (Apache sslonly handles redirect), HSTS starts at 3600s
 
 ### Pending Todos
 
@@ -93,6 +92,6 @@ None for Phase 7.
 
 ## Session Continuity
 
-Last session: 2026-04-10T15:37:27.292Z
-Stopped at: Completed 09-01-PLAN.md
+Last session: 2026-04-10T18:00:00.000Z
+Stopped at: Completed 08-02-PLAN.md — Phase 08 (Database & SSL) fully complete
 Resume file: None
