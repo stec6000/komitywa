@@ -19,9 +19,12 @@ db.sqlite3-journal
 media/*
 !media/.gitkeep
 staticfiles/
+public/static/
+public/media/
 
 # Logs
 *.log
+logs/
 
 # Migrations cache
 */migrations/__pycache__/
