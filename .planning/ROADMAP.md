@@ -7,13 +7,6 @@
 
 ## Phases
 
-### v1.1 Wdrozenie Produkcyjne (Phases 7-10)
-
-- [x] Phase 7: Server Foundation (2/2 plans) — completed 2026-04-10
-- [ ] Phase 8: Database & Security
-- [ ] Phase 9: Email Configuration
-- [ ] Phase 10: Payments Production
-
 <details>
 <summary>✅ v1.0 MVP (Phases 1-6) — SHIPPED 2026-04-04</summary>
 
