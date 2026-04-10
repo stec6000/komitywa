@@ -1,0 +1,112 @@
+# Requirements: Kuchenna Komitywa v1.1 Wdrożenie Produkcyjne
+
+**Defined:** 2026-04-10
+**Core Value:** Klienci mogą przeglądać przepisy, kupować ebooki i zamawiać gotowe wegańskie produkty z odbiorem osobistym — w jednym miejscu.
+
+## v1.1 Requirements
+
+### Infrastruktura serwera (MyDevil.net)
+
+- [ ] **INFRA-01**: Operator może uruchomić Django na MyDevil.net przez Passenger WSGI z dedykowanym virtualenv
+- [ ] **INFRA-02**: Operator może zarządzać całą konfiguracją produkcyjną przez plik `.env` bez zmian w kodzie
+- [ ] **INFRA-03**: Strona serwuje poprawnie pliki statyczne (CSS, JS, ikony) z `public/static/`
+- [ ] **INFRA-04**: Pliki media (ebooki PDF) są dostępne przez `public/media/` na serwerze produkcyjnym
+- [ ] **INFRA-05**: Operator może wdrożyć nową wersję przez skrypt `deploy.sh` (pull, install, migrate, collectstatic, restart)
+- [ ] **INFRA-06**: Błędy aplikacji Django są zapisywane do pliku `logs/django.log`
+
+### Baza danych (PostgreSQL)
+
+- [ ] **DB-01**: Aplikacja używa PostgreSQL jako bazy danych na produkcji (zamiast SQLite)
+- [ ] **DB-02**: Wszystkie migracje Django są wykonane poprawnie na bazie PostgreSQL
+- [ ] **DB-03**: Operator może zalogować się do panelu administracyjnego Django po uruchomieniu produkcji
+
+### Bezpieczeństwo i HTTPS (SSL)
+
+- [ ] **SSL-01**: Strona jest dostępna wyłącznie przez HTTPS z certyfikatem Let's Encrypt
+- [ ] **SSL-02**: Wszystkie żądania HTTP są automatycznie przekierowywane na HTTPS
+- [ ] **SSL-03**: Formularze POST (logowanie, checkout, newsletter) działają poprawnie pod HTTPS — `CSRF_TRUSTED_ORIGINS` skonfigurowane
+- [ ] **SSL-04**: Pliki cookie sesji i CSRF są zabezpieczone flagami Secure i HttpOnly
+- [ ] **SSL-05**: Cron job pinguje stronę co 12h aby zapobiec 24h auto-shutdown na shared hostingu
+
+### Email (Brevo SMTP)
+
+- [ ] **EMAIL-01**: Aplikacja wysyła emaile przez Brevo SMTP (nie console backend)
+- [ ] **EMAIL-02**: Domena nadawcy jest zweryfikowana w Brevo przez rekordy SPF/DKIM w DNS
+- [ ] **EMAIL-03**: Email rejestracji + weryfikacji email działa na produkcji
+- [ ] **EMAIL-04**: Email resetowania hasła działa na produkcji
+- [ ] **EMAIL-05**: Email potwierdzenia zamówienia z załączonym eBookiem PDF działa na produkcji
+- [ ] **EMAIL-06**: Email double opt-in dla newslettera działa na produkcji
+
+### Płatności (P24 Sandbox)
+
+- [ ] **P24-01**: Płatności Przelewy24 (tryb sandbox) działają na produkcji z poprawnym webhook URL wskazującym na domenę produkcyjną
+- [ ] **P24-02**: EBooki PDF są uploadowane przez panel admina na serwerze produkcyjnym
+
+### Weryfikacja
+
+- [ ] **VER-01**: Pełny flow zakupu działa end-to-end: przeglądanie → koszyk → P24 sandbox → potwierdzenie → email z eBookiem
+- [ ] **VER-02**: `python manage.py check --deploy` nie wykazuje żadnych ostrzeżeń bezpieczeństwa
+
+## v2 Requirements
+
+### Płatności produkcyjne
+
+- **P24-03**: Aplikacja przyjmuje płatności przez Przelewy24 na produkcji (nie sandbox) — zależne od dostarczenia danych sprzedawcy przez klienta
+
+### Operacyjne
+
+- **OPS-01**: Automatyczne backupy PostgreSQL przez cron (`pg_dump`) — defer do po launch
+- **OPS-02**: Monitoring błędów przez Sentry — defer do v1.2 gdy jest realy traffic
+
+### Newsletter campaigns
+
+- **CAMP-01**: Admin może tworzyć i wysyłać kampanie emailowe do bazy subskrybentów — odłożone do v1.2
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| CI/CD pipeline | Manual SSH deployment wystarczający dla tego rozmiaru projektu |
+| Docker / nginx / gunicorn | Niedostępne na MyDevil shared hosting (Passenger WSGI) |
+| CDN dla static files | Zbędne przy aktualnym ruchu, MyDevil Apache wystarczy |
+| Migracja danych z SQLite | Brak danych produkcyjnych do przeniesienia (nowy sklep) |
+| Split settings (base/dev/prod) | django-environ + .env na środowisko to właściwy wzorzec |
+| Redis / Celery | Zbędne na shared hostingu, brak asynchronicznych tasków |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| INFRA-01 | TBD | Pending |
+| INFRA-02 | TBD | Pending |
+| INFRA-03 | TBD | Pending |
+| INFRA-04 | TBD | Pending |
+| INFRA-05 | TBD | Pending |
+| INFRA-06 | TBD | Pending |
+| DB-01 | TBD | Pending |
+| DB-02 | TBD | Pending |
+| DB-03 | TBD | Pending |
+| SSL-01 | TBD | Pending |
+| SSL-02 | TBD | Pending |
+| SSL-03 | TBD | Pending |
+| SSL-04 | TBD | Pending |
+| SSL-05 | TBD | Pending |
+| EMAIL-01 | TBD | Pending |
+| EMAIL-02 | TBD | Pending |
+| EMAIL-03 | TBD | Pending |
+| EMAIL-04 | TBD | Pending |
+| EMAIL-05 | TBD | Pending |
+| EMAIL-06 | TBD | Pending |
+| P24-01 | TBD | Pending |
+| P24-02 | TBD | Pending |
+| VER-01 | TBD | Pending |
+| VER-02 | TBD | Pending |
+
+**Coverage:**
+- v1.1 requirements: 24 total
+- Mapped to phases: 0 (roadmap pending)
+- Unmapped: 24 ⚠️
+
+---
+*Requirements defined: 2026-04-10*
+*Last updated: 2026-04-10 after initial definition for v1.1*
