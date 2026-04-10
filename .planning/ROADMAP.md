@@ -55,7 +55,10 @@ Plans:
   3. Site is accessible only via HTTPS with a valid Let's Encrypt certificate — HTTP requests redirect to HTTPS
   4. POST forms (login, checkout, newsletter signup) work correctly under HTTPS without CSRF errors
   5. Session and CSRF cookies have Secure and HttpOnly flags set — a cron job pings the site every 12h to prevent auto-shutdown
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 08-01-PLAN.md — PostgreSQL adapter and database setup (psycopg, migrations, superuser)
+- [ ] 08-02-PLAN.md — Let's Encrypt HTTPS, security settings, keep-alive cron
 
 ### Phase 9: Email
 **Goal**: All application email flows work on production through Brevo SMTP with proper sender domain authentication
@@ -91,6 +94,6 @@ Plans:
 | 5. Payments & Orders | v1.0 | 2/2 | Complete | 2026-04-03 |
 | 6. Newsletter | v1.0 | 2/2 | Complete | 2026-04-03 |
 | 7. Server Foundation | v1.1 | 2/2 | Complete | 2026-04-10 |
-| 8. Database & SSL | v1.1 | 0/? | Not started | - |
+| 8. Database & SSL | v1.1 | 0/2 | Not started | - |
 | 9. Email | v1.1 | 0/? | Not started | - |
 | 10. Payments & Verification | v1.1 | 0/? | Not started | - |
