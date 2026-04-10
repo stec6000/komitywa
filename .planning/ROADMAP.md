@@ -18,6 +18,13 @@
 
 </details>
 
+### v1.1 Production Deployment (Phases 7-10)
+
+- [ ] Phase 7: Server Foundation (0/2 plans) — in progress
+- [ ] Phase 8: Database & SSL (0/? plans) — not started
+- [ ] Phase 9: Email (0/? plans) — not started
+- [ ] Phase 10: Payments & Verify (0/? plans) — not started
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -28,3 +35,4 @@
 | 4. Shop | v1.0 | 3/3 | Complete | 2026-04-02 |
 | 5. Payments & Orders | v1.0 | 2/2 | Complete | 2026-04-03 |
 | 6. Newsletter | v1.0 | 2/2 | Complete | 2026-04-03 |
+| 7. Server Foundation | v1.1 | 0/2 | In Progress | - |
