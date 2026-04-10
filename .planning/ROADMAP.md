@@ -90,7 +90,7 @@ Plans:
 | 4. Shop | v1.0 | 3/3 | Complete | 2026-04-02 |
 | 5. Payments & Orders | v1.0 | 2/2 | Complete | 2026-04-03 |
 | 6. Newsletter | v1.0 | 2/2 | Complete | 2026-04-03 |
-| 7. Server Foundation | v1.1 | 0/2 | Planned | - |
+| 7. Server Foundation | v1.1 | 0/2 | In Progress | - |
 | 8. Database & SSL | v1.1 | 0/? | Not started | - |
 | 9. Email | v1.1 | 0/? | Not started | - |
 | 10. Payments & Verification | v1.1 | 0/? | Not started | - |

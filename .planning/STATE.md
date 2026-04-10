@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Wdrożenie Produkcyjne
 status: in_progress
-stopped_at: Roadmap created — ready to plan Phase 7
-last_updated: "2026-04-10T00:00:00.000Z"
+stopped_at: "07-01 Tasks 1-2 complete; Task 3 checkpoint:human-action pending (MyDevil virtualenv setup)"
+last_updated: "2026-04-10T07:47:30Z"
 last_activity: 2026-04-10
 progress:
   total_phases: 4
   completed_phases: 0
-  total_plans: 0
+  total_plans: 2
   completed_plans: 0
   percent: 0
 ---
@@ -26,18 +26,29 @@ See: .planning/PROJECT.md (updated 2026-04-10)
 ## Current Position
 
 Phase: 7 of 10 (Server Foundation)
-Plan: — (not yet planned)
-Status: Ready to plan
-Last activity: 2026-04-10 — Roadmap created for v1.1 (4 phases, 24 requirements)
+Plan: 07-01 (Task 3 checkpoint pending), 07-02 (complete)
+Status: In progress — waiting on human-action checkpoint
+Last activity: 2026-04-10 — Tasks 1-2 complete (passenger_wsgi.py, settings.py, requirements.txt, deploy.sh)
 
 Progress: [░░░░░░░░░░] 0%
 
 ## Milestone Status
 
-✅ **v1.0 MVP shipped** — 2026-04-04
-- 6 phases, 16 plans, 30 tasks
-- Archive: `.planning/milestones/v1.0-ROADMAP.md`
-- Tag: `v1.0`
+**v1.1 Production Deployment** — In Progress
+
+- Phase 7: Server Foundation — Plan 01 tasks 1-2 complete, Task 3 checkpoint pending
+- Phase 8: Database & SSL — Not started
+- Phase 9: Email — Not started
+- Phase 10: Payments & Verify — Not started
+
+Previous:
+- v1.0 MVP shipped — 2026-04-04 (archive: `.planning/milestones/v1.0-ROADMAP.md`)
+
+## Current Phase
+
+**Phase:** 07-server-foundation
+**Current Plan:** 01 of 2
+**Status:** Task 3 checkpoint:human-action (MyDevil virtualenv setup)
 
 🔄 **v1.1 Wdrożenie Produkcyjne — in progress**
 - 4 phases (7-10), 24 requirements
@@ -47,7 +58,10 @@ Progress: [░░░░░░░░░░] 0%
 
 ### Decisions
 
-All decisions logged in PROJECT.md Key Decisions table.
+- Direct os.environ assignment for DJANGO_SETTINGS_MODULE in passenger_wsgi.py (not setdefault)
+- WhiteNoise CompressedManifestStaticFilesStorage for cache-busting static files
+- Pre-HTTPS security settings always-on; HTTPS-dependent settings env-driven with safe defaults
+- LOGGING at WARNING level for initial launch visibility
 
 v1.1 key decisions:
 - MyDevil.net as hosting (shared hosting with Passenger WSGI)
@@ -59,10 +73,11 @@ v1.1 key decisions:
 
 ### Pending Todos
 
-None.
+- Task 3 checkpoint: Operator must create MyDevil virtualenv and configure panel interpreter
 
 ### Blockers/Concerns
 
+- MyDevil server-side virtualenv not yet created (Task 3 checkpoint — blocking phase completion)
 - P24 production credentials not yet obtained (seller verification pending)
 - Brevo SPF/DKIM DNS propagation can take up to 48h — set up DNS records early
 - MyDevil PostgreSQL host address only known after SSH login (pgsqlX.mydevil.net)
@@ -70,5 +85,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-10
-Stopped at: Roadmap v1.1 created with 4 phases (7-10)
+Stopped at: Phase 7 executing — 07-01 Tasks 1-2 done, Task 3 checkpoint pending; 07-02 complete
 Resume file: None

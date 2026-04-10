@@ -1,4 +1,4 @@
-django
+django>=5.2,<5.3
 django-cors-headers
 django-environ
 djangorestframework
@@ -6,3 +6,5 @@ django-allauth
 dj-rest-auth
 drf-spectacular
 requests
+Pillow
+whitenoise>=6.12,<7
