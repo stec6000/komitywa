@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import environ
+import os
 from pathlib import Path
 
 
@@ -216,6 +217,7 @@ DEFAULT_FROM_EMAIL = env(
 )
 
 # Logging
+os.makedirs(BASE_DIR / "logs", exist_ok=True)
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
