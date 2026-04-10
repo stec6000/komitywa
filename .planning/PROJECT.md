@@ -6,6 +6,17 @@ Strona informacyjna i sklep online dla firmy Kuchenna Komitywa — wegańskiej/r
 
 v1.0 MVP dostarczył kompletny serwis: od fundacji szablonów przez sklep, płatności Przelewy24 po newsletter z double opt-in.
 
+## Current Milestone: v1.1 Wdrożenie Produkcyjne
+
+**Goal:** Przenieść aplikację z dev na MyDevil.net z pełną konfiguracją produkcyjną (PostgreSQL, Brevo SMTP, HTTPS, P24 sandbox).
+
+**Target features:**
+- Konfiguracja środowiska produkcyjnego na MyDevil.net (WSGI/Passenger, settings prod, static/media files)
+- Migracja bazy danych z SQLite na PostgreSQL
+- Konfiguracja emaila przez Brevo SMTP
+- HTTPS + domena (certyfikat SSL na MyDevil)
+- P24 skonfigurowane w trybie sandbox na produkcji
+
 ## Core Value
 
 Klienci mogą przeglądać przepisy, kupować ebooki i zamawiać gotowe wegańskie produkty z odbiorem osobistym — w jednym miejscu.
@@ -46,10 +57,12 @@ Klienci mogą przeglądać przepisy, kupować ebooki i zamawiać gotowe wegańsk
 
 <!-- Next milestone scope. -->
 
-- [ ] Wdrożenie produkcyjne (PostgreSQL, storage S3/lokalny, WSGI/Gunicorn, HTTPS)
-- [ ] Konfiguracja email produkcyjnego (SendGrid / SMTP)
-- [ ] Testy P24 sandbox → produkcja (weryfikacja danych sprzedawcy)
-- [ ] Panel do wysyłania newsletterów (kampanie, baza subskrybentów)
+- [ ] Konfiguracja środowiska MyDevil.net (Passenger WSGI, settings prod, static/media) — v1.1
+- [ ] Migracja bazy z SQLite na PostgreSQL — v1.1
+- [ ] Konfiguracja Brevo SMTP na produkcji — v1.1
+- [ ] HTTPS + domena z certyfikatem SSL (MyDevil) — v1.1
+- [ ] P24 sandbox na środowisku produkcyjnym — v1.1
+- [ ] Panel do wysyłania newsletterów (kampanie, baza subskrybentów) — odłożone (v1.2)
 
 ### Out of Scope
 
@@ -116,4 +129,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after v1.0 milestone — full MVP shipped (templates, shop, P24 payments, newsletter)*
+*Last updated: 2026-04-10 — v1.1 milestone started (production deployment: MyDevil.net, PostgreSQL, Brevo, HTTPS)*
