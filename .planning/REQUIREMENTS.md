@@ -16,9 +16,9 @@
 
 ### Baza danych (PostgreSQL)
 
-- [ ] **DB-01**: Aplikacja używa PostgreSQL jako bazy danych na produkcji (zamiast SQLite)
-- [ ] **DB-02**: Wszystkie migracje Django są wykonane poprawnie na bazie PostgreSQL
-- [ ] **DB-03**: Operator może zalogować się do panelu administracyjnego Django po uruchomieniu produkcji
+- [x] **DB-01**: Aplikacja używa PostgreSQL jako bazy danych na produkcji (zamiast SQLite)
+- [x] **DB-02**: Wszystkie migracje Django są wykonane poprawnie na bazie PostgreSQL
+- [x] **DB-03**: Operator może zalogować się do panelu administracyjnego Django po uruchomieniu produkcji
 
 ### Bezpieczeństwo i HTTPS (SSL)
 
@@ -83,9 +83,9 @@
 | INFRA-04 | Phase 7 | Complete |
 | INFRA-05 | Phase 7 | Complete |
 | INFRA-06 | Phase 7 | Complete |
-| DB-01 | Phase 8 | Pending |
-| DB-02 | Phase 8 | Pending |
-| DB-03 | Phase 8 | Pending |
+| DB-01 | Phase 8 | Complete |
+| DB-02 | Phase 8 | Complete |
+| DB-03 | Phase 8 | Complete |
 | SSL-01 | Phase 8 | Pending |
 | SSL-02 | Phase 8 | Pending |
 | SSL-03 | Phase 8 | Pending |
