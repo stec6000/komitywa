@@ -22,11 +22,11 @@
 
 ### Bezpieczeństwo i HTTPS (SSL)
 
-- [ ] **SSL-01**: Strona jest dostępna wyłącznie przez HTTPS z certyfikatem Let's Encrypt
-- [ ] **SSL-02**: Wszystkie żądania HTTP są automatycznie przekierowywane na HTTPS
-- [ ] **SSL-03**: Formularze POST (logowanie, checkout, newsletter) działają poprawnie pod HTTPS — `CSRF_TRUSTED_ORIGINS` skonfigurowane
-- [ ] **SSL-04**: Pliki cookie sesji i CSRF są zabezpieczone flagami Secure i HttpOnly
-- [ ] **SSL-05**: Cron job pinguje stronę co 12h aby zapobiec 24h auto-shutdown na shared hostingu
+- [x] **SSL-01**: Strona jest dostępna wyłącznie przez HTTPS z certyfikatem Let's Encrypt
+- [x] **SSL-02**: Wszystkie żądania HTTP są automatycznie przekierowywane na HTTPS
+- [x] **SSL-03**: Formularze POST (logowanie, checkout, newsletter) działają poprawnie pod HTTPS — `CSRF_TRUSTED_ORIGINS` skonfigurowane
+- [x] **SSL-04**: Pliki cookie sesji i CSRF są zabezpieczone flagami Secure i HttpOnly
+- [x] **SSL-05**: Cron job pinguje stronę co 12h aby zapobiec 24h auto-shutdown na shared hostingu
 
 ### Email (Brevo SMTP)
 
@@ -86,11 +86,11 @@
 | DB-01 | Phase 8 | Complete |
 | DB-02 | Phase 8 | Complete |
 | DB-03 | Phase 8 | Complete |
-| SSL-01 | Phase 8 | Pending |
-| SSL-02 | Phase 8 | Pending |
-| SSL-03 | Phase 8 | Pending |
-| SSL-04 | Phase 8 | Pending |
-| SSL-05 | Phase 8 | Pending |
+| SSL-01 | Phase 8 | Complete |
+| SSL-02 | Phase 8 | Complete |
+| SSL-03 | Phase 8 | Complete |
+| SSL-04 | Phase 8 | Complete |
+| SSL-05 | Phase 8 | Complete |
 | EMAIL-01 | Phase 9 | Pending |
 | EMAIL-02 | Phase 9 | Pending |
 | EMAIL-03 | Phase 9 | Pending |
