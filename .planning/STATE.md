@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Wdrożenie Produkcyjne
 status: in_progress
-stopped_at: "07-01 Tasks 1-2 complete; Task 3 checkpoint:human-action pending (MyDevil virtualenv setup)"
+stopped_at: "07-01 Tasks 1-2 complete + 07-02 complete; Task 3 checkpoint:human-action pending (MyDevil virtualenv setup)"
 last_updated: "2026-04-10T07:47:30Z"
 last_activity: 2026-04-10
 progress:
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-10)
 Phase: 7 of 10 (Server Foundation)
 Plan: 07-01 (Task 3 checkpoint pending), 07-02 (complete)
 Status: In progress — waiting on human-action checkpoint
-Last activity: 2026-04-10 — Tasks 1-2 complete (passenger_wsgi.py, settings.py, requirements.txt, deploy.sh)
+Last activity: 2026-04-10 — All code changes done; passenger_wsgi.py, settings.py, requirements.txt, deploy.sh, .env.example, .gitignore created
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -62,6 +62,9 @@ Previous:
 - WhiteNoise CompressedManifestStaticFilesStorage for cache-busting static files
 - Pre-HTTPS security settings always-on; HTTPS-dependent settings env-driven with safe defaults
 - LOGGING at WARNING level for initial launch visibility
+- deploy.sh uses set -e for fail-fast on errors
+- Security env vars commented out in .env.example (Phase 8 activates after HTTPS)
+- DATABASE_URL commented out in .env.example (SQLite default until Phase 8)
 
 v1.1 key decisions:
 - MyDevil.net as hosting (shared hosting with Passenger WSGI)
