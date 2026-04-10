@@ -216,10 +216,6 @@ DEFAULT_FROM_EMAIL = env(
     "DEFAULT_FROM_EMAIL",
     default="Kuchenna Komitywa <noreply@kuchennakomitywa.pl>",
 )
-NEWSLETTER_FROM_EMAIL = env(
-    "NEWSLETTER_FROM_EMAIL",
-    default=DEFAULT_FROM_EMAIL,
-)
 
 # Logging
 os.makedirs(BASE_DIR / "logs", exist_ok=True)

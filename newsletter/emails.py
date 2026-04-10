@@ -41,7 +41,7 @@ def send_confirmation_email(subscriber, request):
         subject="Potwierd\u017a zapis do newslettera"
         " \u2014 Kuchenna Komitywa",
         body=body,
-        from_email=settings.NEWSLETTER_FROM_EMAIL,
+        from_email=settings.DEFAULT_FROM_EMAIL,
         to=[subscriber.email],
     )
     email.send(fail_silently=False)
