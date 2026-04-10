@@ -40,7 +40,10 @@
   3. Static files (CSS, JS, icons) and media files (ebook PDFs) load correctly in the browser at their public URLs
   4. Operator can deploy a new version by running `deploy.sh` which pulls code, installs deps, runs migrations, collects static, and restarts the app
   5. Application errors are written to `logs/django.log` on the server
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 07-01-PLAN.md — Production configuration (passenger_wsgi.py, settings.py, requirements.txt)
+- [ ] 07-02-PLAN.md — Deploy script and environment template (deploy.sh, .env.example, .gitignore)
 
 ### Phase 8: Database & SSL
 **Goal**: Application runs on PostgreSQL with HTTPS-only access and production-grade security settings
@@ -87,7 +90,7 @@
 | 4. Shop | v1.0 | 3/3 | Complete | 2026-04-02 |
 | 5. Payments & Orders | v1.0 | 2/2 | Complete | 2026-04-03 |
 | 6. Newsletter | v1.0 | 2/2 | Complete | 2026-04-03 |
-| 7. Server Foundation | v1.1 | 0/? | Not started | - |
+| 7. Server Foundation | v1.1 | 0/2 | Planned | - |
 | 8. Database & SSL | v1.1 | 0/? | Not started | - |
 | 9. Email | v1.1 | 0/? | Not started | - |
 | 10. Payments & Verification | v1.1 | 0/? | Not started | - |
