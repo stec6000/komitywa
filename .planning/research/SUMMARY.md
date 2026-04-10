@@ -1,168 +1,118 @@
-# Project Research Summary
+# Research Summary — v1.1 Wdrożenie Produkcyjne
 
-**Project:** Kuchenna Komitywa
-**Domain:** Vegan food business website (e-commerce + recipe blog + newsletter)
-**Researched:** 2026-03-30
+**Researched:** 2026-04-10
 **Confidence:** HIGH
 
-## Executive Summary
+## Stack Additions
 
-Kuchenna Komitywa is a vegan/plant-based food business website combining a recipe blog, ebook sales, physical product sales (jarred meals, cakes with local pickup), and newsletter. The existing Django 5.2 backend with email-based authentication provides a solid foundation, but needs a significant shift from API-only to Django templates with server-rendered HTML.
+- **psycopg[binary] >=3.3,<3.4** — PostgreSQL adapter required for production DB. The `[binary]` variant bundles pre-compiled libpq, which is essential on MyDevil shared hosting where you cannot install system packages. Django 5.2 prefers psycopg3 over legacy psycopg2.
+- **whitenoise >=6.12,<7** — WSGI middleware that serves compressed, cache-busted static files directly from the Django/Passenger process. Adds gzip/brotli and content-hashed filenames on top of MyDevil's native static serving from `public/`. Zero server configuration required.
 
-The recommended approach is to build on the existing Django stack using Django templates + Bootstrap 5 + htmx for interactivity, custom e-commerce models (not a heavy framework like Oscar — the product catalog is simple enough), Przelewy24 for payments, and Celery for async email delivery. The frontend should be mobile-first given that 70%+ of food blog traffic comes from mobile devices.
+Note: ARCHITECTURE.md mentions `psycopg2-binary` in one place but STACK.md explicitly recommends `psycopg[binary]` (psycopg3) with detailed rationale. **Use psycopg3.** PITFALLS.md is neutral on version but confirms binary variant is required on shared hosting.
 
-Key risks include: Przelewy24 webhook security (fake payment confirmations), ebook PDF exposure without payment verification, RODO/GDPR compliance requirements (mandatory for Polish e-commerce), and email deliverability for ebook delivery. All are preventable with proper implementation in the right phase.
+## Feature Categories
 
-## Key Findings
+### Must Have (Table Stakes)
 
-### Recommended Stack
+- `passenger_wsgi.py` created at project root with correct `sys.path` and `DJANGO_SETTINGS_MODULE`
+- Python virtualenv created on server, all requirements installed inside it
+- Production `.env` deployed on server (not in git) with correct values for all vars
+- `settings.py` updated: `DATABASE_URL` via `env.db()`, WhiteNoise middleware, security settings via env
+- PostgreSQL database created on MyDevil (`devil pgsql db add komitywa`)
+- Django migrations run against fresh PostgreSQL database
+- Initial data seeded: superuser created, products uploaded through admin
+- `collectstatic` run to populate `public/static/`
+- Let's Encrypt SSL certificate configured on MyDevil
+- `SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SECURE_HSTS_SECONDS` enabled via `.env`
+- `CSRF_TRUSTED_ORIGINS` set to production domain(s) — required for all POST forms under HTTPS
+- `SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")` — required so Passenger behind Apache generates correct `https://` URLs
+- `ALLOWED_HOSTS` set to production domain + www variant
+- Brevo SMTP credentials in `.env` (SMTP key, not API key)
+- Brevo sender domain authenticated via SPF/DKIM DNS records
+- All email flows tested end-to-end: registration, password reset, order confirmation, ebook delivery, newsletter double opt-in
+- P24 sandbox credentials in production `.env`
+- P24 webhook URL updated in sandbox panel to `https://kuchennakomitywa.pl/zamowienie/webhook/p24/`
+- Ebook PDFs uploaded through production admin (not copied from dev)
 
-The existing Django 5.2 + allauth + DRF stack is kept. New additions: Bootstrap 5 for responsive CSS, htmx for dynamic interactions (cart, search), Pillow for image handling, easy-thumbnails for auto-resizing, Celery + Redis for async tasks (email, order processing), and django-crispy-forms for form rendering.
+### Nice to Have
 
-**Core technologies:**
-- Django 5.2 + templates: Server-rendered HTML, great for SEO, simpler than SPA
-- Bootstrap 5 + htmx: Responsive design + dynamic interactions without JS framework
-- Custom e-commerce models: Lighter than django-oscar for 2 product types
-- Przelewy24 REST API: Polish payment gateway with BLIK, bank transfers, cards
-- Celery + Redis: Async email sending (ebook delivery, newsletter, confirmations)
+- `manage.py check --deploy` run and all warnings resolved before go-live
+- `.env.example` committed to git with all required var names (no values)
+- Custom `404.html` and `500.html` templates with site branding
+- `deploy.sh` script on server (pull, clear pyc, pip install, migrate, collectstatic, restart)
+- Django `LOGGING` dict writing errors to file in `logs/django.log`
+- Keep-alive cron job pinging site every 12h to prevent 24h auto-shutdown
+- `clearsessions` cron job to prevent `django_session` table bloat on PostgreSQL
+- Database backup cron job (`pg_dump`) scheduled for first week post-launch
 
-### Expected Features
+### Out of Scope
 
-**Must have (table stakes):**
-- Hero section with brand story and value proposition
-- Recipe blog with categories, search, high-quality photos, Schema.org markup
-- Product catalog with clear categories (ebooks, dania w sloiku, ciasta)
-- Shopping cart with checkout flow
-- Przelewy24 payments
-- Ebook delivery via email after payment
-- Newsletter signup with double opt-in
-- Mobile-responsive design
-- Legal pages (regulamin, polityka prywatnosci, RODO)
-- Contact info with pickup location
+- Production P24 credentials (client has not provided them yet; env var swap when ready)
+- CI/CD pipeline — manual SSH deployment is correct for this hosting setup
+- Docker, nginx config, gunicorn — none are available or needed on MyDevil shared hosting
+- Sentry error tracking — defer to v1.2 once there is real traffic
+- CDN, Redis, Celery — premature optimization at this traffic level
+- Split settings files (base/dev/prod) — django-environ + single `.env` per environment is the right pattern here
 
-**Should have (competitive):**
-- Recipe print view
-- Recipe sharing (social media)
-- Related recipes suggestions
-- Product reviews/ratings
-- Order history for logged-in users
+## Architecture Changes
 
-**Defer (v2+):**
-- Ingredient quantity scaling by servings
-- Meal planning / weekly menu
-- Loyalty program
-- Multiple pickup locations
-- Recipe video integration
+**New file: `passenger_wsgi.py`** (project root, alongside `manage.py`)
 
-### Architecture Approach
+```python
+import sys, os
+sys.path.insert(0, os.path.dirname(__file__))
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
+```
 
-Django MTV pattern with 5 apps: pages (landing/static), recipes (blog), shop (products/cart/checkout/orders/payments), newsletter (subscribers), and existing accounts (auth). Template inheritance from base.html with Bootstrap 5. htmx for dynamic interactions (cart add/remove, search, newsletter signup). Products use model inheritance: base Product → Ebook and PhysicalProduct subtypes.
+Passenger reads this file automatically. Verify with `python passenger_wsgi.py` over SSH — no output means success.
 
-**Major components:**
-1. pages app — Landing page, about, contact, legal pages
-2. recipes app — Recipe CRUD, categories, search, Schema.org SEO
-3. shop app — Product catalog, cart, checkout, orders, Przelewy24 integration, ebook delivery
-4. newsletter app — Subscriber management, double opt-in, confirmation
-5. accounts app (existing) — Auth, now with template-based views alongside API
+**Modified: `settings.py`** (additive changes only, no rewrite)
+1. Database: replace hardcoded SQLite block with `env.db("DATABASE_URL", default="sqlite:///db.sqlite3")` — dev keeps SQLite, prod uses PostgreSQL via env var
+2. Middleware: insert `whitenoise.middleware.WhiteNoiseMiddleware` immediately after `SecurityMiddleware`
+3. Storages: add `STORAGES = {"staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"}}`
+4. Security: add `SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SECURE_HSTS_*`, `CSRF_TRUSTED_ORIGINS`, `SECURE_PROXY_SSL_HEADER` — all driven by env vars with `False`/`0` defaults so dev is unaffected
 
-### Critical Pitfalls
+**New file: `.env` (production, not in git)** — full template in ARCHITECTURE.md. Key vars: `SECRET_KEY`, `DEBUG=False`, `ALLOWED_HOSTS`, `DATABASE_URL`, `EMAIL_*`, `P24_*`, security settings, `CSRF_TRUSTED_ORIGINS`
 
-1. **Hardcoded secrets** — SECRET_KEY in settings.py (already present). Fix: move to .env with python-dotenv (already installed).
-2. **Przelewy24 webhook fraud** — Unverified webhooks allow fake payments. Fix: CRC signature verification + amount matching.
-3. **Ebook URL exposure** — PDFs in public media dir downloadable without payment. Fix: serve through authenticated Django view.
-4. **RODO non-compliance** — Polish law requires privacy policy, double opt-in, cookie consent, regulamin. Fix: legal pages in Phase 1, consent in checkout/newsletter.
-5. **Image performance** — Food sites are image-heavy, unoptimized images kill load time. Fix: auto-thumbnails, WebP, lazy loading.
+**Existing `STATIC_ROOT` and `MEDIA_ROOT`** already point to `public/static/` and `public/media/` — these align perfectly with MyDevil's convention that `public_python/public/` is served directly by Apache. No changes needed.
 
-## Implications for Roadmap
+**`requirements.txt`**: add `psycopg[binary]>=3.3,<3.4` and `whitenoise>=6.12,<7`
 
-### Phase 1: Foundation & Infrastructure
-**Rationale:** Fix existing security issues, set up template infrastructure, configure environment properly.
-**Delivers:** base.html, Bootstrap 5 theme, .env configuration, static/media setup, legal page stubs
-**Addresses:** Landing page foundation, security hardening
-**Avoids:** Hardcoded secrets pitfall, production deployment issues
+**No changes to**: `backend/wsgi.py`, `backend/urls.py`, any app code (accounts, core, recipes, shop, newsletter)
 
-### Phase 2: Landing Page & Brand Identity
-**Rationale:** Public-facing entry point needed before content. Brand identity informs all subsequent visual work.
-**Delivers:** Landing page, about page, contact page, brand CSS theme
-**Addresses:** Hero section, brand presence, contact info, mobile responsiveness
+## Watch Out For
 
-### Phase 3: Recipe Blog
-**Rationale:** Core content that drives organic traffic (SEO). Independent of shop, can launch early for marketing.
-**Delivers:** Recipe model, list/detail views, categories, search, Schema.org markup, admin
-**Uses:** Pillow, easy-thumbnails, django-meta
-**Implements:** recipes app architecture
+1. **Static files invisible when DEBUG=False** — run `collectstatic` before first test; check browser Network tab for 404s on `/static/`; if admin panel is unstyled, this is the cause
+2. **CSRF 403 on all forms** — `CSRF_TRUSTED_ORIGINS` must be set to production domain before any form (login, checkout, newsletter) is tested; missing this makes every POST fail with 403
+3. **`.env` silently not found** — `django-environ`'s `read_env()` does not raise if the file is missing; consequence is `SECRET_KEY` crash OR silent fallback to console email and empty P24 credentials; verify with `cat public_python/.env` after deployment
+4. **Brevo SMTP key vs API key** — these are different credentials in Brevo dashboard; using the API key as `EMAIL_HOST_PASSWORD` causes authentication failure; SMTP key starts with `xsmtpsib-`; also add SPF/DKIM DNS records or Brevo rewrites sender to `@brevosend.com`
+5. **P24 webhook generates localhost URL** — `build_absolute_uri()` in `shop/views.py` uses the request `Host` header; if `SECURE_PROXY_SSL_HEADER` is missing, it generates `http://localhost/...`; set this header AND verify after first sandbox transaction that the webhook URL in P24 panel is `https://kuchennakomitywa.pl/...`
 
-### Phase 4: Shop & Products
-**Rationale:** Depends on brand identity (Phase 2) for product presentation. Independent of payments (can show catalog first).
-**Delivers:** Product models, catalog views, cart, product admin
-**Implements:** shop app (catalog + cart portion)
+## Deployment Order
 
-### Phase 5: Payments & Orders
-**Rationale:** Depends on shop (Phase 4) for cart/products. Critical path for revenue.
-**Delivers:** Przelewy24 integration, checkout flow, order management, ebook email delivery
-**Addresses:** Payment processing, ebook delivery, order confirmation
-**Avoids:** P24 webhook security pitfall, ebook exposure pitfall
+1. DNS: point A record for `kuchennakomitywa.pl` to MyDevil server IP; remove AAAA record if present (blocks Let's Encrypt)
+2. MyDevil panel: add domain, configure Python website type with virtualenv path
+3. SSH: create virtualenv at `~/.virtualenvs/komitywa`, activate, `pip install -r requirements.txt`
+4. SSH: `devil pgsql db add komitywa`, note exact host (pgsqlX.mydevil.net), user, and set password
+5. Upload code: `git clone` (or rsync) into `public_python/`
+6. Create `.env` at project root with all production values
+7. Create `passenger_wsgi.py` at project root
+8. SSH: `python manage.py migrate` (creates schema in PostgreSQL)
+9. SSH: `python manage.py createsuperuser`
+10. SSH: `python manage.py collectstatic --noinput`
+11. SSL: configure Let's Encrypt via DevilWEB panel or `devil ssl www add IP le le kuchennakomitywa.pl`
+12. Enable HTTPS security settings in `.env` (`SECURE_SSL_REDIRECT=True`, cookie secure flags, HSTS) — only after SSL is confirmed working
+13. `devil www restart kuchennakomitywa.pl` — test site loads at `https://`
+14. Run `python manage.py check --deploy` — resolve all warnings
+15. Brevo: add SPF/DKIM DNS records; configure SMTP credentials in `.env`; test with `manage.py shell` send_mail
+16. Upload ebook PDFs through Django admin on production
+17. P24: update webhook URL in sandbox panel to production domain, test sandbox purchase end-to-end
+18. End-to-end verification: browse, register, order, pay (sandbox), receive email with ebook attachment
 
-### Phase 6: Newsletter
-**Rationale:** Can be built after main site structure exists. Needs double opt-in for RODO compliance.
-**Delivers:** Subscriber model, signup widget, double opt-in flow, confirmation emails
-**Avoids:** RODO compliance pitfall
+## Open Questions
 
-### Phase 7: Polish & Production
-**Rationale:** Final optimization after all features work. SEO, performance, security, deployment.
-**Delivers:** Image optimization, caching, SEO audit, production config, deployment
-**Avoids:** Performance pitfalls, email deliverability issues
-
-### Phase Ordering Rationale
-
-- Foundation first — security and infrastructure must be solid before building features
-- Landing page before content — brand identity informs visual design of recipes and shop
-- Recipes before shop — drives organic traffic, can launch independently for marketing
-- Shop before payments — catalog can be shown before payments work (builds anticipation)
-- Newsletter last of features — simple, independent, but needs all pages to exist for footer widget
-- Polish last — optimization makes sense only after all features are complete
-
-### Research Flags
-
-Phases likely needing deeper research during planning:
-- **Phase 5 (Payments):** Przelewy24 REST API specifics, sandbox setup, webhook format
-- **Phase 3 (Recipes):** Schema.org Recipe markup specifics, Google Rich Results requirements
-
-Phases with standard patterns (skip research-phase):
-- **Phase 1 (Foundation):** Standard Django template setup, well-documented
-- **Phase 2 (Landing):** Standard Bootstrap landing page patterns
-- **Phase 6 (Newsletter):** Simple CRUD + email confirmation flow
-
-## Confidence Assessment
-
-| Area | Confidence | Notes |
-|------|------------|-------|
-| Stack | HIGH | Django ecosystem is mature, all recommended packages well-maintained |
-| Features | HIGH | Food business website is a well-understood domain |
-| Architecture | HIGH | Standard Django patterns, no exotic requirements |
-| Pitfalls | HIGH | Common e-commerce and Django pitfalls, well-documented |
-
-**Overall confidence:** HIGH
-
-### Gaps to Address
-
-- Przelewy24 API version and exact integration flow — verify during Phase 5 planning with current P24 docs
-- Email service provider choice (SES vs Mailgun vs other) — decide during Phase 5 planning based on volume needs
-- Hosting platform (VPS, PaaS, etc.) — decide during Phase 7 planning
-
-## Sources
-
-### Primary (HIGH confidence)
-- Django documentation (djangoproject.com)
-- Przelewy24 developer docs (developers.przelewy24.pl)
-- Bootstrap 5 documentation
-- htmx documentation (htmx.org)
-
-### Secondary (MEDIUM confidence)
-- Django e-commerce community patterns
-- Polish RODO/GDPR compliance guidelines
-- Food blog SEO best practices
-
----
-*Research completed: 2026-03-30*
-*Ready for roadmap: yes*
+1. **PostgreSQL host address**: MyDevil uses `pgsqlX.mydevil.net` where X matches the server number (e.g., server `s5` uses `pgsql5`). The exact number is only known after logging in — confirm before writing `DATABASE_URL` in `.env`.
+2. **Brevo domain verification timing**: SPF/DKIM DNS records can take up to 48h to propagate. If not done before deployment day, emails will send with `@brevosend.com` as sender. Plan DNS setup at least 2 days before go-live.
+3. **Production P24 credentials**: The client has not yet provided production merchant credentials. Deployment proceeds with sandbox. Confirm whether switching to production P24 is a single `.env` edit + restart (it is), and agree with the client on timing so there is no gap between credential handoff and the switch.
