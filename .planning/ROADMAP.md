@@ -70,7 +70,10 @@ Plans:
   3. Registration email with verification link arrives and the link works on production
   4. Password reset email arrives and the reset flow completes successfully on production
   5. Newsletter double opt-in confirmation email arrives and the confirm link works on production
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [x] 09-01-PLAN.md — Email templates, Site migration, Brevo SMTP config
+- [ ] 09-02-PLAN.md — SPF/DKIM DNS verification and production email testing
 
 ### Phase 10: Payments & Verification
 **Goal**: Full purchase flow works end-to-end on production with P24 sandbox payments and ebook delivery
@@ -95,5 +98,5 @@ Plans:
 | 6. Newsletter | v1.0 | 2/2 | Complete | 2026-04-03 |
 | 7. Server Foundation | v1.1 | 2/2 | Complete | 2026-04-10 |
 | 8. Database & SSL | v1.1 | 1/2 | In Progress|  |
-| 9. Email | v1.1 | 0/? | Not started | - |
+| 9. Email | v1.1 | 1/2 | In Progress | - |
 | 10. Payments & Verification | v1.1 | 0/? | Not started | - |

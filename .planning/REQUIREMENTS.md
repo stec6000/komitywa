@@ -30,12 +30,12 @@
 
 ### Email (Brevo SMTP)
 
-- [ ] **EMAIL-01**: Aplikacja wysyła emaile przez Brevo SMTP (nie console backend)
+- [x] **EMAIL-01**: Aplikacja wysyła emaile przez Brevo SMTP (nie console backend)
 - [ ] **EMAIL-02**: Domena nadawcy jest zweryfikowana w Brevo przez rekordy SPF/DKIM w DNS
-- [ ] **EMAIL-03**: Email rejestracji + weryfikacji email działa na produkcji
-- [ ] **EMAIL-04**: Email resetowania hasła działa na produkcji
-- [ ] **EMAIL-05**: Email potwierdzenia zamówienia z załączonym eBookiem PDF działa na produkcji
-- [ ] **EMAIL-06**: Email double opt-in dla newslettera działa na produkcji
+- [x] **EMAIL-03**: Email rejestracji + weryfikacji email działa na produkcji
+- [x] **EMAIL-04**: Email resetowania hasła działa na produkcji
+- [x] **EMAIL-05**: Email potwierdzenia zamówienia z załączonym eBookiem PDF działa na produkcji
+- [x] **EMAIL-06**: Email double opt-in dla newslettera działa na produkcji
 
 ### Płatności (P24 Sandbox)
 
@@ -91,12 +91,12 @@
 | SSL-03 | Phase 8 | Pending |
 | SSL-04 | Phase 8 | Pending |
 | SSL-05 | Phase 8 | Pending |
-| EMAIL-01 | Phase 9 | Pending |
+| EMAIL-01 | Phase 9 | Complete |
 | EMAIL-02 | Phase 9 | Pending |
-| EMAIL-03 | Phase 9 | Pending |
-| EMAIL-04 | Phase 9 | Pending |
-| EMAIL-05 | Phase 9 | Pending |
-| EMAIL-06 | Phase 9 | Pending |
+| EMAIL-03 | Phase 9 | Complete |
+| EMAIL-04 | Phase 9 | Complete |
+| EMAIL-05 | Phase 9 | Complete |
+| EMAIL-06 | Phase 9 | Complete |
 | P24-01 | Phase 10 | Pending |
 | P24-02 | Phase 10 | Pending |
 | VER-01 | Phase 10 | Pending |

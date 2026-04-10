@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Wdrożenie Produkcyjne
 current_plan: 1
-status: executing
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-04-10T11:59:45.506Z"
+status: verifying
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-04-10T15:37:27.295Z"
 last_activity: 2026-04-10
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 100
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-10)
 
 Phase: 08 (database-ssl) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-10
 
 Progress: [██████████] 100%
@@ -50,7 +50,7 @@ Previous:
 
 **Phase:** 07-server-foundation
 **Current Plan:** 1
-**Status:** Ready to execute
+**Status:** Phase complete — ready for verification
 
 🔄 **v1.1 Wdrożenie Produkcyjne — in progress**
 
@@ -78,6 +78,8 @@ v1.1 key decisions:
 - whitenoise for static file serving behind Passenger
 - P24 sandbox on production for now (prod credentials pending seller verification)
 - [Phase 08-database-ssl]: psycopg[binary] (not psycopg2) as PostgreSQL adapter -- Django 5.2 preferred, binary needed on shared hosting
+- [Phase 09]: ACCOUNT_EMAIL_VERIFICATION set to mandatory for ebook delivery reliability
+- [Phase 09]: Hardcoded brand name in email subjects instead of current_site.name
 
 ### Pending Todos
 
@@ -91,6 +93,6 @@ None for Phase 7.
 
 ## Session Continuity
 
-Last session: 2026-04-10T11:59:45.502Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-04-10T15:37:27.292Z
+Stopped at: Completed 09-01-PLAN.md
 Resume file: None
