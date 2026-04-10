@@ -7,12 +7,12 @@
 
 ### Infrastruktura serwera (MyDevil.net)
 
-- [ ] **INFRA-01**: Operator może uruchomić Django na MyDevil.net przez Passenger WSGI z dedykowanym virtualenv
-- [ ] **INFRA-02**: Operator może zarządzać całą konfiguracją produkcyjną przez plik `.env` bez zmian w kodzie
-- [ ] **INFRA-03**: Strona serwuje poprawnie pliki statyczne (CSS, JS, ikony) z `public/static/`
-- [ ] **INFRA-04**: Pliki media (ebooki PDF) są dostępne przez `public/media/` na serwerze produkcyjnym
+- [x] **INFRA-01**: Operator może uruchomić Django na MyDevil.net przez Passenger WSGI z dedykowanym virtualenv
+- [x] **INFRA-02**: Operator może zarządzać całą konfiguracją produkcyjną przez plik `.env` bez zmian w kodzie
+- [x] **INFRA-03**: Strona serwuje poprawnie pliki statyczne (CSS, JS, ikony) z `public/static/`
+- [x] **INFRA-04**: Pliki media (ebooki PDF) są dostępne przez `public/media/` na serwerze produkcyjnym
 - [ ] **INFRA-05**: Operator może wdrożyć nową wersję przez skrypt `deploy.sh` (pull, install, migrate, collectstatic, restart)
-- [ ] **INFRA-06**: Błędy aplikacji Django są zapisywane do pliku `logs/django.log`
+- [x] **INFRA-06**: Błędy aplikacji Django są zapisywane do pliku `logs/django.log`
 
 ### Baza danych (PostgreSQL)
 
@@ -77,12 +77,12 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 7 | Pending |
-| INFRA-02 | Phase 7 | Pending |
-| INFRA-03 | Phase 7 | Pending |
-| INFRA-04 | Phase 7 | Pending |
+| INFRA-01 | Phase 7 | Complete |
+| INFRA-02 | Phase 7 | Complete |
+| INFRA-03 | Phase 7 | Complete |
+| INFRA-04 | Phase 7 | Complete |
 | INFRA-05 | Phase 7 | Pending |
-| INFRA-06 | Phase 7 | Pending |
+| INFRA-06 | Phase 7 | Complete |
 | DB-01 | Phase 8 | Pending |
 | DB-02 | Phase 8 | Pending |
 | DB-03 | Phase 8 | Pending |

@@ -49,8 +49,8 @@
   5. Application errors are written to `logs/django.log` on the server
 **Plans:** 2 plans
 Plans:
-- [ ] 07-01-PLAN.md — Production configuration (passenger_wsgi.py, settings.py, requirements.txt)
-- [ ] 07-02-PLAN.md — Deploy script and environment template (deploy.sh, .env.example, .gitignore)
+- [x] 07-01-PLAN.md — Production configuration (passenger_wsgi.py, settings.py, requirements.txt)
+- [x] 07-02-PLAN.md — Deploy script and environment template (deploy.sh, .env.example, .gitignore)
 
 ### Phase 8: Database & SSL
 **Goal**: Application runs on PostgreSQL with HTTPS-only access and production-grade security settings
