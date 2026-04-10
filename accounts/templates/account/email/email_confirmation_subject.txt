@@ -1,1 +1,1 @@
-Potwierdzenie adresu email w {{ current_site.name }}
+Potwierdzenie adresu email — Kuchenna Komitywa
