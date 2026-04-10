@@ -1,6 +1,10 @@
-Witaj {{ user.get_username }},
+Cześć!
 
-Prosze potwierdzic adres email klikajac w link:
+Prosimy o potwierdzenie adresu email klikając w poniższy link:
 {{ activate_url }}
 
-Jesli to nie Ty, zignoruj te wiadomosc.
+Jeśli to nie Ty, zignoruj tę wiadomość.
+
+--
+Kuchenna Komitywa
+https://kuchennakomitywa.pl

@@ -22,20 +22,20 @@
 
 ### Bezpieczeństwo i HTTPS (SSL)
 
-- [x] **SSL-01**: Strona jest dostępna wyłącznie przez HTTPS z certyfikatem Let's Encrypt
-- [x] **SSL-02**: Wszystkie żądania HTTP są automatycznie przekierowywane na HTTPS
-- [x] **SSL-03**: Formularze POST (logowanie, checkout, newsletter) działają poprawnie pod HTTPS — `CSRF_TRUSTED_ORIGINS` skonfigurowane
-- [x] **SSL-04**: Pliki cookie sesji i CSRF są zabezpieczone flagami Secure i HttpOnly
-- [x] **SSL-05**: Cron job pinguje stronę co 12h aby zapobiec 24h auto-shutdown na shared hostingu
+- [ ] **SSL-01**: Strona jest dostępna wyłącznie przez HTTPS z certyfikatem Let's Encrypt
+- [ ] **SSL-02**: Wszystkie żądania HTTP są automatycznie przekierowywane na HTTPS
+- [ ] **SSL-03**: Formularze POST (logowanie, checkout, newsletter) działają poprawnie pod HTTPS — `CSRF_TRUSTED_ORIGINS` skonfigurowane
+- [ ] **SSL-04**: Pliki cookie sesji i CSRF są zabezpieczone flagami Secure i HttpOnly
+- [ ] **SSL-05**: Cron job pinguje stronę co 12h aby zapobiec 24h auto-shutdown na shared hostingu
 
 ### Email (Brevo SMTP)
 
-- [ ] **EMAIL-01**: Aplikacja wysyła emaile przez Brevo SMTP (nie console backend)
+- [x] **EMAIL-01**: Aplikacja wysyła emaile przez Brevo SMTP (nie console backend)
 - [ ] **EMAIL-02**: Domena nadawcy jest zweryfikowana w Brevo przez rekordy SPF/DKIM w DNS
-- [ ] **EMAIL-03**: Email rejestracji + weryfikacji email działa na produkcji
-- [ ] **EMAIL-04**: Email resetowania hasła działa na produkcji
-- [ ] **EMAIL-05**: Email potwierdzenia zamówienia z załączonym eBookiem PDF działa na produkcji
-- [ ] **EMAIL-06**: Email double opt-in dla newslettera działa na produkcji
+- [x] **EMAIL-03**: Email rejestracji + weryfikacji email działa na produkcji
+- [x] **EMAIL-04**: Email resetowania hasła działa na produkcji
+- [x] **EMAIL-05**: Email potwierdzenia zamówienia z załączonym eBookiem PDF działa na produkcji
+- [x] **EMAIL-06**: Email double opt-in dla newslettera działa na produkcji
 
 ### Płatności (P24 Sandbox)
 
@@ -86,17 +86,17 @@
 | DB-01 | Phase 8 | Complete |
 | DB-02 | Phase 8 | Complete |
 | DB-03 | Phase 8 | Complete |
-| SSL-01 | Phase 8 | Complete |
-| SSL-02 | Phase 8 | Complete |
-| SSL-03 | Phase 8 | Complete |
-| SSL-04 | Phase 8 | Complete |
-| SSL-05 | Phase 8 | Complete |
-| EMAIL-01 | Phase 9 | Pending |
+| SSL-01 | Phase 8 | Pending |
+| SSL-02 | Phase 8 | Pending |
+| SSL-03 | Phase 8 | Pending |
+| SSL-04 | Phase 8 | Pending |
+| SSL-05 | Phase 8 | Pending |
+| EMAIL-01 | Phase 9 | Complete |
 | EMAIL-02 | Phase 9 | Pending |
-| EMAIL-03 | Phase 9 | Pending |
-| EMAIL-04 | Phase 9 | Pending |
-| EMAIL-05 | Phase 9 | Pending |
-| EMAIL-06 | Phase 9 | Pending |
+| EMAIL-03 | Phase 9 | Complete |
+| EMAIL-04 | Phase 9 | Complete |
+| EMAIL-05 | Phase 9 | Complete |
+| EMAIL-06 | Phase 9 | Complete |
 | P24-01 | Phase 10 | Pending |
 | P24-02 | Phase 10 | Pending |
 | VER-01 | Phase 10 | Pending |
