@@ -77,36 +77,36 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
-| INFRA-04 | TBD | Pending |
-| INFRA-05 | TBD | Pending |
-| INFRA-06 | TBD | Pending |
-| DB-01 | TBD | Pending |
-| DB-02 | TBD | Pending |
-| DB-03 | TBD | Pending |
-| SSL-01 | TBD | Pending |
-| SSL-02 | TBD | Pending |
-| SSL-03 | TBD | Pending |
-| SSL-04 | TBD | Pending |
-| SSL-05 | TBD | Pending |
-| EMAIL-01 | TBD | Pending |
-| EMAIL-02 | TBD | Pending |
-| EMAIL-03 | TBD | Pending |
-| EMAIL-04 | TBD | Pending |
-| EMAIL-05 | TBD | Pending |
-| EMAIL-06 | TBD | Pending |
-| P24-01 | TBD | Pending |
-| P24-02 | TBD | Pending |
-| VER-01 | TBD | Pending |
-| VER-02 | TBD | Pending |
+| INFRA-01 | Phase 7 | Pending |
+| INFRA-02 | Phase 7 | Pending |
+| INFRA-03 | Phase 7 | Pending |
+| INFRA-04 | Phase 7 | Pending |
+| INFRA-05 | Phase 7 | Pending |
+| INFRA-06 | Phase 7 | Pending |
+| DB-01 | Phase 8 | Pending |
+| DB-02 | Phase 8 | Pending |
+| DB-03 | Phase 8 | Pending |
+| SSL-01 | Phase 8 | Pending |
+| SSL-02 | Phase 8 | Pending |
+| SSL-03 | Phase 8 | Pending |
+| SSL-04 | Phase 8 | Pending |
+| SSL-05 | Phase 8 | Pending |
+| EMAIL-01 | Phase 9 | Pending |
+| EMAIL-02 | Phase 9 | Pending |
+| EMAIL-03 | Phase 9 | Pending |
+| EMAIL-04 | Phase 9 | Pending |
+| EMAIL-05 | Phase 9 | Pending |
+| EMAIL-06 | Phase 9 | Pending |
+| P24-01 | Phase 10 | Pending |
+| P24-02 | Phase 10 | Pending |
+| VER-01 | Phase 10 | Pending |
+| VER-02 | Phase 10 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 24 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 24 ⚠️
+- Mapped to phases: 24
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-10*
-*Last updated: 2026-04-10 after initial definition for v1.1*
+*Last updated: 2026-04-10 after roadmap creation — all 24 requirements mapped to Phases 7-10*
