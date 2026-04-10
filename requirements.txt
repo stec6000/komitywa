@@ -8,3 +8,4 @@ drf-spectacular
 requests
 Pillow
 whitenoise>=6.12,<7
+psycopg[binary]>=3.3,<4
