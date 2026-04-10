@@ -1,218 +1,181 @@
-# Feature Landscape
+# Feature Landscape: v1.1 Production Deployment
 
-**Domain:** Vegan/plant-based food business website (recipes, ebooks, physical products, newsletter)
+**Domain:** Django production deployment on MyDevil.net shared hosting
 **Project:** Kuchenna Komitywa
-**Researched:** 2026-03-30
+**Researched:** 2026-04-10
 
 ## Table Stakes
 
-Features users expect from a food business website. Missing any of these and the site feels incomplete or untrustworthy.
+Features absolutely required for the site to be live and functional. Missing any of these means the site cannot go to production.
 
-### Landing Page & Brand Presence
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Hero section with value proposition | First impression; users decide in 3 seconds whether to stay | Low | Strong food photography + clear "who we are" message |
-| About / story section | Vegan customers care about brand values and mission | Low | Founder story, why vegan, philosophy |
-| Product/service overview cards | Users need to immediately see what's offered | Low | Links to recipes, ebooks, products |
-| Contact information & location | Local pickup requires knowing where you are | Low | Address, hours, map embed, phone/email |
-| Mobile-responsive design | 70%+ of food blog traffic is mobile; people browse recipes on phones | Medium | Django templates must be mobile-first |
-| Fast page load (< 3s) | Core Web Vitals affect SEO; food sites are image-heavy | Medium | Image optimization, lazy loading, compressed assets |
-
-### Recipe Blog
+### Server Configuration
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Recipe cards with structured layout | Standard format: ingredients, steps, times, servings | Medium | Dedicated recipe model, not just blog posts |
-| Recipe categories and tags | Users browse by meal type, ingredient, dietary need | Low | Categories: sniadanie, obiad, deser, etc. |
-| Recipe search | Users come looking for specific recipes | Medium | Full-text search across title, ingredients, description |
-| High-quality recipe photos | Food blogs live or die by photography | Low (technical) | Image upload, responsive sizing, WebP format |
-| Recipe Schema.org JSON-LD markup | Google rich snippets increase CTR by up to 82%; non-negotiable for food SEO | Medium | Recipe structured data: name, image, ingredients, steps, times, nutrition, ratings |
-| "Jump to recipe" button | Users hate scrolling past story content to find the recipe | Low | Anchor link at top of post |
-| Print-friendly recipe view | Users print recipes for the kitchen | Low | CSS print stylesheet or print button |
-| Prep time / cook time / total time | Users filter by available time | Low | Fields on recipe model |
-| Servings with adjustment | Users need to scale recipes | Low-Medium | Static display is table stakes; interactive scaling is a differentiator |
-| Recipe pagination / archive | Browsing older content | Low | Standard Django pagination |
+| Passenger WSGI setup | MyDevil runs Python apps via Phusion Passenger; no alternative | Low | `passenger_wsgi.py` in `public_python/` with `DJANGO_SETTINGS_MODULE=backend.settings` |
+| Python virtualenv on server | Isolate dependencies; MyDevil requires explicit venv path for Python site type | Low | Create venv, `pip install -r requirements.txt` inside it |
+| Production `.env` file | `DEBUG=False`, unique `SECRET_KEY`, proper `ALLOWED_HOSTS`; already uses django-environ | Low | Set correct values on server; never commit `.env` |
+| `collectstatic` execution | Static files must be collected to `STATIC_ROOT` for production serving | Low | `python manage.py collectstatic`; STATIC_ROOT already set to `public/static` |
+| Application restart procedure | MyDevil does not auto-restart on code changes | Low | `devil www restart DOMENA` after each deployment |
 
-### E-commerce (Ebooks)
+### Database Migration (SQLite to PostgreSQL)
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Ebook product pages with preview | Users need to see what they're buying: cover, description, table of contents | Low | Product detail page with sample pages/screenshots |
-| Shopping cart | Standard e-commerce expectation | Medium | Session-based cart, works for logged-in and guest users |
-| Checkout flow with Przelewy24 | Polish users expect BLIK and bank transfers | High | Przelewy24 integration, payment confirmation webhooks |
-| Order confirmation page + email | Users need purchase confirmation | Medium | Thank-you page + email with receipt |
-| PDF delivery via email | Project constraint: ebooks delivered by email only | Medium | Post-payment email with PDF attachment or secure download link |
-| Order history (logged-in users) | Users want to reference past purchases | Low | Simple order list in user profile |
+| PostgreSQL database creation on MyDevil | SQLite unsuitable for production (concurrent writes fail, no remote access) | Low | `devil pgsql db add NAZWA_BAZY` on MyDevil shell |
+| psycopg installation | Django PostgreSQL adapter; required dependency | Low | Use `psycopg[binary]` (psycopg3) -- Django 5.2 supports it natively; psycopg2 is legacy |
+| Database URL configuration via env | Connection string must not be hardcoded | Low | `DATABASES["default"] = env.db("DATABASE_URL")` -- django-environ supports this natively |
+| Django migrations on PostgreSQL | Schema must be created on fresh PostgreSQL database | Low | `python manage.py migrate` on server after database creation |
+| Initial data seeding | Admin account, site configuration, initial content | Medium | `createsuperuser` + manual content entry via admin; or `dumpdata`/`loaddata` if migrating dev data |
 
-### E-commerce (Physical Products)
-
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Product catalog with photos | Jarred meals and cakes need appetizing presentation | Low | Product list + detail pages |
-| Product availability status | Local pickup items may be limited or seasonal | Low | In stock / out of stock / available on [date] |
-| Pickup date/time selection | Core to local pickup model | Medium | Date picker during checkout; must define available slots |
-| Order confirmation with pickup details | Users need to know when and where to pick up | Low | Email + confirmation page with address, date, instructions |
-| Clear pricing with VAT | Legal requirement in Poland | Low | Prices displayed with VAT included (standard in PL) |
-
-### Newsletter
+### Email Configuration (Brevo SMTP)
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Email signup form | Basic list building | Low | Inline form in footer + dedicated signup spots |
-| GDPR-compliant consent | Legal requirement in EU/Poland | Low | Checkbox with clear consent text, link to privacy policy |
-| Subscription confirmation (double opt-in) | GDPR best practice, prevents spam signups | Low | Confirmation email flow |
-| Unsubscribe link | Legal requirement | Low | One-click unsubscribe in every email |
+| SMTP backend switch | Console backend is dev-only; emails must actually send in production | Low | `EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend` in prod `.env` |
+| Brevo SMTP credentials | Transactional emails: order confirmations, ebook PDF delivery, newsletter, auth flows | Low | `EMAIL_HOST=smtp-relay.brevo.com`, port 587, TLS; use SMTP key (not API key) |
+| Sender domain verification | Brevo requires SPF/DKIM DNS records for deliverability | Medium | Add DNS records on `kuchennakomitywa.pl`; without this, emails land in spam |
+| Email flow verification | All email types must work: registration, password reset, order confirmation, ebook delivery, newsletter | Medium | Manual end-to-end testing of each email flow after deployment |
 
-### Trust & Legal
+### SSL / HTTPS
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Privacy policy page | GDPR requirement | Low | Static page, Polish language |
-| Terms of service / regulamin | Required for e-commerce in Poland | Low | Static page |
-| Cookie consent banner | EU e-Privacy directive | Low | Simple banner with accept/reject |
-| SSL certificate | Users expect HTTPS; browsers warn otherwise | Low | Infrastructure concern, not app feature |
+| Let's Encrypt certificate | HTTPS mandatory for payments, user accounts, and modern browser trust | Low | `devil ssl www add IP le le DOMENA` or via DevilWEB panel; auto-renews |
+| Django HTTPS security settings | Cookies, CSRF, session must enforce HTTPS | Low | `SECURE_SSL_REDIRECT`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`, `SECURE_HSTS_SECONDS` |
+| Remove AAAA DNS record if present | MyDevil does not support IPv6 for Let's Encrypt validation; cert generation fails with AAAA | Low | Check and remove AAAA record from DNS before generating certificate |
+
+### Static and Media Files
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Static files served from `public/static` | CSS, JS, images must load; MyDevil serves `public/` directory via web server | Low | Already configured: `STATIC_ROOT = BASE_DIR / "public" / "static"` |
+| Media files served from `public/media` | Recipe photos, product images, ebook covers must display | Low | Already configured: `MEDIA_ROOT = BASE_DIR / "public" / "media"` |
+| WhiteNoise middleware | Serves static files through Django with compression and caching headers; fallback when web server config is limited | Low | `whitenoise` package; insert middleware after `SecurityMiddleware` |
+
+### Przelewy24 (Sandbox on Production)
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| P24 sandbox credentials in prod `.env` | Payment flow must work end-to-end in sandbox mode | Low | Copy existing sandbox credentials to production `.env` |
+| P24 webhook URL update | Webhook callback must point to production domain, not localhost | Low | Update P24 sandbox panel with `https://DOMENA/shop/p24/webhook/` URL |
+| HTTPS for P24 callbacks | P24 requires HTTPS for webhook notifications | Low | Depends on SSL certificate being active first |
+
+### Domain and DNS
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Domain DNS pointing to MyDevil | Site must be accessible at the production domain | Low | A record pointing to MyDevil server IP address |
+| `ALLOWED_HOSTS` in production `.env` | Django rejects requests for unknown hosts when `DEBUG=False` | Low | Domain name + `www` variant in env |
+| `CSRF_TRUSTED_ORIGINS` setting | Django 4+ requires explicit trusted origins for HTTPS POST requests (forms, checkout) | Low | `["https://kuchennakomitywa.pl", "https://www.kuchennakomitywa.pl"]` |
 
 ## Differentiators
 
-Features that set Kuchenna Komitywa apart. Not expected, but create loyalty and competitive advantage.
+Not required for go-live but improve reliability, maintainability, or developer experience. Low effort, high value.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Recipe ratings and reviews | Community engagement; social proof drives trust; helps with Schema.org rich snippets (star ratings in Google) | Medium | Logged-in users rate 1-5 stars + optional comment |
-| "I made this" photo uploads | Community building, user-generated content, social proof (Minimalist Baker pattern) | Medium | Users upload photos of their versions; moderation needed |
-| Recipe collections / favorites | Personalization drives return visits; users build their own cookbook | Low | Logged-in users save recipes to favorites list |
-| Lead magnet (free recipe PDF for signup) | Dramatically increases newsletter conversion vs plain "subscribe" | Low-Medium | Free PDF ebook/recipe card in exchange for email |
-| Seasonal / featured recipe highlights | Curated content feels premium; drives engagement with timely content | Low | Admin-curated featured recipes on homepage |
-| Related recipes on product pages | Cross-selling: "Made with our jarred pesto" links recipe to product | Low | Manual or tag-based recipe-product linking |
-| Bundle deals (ebook + product) | Increases average order value | Medium | Cart logic for bundles/discounts |
-| Interactive serving size adjuster | Recipes auto-scale ingredient quantities | Medium | JavaScript-based ingredient multiplication |
-| Nutritional information per recipe | Health-conscious vegan audience values this data | Low-Medium | Manual entry per recipe; displays in Schema.org markup |
-| Social sharing buttons on recipes | Extends reach; food content is highly shareable | Low | Share to Facebook, Pinterest, WhatsApp |
-| Recipe difficulty level | Helps users find appropriate recipes | Low | Simple field: easy/medium/advanced |
-| Email welcome sequence | Automated onboarding series builds relationship after signup | Medium | Requires email automation (e.g., via external service or Django tasks) |
-| Blog content beyond recipes | Vegan lifestyle, tips, product stories build SEO and authority | Low | Standard blog posts alongside recipe posts |
-| Open Graph meta tags for social sharing | Recipe links shared on social media show rich previews with images | Low | og:title, og:image, og:description meta tags |
+| `manage.py check --deploy` audit | Catches security misconfigurations before go-live; free safety net | Low | Run against production settings; fix all warnings |
+| `.env.example` file | Documents all required env vars; prevents forgotten config during future deployments | Low | Copy of `.env` structure without secret values |
+| Custom 404/500 error pages | Professional appearance when errors occur; Django default pages are ugly with `DEBUG=False` | Low | `templates/404.html` and `templates/500.html` with site branding |
+| Deployment shell script | Repeatable deployments; avoids forgetting steps (pull, install, migrate, collectstatic, restart) | Low | Single `deploy.sh` script on server |
+| Error logging configuration | Django `LOGGING` dict writing to file; MyDevil stores errors in `domains/DOMENA/logs/error.log` | Low | Configure Django logging to write to MyDevil's log directory |
+| Database backup via cron | Recover from data loss; `pg_dump` scheduled via MyDevil cron | Low | Set up within first week of going live |
+| Sentry error tracking | Proactive error notification; see production errors before users report them | Medium | `sentry-sdk[django]`; free tier sufficient for low-traffic site |
+| `SERVER_EMAIL` setting | Django admin receives error notification emails from the correct address | Low | Set to a valid email address in production settings |
 
 ## Anti-Features
 
-Features to explicitly NOT build. Each would add complexity without proportional value for this project scope.
+Features to explicitly NOT build for this milestone. Each adds complexity without proportional value.
 
 | Anti-Feature | Why Avoid | What to Do Instead |
 |--------------|-----------|-------------------|
-| User-generated recipes | Moderation burden, quality control nightmare, off-brand content | Keep recipes editorial/admin-only; let users comment and rate |
-| Real-time chat / customer support widget | Overkill for a small food business; adds infrastructure complexity | Contact form + email address; FAQ page |
-| Subscription/recurring orders | Complex billing logic, inventory management for a business with local pickup | One-time orders only in v1; evaluate demand later |
-| Loyalty points / rewards program | Complex to implement well; meaningless with small product catalog | Focus on quality content and newsletter relationship instead |
-| Multi-language support | Polish-only constraint; translation adds ongoing maintenance cost | Single language, optimize for Polish SEO |
-| Delivery/shipping integration | Out of scope (local pickup only); shipping adds logistics complexity | Clear "local pickup only" messaging; revisit if demand warrants |
-| OAuth / social login | Email/password is sufficient; social login adds OAuth complexity and privacy concerns | Keep email-only auth as decided |
-| Marketplace / third-party sellers | Completely different business model; massive complexity | Stay single-vendor |
-| Mobile app | Web-first approach is correct; PWA could be added later if needed | Responsive web design covers mobile use cases |
-| In-browser ebook reader | Project constraint is email delivery; reader adds significant frontend complexity | PDF delivery via email as specified |
-| Complex product configurator | Overkill for jarred meals and cakes | Simple product variants if needed (e.g., cake size) |
-| AI-powered recipe recommendations | Cool but premature; needs usage data and significant ML infrastructure | Manual curation (featured recipes, related recipes by tag) |
-| Comment system on product pages | Low value; product reviews are more useful than discussion threads | Keep comments on recipes only; products get ratings if needed |
+| CI/CD pipeline | Overkill for single-developer project on shared hosting | Manual deployment via SSH + `deploy.sh` script |
+| Docker containerization | MyDevil is shared hosting with no Docker support | Use MyDevil's native Python/Passenger setup |
+| Nginx/Apache configuration | MyDevil manages the web server; cannot configure it directly | Passenger WSGI + WhiteNoise handles everything needed |
+| Redis/Memcached caching | Premature optimization; site traffic will be low initially | Django default caching; add later if performance requires it |
+| Celery task queue | No background task needs; email sending is synchronous and fast enough | Send emails synchronously; revisit only if newsletter campaigns grow large |
+| Staging environment | Single shared hosting account; one domain is sufficient | Test locally with production-like settings, deploy to production |
+| CDN for static files | Low-traffic site; WhiteNoise compression is sufficient | Add CloudFlare later if performance becomes an issue |
+| Automated cloud backups | Manual `pg_dump` is sufficient at this scale | Simple cron job for local backups |
+| Production P24 credentials | Client has not provided production merchant credentials yet | Keep sandbox; switch when credentials arrive (env var change only) |
+| Split settings files (base/dev/prod) | django-environ already handles env-specific config via `.env` per environment | Single `settings.py` + different `.env` files |
+| Gunicorn/uWSGI | MyDevil uses Passenger; cannot swap WSGI servers on shared hosting | Passenger is the only option and works fine |
+| Database connection pooling | Low traffic; connection overhead is negligible | Revisit if performance monitoring shows connection issues |
 
 ## Feature Dependencies
 
 ```
-Authentication (existing) --> Order History
-Authentication (existing) --> Recipe Favorites
-Authentication (existing) --> Recipe Ratings/Reviews
-Authentication (existing) --> "I Made This" Photos
+Domain DNS ──→ SSL Certificate ──→ HTTPS Security Settings
+                                ──→ P24 Webhook URL Update
+                                ──→ CSRF Trusted Origins
 
-Recipe Model --> Recipe Categories/Tags
-Recipe Model --> Recipe Search
-Recipe Model --> Recipe Schema.org Markup
-Recipe Model --> Recipe Ratings
-Recipe Model --> Print View
-Recipe Model --> Social Sharing
+PostgreSQL Creation ──→ Database URL Config ──→ Django Migrations ──→ Data Seeding
+                                                                   ──→ Application Start
 
-Product Model --> Product Catalog
-Product Model --> Shopping Cart
-Shopping Cart --> Checkout Flow
-Checkout Flow --> Przelewy24 Integration
-Przelewy24 Integration --> Order Confirmation
-Order Confirmation --> PDF Email Delivery (ebooks)
-Order Confirmation --> Pickup Details (physical products)
-Checkout Flow --> Pickup Date/Time Selection (physical products)
+Virtualenv Setup ──→ pip install requirements ──→ passenger_wsgi.py ──→ Application Start
+                                               ──→ collectstatic
 
-Newsletter Signup Form --> GDPR Consent
-Newsletter Signup Form --> Double Opt-in Flow
-Newsletter Signup Form --> Lead Magnet Delivery
+Brevo Account ──→ Domain Verification (SPF/DKIM DNS) ──→ SMTP Credentials in .env
+                                                       ──→ Email Flow Testing
 
-Landing Page --> Brand Visual Identity (constraint: must be created from scratch)
-All Pages --> Mobile-Responsive Design
-All Pages --> Cookie Consent Banner
+SSL Certificate ──→ SECURE_SSL_REDIRECT + cookie security settings
+SSL Certificate ──→ P24 webhook HTTPS requirement
 ```
+
+## Critical Path (Execution Order)
+
+This order matters because of hard dependencies:
+
+1. **DNS setup** -- domain must point to MyDevil before anything else
+2. **Virtualenv + dependencies** -- nothing runs without Python packages
+3. **PostgreSQL setup + migrations** -- app cannot start without database
+4. **Production `.env` + passenger_wsgi.py** -- app must boot
+5. **SSL certificate** -- must be active before enabling HTTPS settings
+6. **HTTPS security settings + CSRF trusted origins** -- enable after SSL confirmed
+7. **collectstatic** -- site looks broken without CSS/JS
+8. **Email configuration (Brevo SMTP + domain verification)** -- transactional emails must work
+9. **P24 webhook URL update** -- payment flow needs correct callback URL
+10. **End-to-end verification** -- test all flows: browse, register, order, pay, receive email
 
 ## MVP Recommendation
 
-### Must Ship (Phase 1 priority)
+### Must Ship (all Table Stakes)
 
-These features form the minimum viable product. Without them, the site cannot function as a business.
+Everything in the Table Stakes section is required. The site cannot function without any single item.
 
-1. **Landing page** with hero, about, services overview, contact/location -- this IS the business's public face
-2. **Recipe blog** with recipe cards, categories, search, photos, Schema.org markup -- primary traffic driver and brand builder
-3. **Ebook product pages + cart + checkout + Przelewy24 + email PDF delivery** -- revenue stream #1
-4. **Physical product catalog + cart + checkout + pickup scheduling** -- revenue stream #2 (can share cart/checkout with ebooks)
-5. **Newsletter signup** with GDPR consent and double opt-in -- list building from day one
-6. **Legal pages** (privacy policy, terms, cookie consent) -- legal requirement, cannot launch without these
+1. Server: Passenger WSGI + virtualenv + production `.env`
+2. Database: PostgreSQL created, migrated, initial data seeded
+3. SSL: Let's Encrypt certificate + HTTPS security settings
+4. Static/Media: `collectstatic` + WhiteNoise
+5. Email: Brevo SMTP configured, domain verified, all flows tested
+6. P24: Sandbox credentials on production, webhook URL updated
+7. Domain: DNS configured, `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` set
 
-### Ship Soon After (Phase 2)
+### Include from Differentiators (low effort, high value)
 
-7. **Recipe ratings and reviews** -- community engagement, SEO boost from rich snippets
-8. **Recipe favorites/collections** -- drives return visits
-9. **Lead magnet for newsletter** -- significantly improves conversion
-10. **Order history in user profile** -- table stakes for returning customers
-11. **Open Graph tags + social sharing** -- extends reach with minimal effort
+These should ship with the deployment -- they take minutes and prevent real problems:
 
-### Defer (Phase 3+)
+1. `manage.py check --deploy` -- free security audit, catches missed settings
+2. `.env.example` -- documentation for all required env vars
+3. Custom 404/500 pages -- site looks professional even when errors occur
+4. `deploy.sh` script -- makes re-deployment reliable and repeatable
+5. Error logging to file -- debug production issues without guessing
 
-12. **"I made this" photo uploads** -- community building but needs moderation
-13. **Interactive serving adjuster** -- nice UX but not critical
-14. **Email welcome sequence** -- requires email automation infrastructure
-15. **Bundle deals** -- requires cart complexity
-16. **Nutritional information** -- valuable but labor-intensive data entry
+### Defer to Post-Launch (first week)
 
-## Feature Prioritization Matrix
-
-| Feature | User Value | Business Value | Complexity | Priority |
-|---------|-----------|---------------|------------|----------|
-| Landing page | High | High | Low | P0 - Ship first |
-| Recipe blog (full) | High | High (SEO) | Medium | P0 - Ship first |
-| Recipe Schema.org markup | Medium | High (SEO) | Medium | P0 - Ship with recipes |
-| Ebook store + checkout | High | High (revenue) | High | P0 - Ship first |
-| Physical product store | High | High (revenue) | High | P0 - Ship first |
-| Przelewy24 integration | High | Critical | High | P0 - Ship first |
-| Newsletter signup | Medium | High (retention) | Low | P0 - Ship first |
-| Legal pages | Low | Critical (legal) | Low | P0 - Ship first |
-| Mobile-responsive design | High | High (SEO) | Medium | P0 - Across all phases |
-| Cookie consent | Low | Critical (legal) | Low | P0 - Ship first |
-| Recipe ratings/reviews | Medium | Medium (SEO) | Medium | P1 - Ship soon |
-| Recipe favorites | Medium | Medium (retention) | Low | P1 - Ship soon |
-| Lead magnet | Low | High (conversion) | Low | P1 - Ship soon |
-| Order history | Medium | Low | Low | P1 - Ship soon |
-| OG tags + sharing | Low | Medium (reach) | Low | P1 - Ship soon |
-| "I made this" photos | Low | Medium (community) | Medium | P2 - Defer |
-| Serving adjuster | Medium | Low | Medium | P2 - Defer |
-| Email welcome sequence | Low | Medium (retention) | Medium | P2 - Defer |
-| Bundle deals | Low | Medium (AOV) | Medium | P2 - Defer |
-| Nutritional info | Medium | Low | Low-Medium | P2 - Defer |
+6. Database backup cron job -- set up once site is stable
+7. Sentry error tracking -- add when there is real traffic to monitor
 
 ## Sources
 
-- [Google Recipe Schema Docs](https://developers.google.com/search/docs/appearance/structured-data/recipe)
-- [Schema.org Recipe Type](https://schema.org/Recipe)
-- [Top 10 Website Features for Food & Beverage Brands 2025](https://theartlogic.com/top-10-food-beverage-website-design-trends-2025/)
-- [18 Essential Features for Food E-commerce](https://commercebuild.com/blog/18-essential-features-every-food-and-beverage-ecommerce-site-needs/)
-- [SEO for Food Bloggers 2025 Guide](https://www.clickrank.ai/seo-for-food-bloggers-guide/)
-- [Recipe Blog SEO - Bootstrapped Ventures](https://bootstrapped.ventures/seo-for-food-blogs/)
-- [Food Blog SEO Tips - Foodie Digital](https://foodiedigital.com/seo-tips-for-food-bloggers/)
-- [Vegan Digital Marketing Strategies](https://bnevol.com/blog/vegan-digital-marketing/8-impactful-digital-marketing-strategies-for-vegan-businesses)
-- [Newsletter Signup Best Practices - Moosend](https://moosend.com/blog/newsletter-signup-examples/)
-- [Growing Food Blog Email List - Real Balanced](https://realbalanced.com/blog/business/double-your-food-blogs-email-list/)
-- [Restaurant Pickup Best Practices - Square](https://squareup.com/us/en/the-bottom-line/inside-square/square-online-restaurants-pickup-and-delivery-best-practices)
-- [Przelewy24 Guide - Noda](https://noda.live/articles/przelewy24-guide)
-- [Minimalist Baker](https://minimalistbaker.com/) and [Deliciously Ella](https://deliciouslyella.com/) as competitor references
+- [MyDevil.net Django Documentation](https://pomoc.mydevil.net/Django/)
+- [MyDevil.net PostgreSQL Documentation](https://pomoc.mydevil.net/PostgreSQL/)
+- [MyDevil.net SSL Documentation](https://pomoc.mydevil.net/SSL/)
+- [Django 5.2 Deployment Checklist](https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/)
+- [Brevo SMTP Integration Docs](https://developers.brevo.com/docs/smtp-integration)
+- [Brevo SMTP Key Management](https://help.brevo.com/hc/en-us/articles/7959631848850-Create-and-manage-your-SMTP-keys)
+- [WhiteNoise Django Documentation](https://whitenoise.readthedocs.io/en/stable/django.html)
+- [Practical MyDevil Django Deployment Guide](https://blog.joanna-siwiec.pl/aplikacja-django-na-serwerze-mydevil/1849/)
+- [psycopg3 vs psycopg2 for Django](https://dev.to/jimmyyeung/upgrade-to-django-5-with-psycopg3-4e8b)
+- [Django Forum: psycopg2 support in Django 5.2](https://forum.djangoproject.com/t/is-psycopg2-still-supported-in-django-5-2/41032)
