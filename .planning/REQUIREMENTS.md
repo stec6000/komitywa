@@ -11,7 +11,7 @@
 - [x] **INFRA-02**: Operator może zarządzać całą konfiguracją produkcyjną przez plik `.env` bez zmian w kodzie
 - [x] **INFRA-03**: Strona serwuje poprawnie pliki statyczne (CSS, JS, ikony) z `public/static/`
 - [x] **INFRA-04**: Pliki media (ebooki PDF) są dostępne przez `public/media/` na serwerze produkcyjnym
-- [ ] **INFRA-05**: Operator może wdrożyć nową wersję przez skrypt `deploy.sh` (pull, install, migrate, collectstatic, restart)
+- [x] **INFRA-05**: Operator może wdrożyć nową wersję przez skrypt `deploy.sh` (pull, install, migrate, collectstatic, restart)
 - [x] **INFRA-06**: Błędy aplikacji Django są zapisywane do pliku `logs/django.log`
 
 ### Baza danych (PostgreSQL)
@@ -81,7 +81,7 @@
 | INFRA-02 | Phase 7 | Complete |
 | INFRA-03 | Phase 7 | Complete |
 | INFRA-04 | Phase 7 | Complete |
-| INFRA-05 | Phase 7 | Pending |
+| INFRA-05 | Phase 7 | Complete |
 | INFRA-06 | Phase 7 | Complete |
 | DB-01 | Phase 8 | Pending |
 | DB-02 | Phase 8 | Pending |

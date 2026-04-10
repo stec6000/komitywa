@@ -9,7 +9,7 @@
 
 ### v1.1 Wdrozenie Produkcyjne (Phases 7-10)
 
-- [ ] Phase 7: Server Foundation (2/2 plans) — in progress
+- [x] Phase 7: Server Foundation (2/2 plans) — completed 2026-04-10
 - [ ] Phase 8: Database & Security
 - [ ] Phase 9: Email Configuration
 - [ ] Phase 10: Payments Production
@@ -30,7 +30,7 @@
 
 **Milestone Goal:** Przenieść aplikację z dev na MyDevil.net z pełną konfiguracją produkcyjną (PostgreSQL, Brevo SMTP, HTTPS, P24 sandbox).
 
-- [ ] **Phase 7: Server Foundation** - Passenger WSGI, virtualenv, production settings, static/media, deploy script, logging
+- [x] **Phase 7: Server Foundation** - Passenger WSGI, virtualenv, production settings, static/media, deploy script, logging
 - [ ] **Phase 8: Database & SSL** - PostgreSQL migration, superuser, Let's Encrypt HTTPS, security headers, keep-alive cron
 - [ ] **Phase 9: Email** - Brevo SMTP configuration, SPF/DKIM DNS verification, all email flows tested on production
 - [ ] **Phase 10: Payments & Verification** - P24 sandbox webhook on production domain, ebook upload, end-to-end purchase test, deploy check
@@ -97,7 +97,7 @@ Plans:
 | 4. Shop | v1.0 | 3/3 | Complete | 2026-04-02 |
 | 5. Payments & Orders | v1.0 | 2/2 | Complete | 2026-04-03 |
 | 6. Newsletter | v1.0 | 2/2 | Complete | 2026-04-03 |
-| 7. Server Foundation | v1.1 | 0/2 | In Progress | - |
+| 7. Server Foundation | v1.1 | 2/2 | Complete | 2026-04-10 |
 | 8. Database & SSL | v1.1 | 0/? | Not started | - |
 | 9. Email | v1.1 | 0/? | Not started | - |
 | 10. Payments & Verification | v1.1 | 0/? | Not started | - |
