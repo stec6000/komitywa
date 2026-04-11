@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.safestring import mark_safe
 
 
 class CheckoutForm(forms.Form):
@@ -29,6 +30,8 @@ class CheckoutForm(forms.Form):
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
     consent_terms = forms.BooleanField(
-        label="Akceptuje regulamin sklepu",
+        label=mark_safe(
+            'Akceptuję <a href="/regulamin/" target="_blank">regulamin sklepu</a>'
+        ),
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )

@@ -1,13 +1,30 @@
-{# Footer - Copyright, legal links (FOUND-02, LEGAL-01, LEGAL-02) #}
+{# Footer - Copyright, legal links, P24 payment logos (FOUND-02, LEGAL-01, LEGAL-02) #}
+{% load static %}
 <footer class="kk-footer">
     <div class="container">
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-md-6 text-center text-md-start">
-                <p class="mb-0">&copy; 2026 Kuchenna Komitywa. Wszelkie prawa zastrzeżone.</p>
+                <p class="mb-1">&copy; 2026 Kuchenna Komitywa. Wszelkie prawa zastrzeżone.</p>
+                <p class="mb-0 kk-footer-nip">NIP: 5423485438</p>
             </div>
             <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
                 <a href="{% url 'privacy-policy' %}" class="kk-footer-link">Polityka prywatności</a>
                 <a href="{% url 'regulations' %}" class="kk-footer-link ms-3">Regulamin</a>
+            </div>
+        </div>
+        <div class="row mt-3 pt-3 kk-footer-payments">
+            <div class="col-12 text-center">
+                <p class="kk-footer-payments-label">Metody płatności</p>
+                <div class="kk-payment-logos">
+                    <img src="{% static 'img/p24/logotypy-bankow/Blik.png' %}" alt="BLIK" class="kk-payment-logo">
+                    <img src="{% static 'img/p24/logotypy-bankow/VISA.png' %}" alt="Visa" class="kk-payment-logo">
+                    <img src="{% static 'img/p24/logotypy-bankow/mastercard.png' %}" alt="Mastercard" class="kk-payment-logo">
+                    <img src="{% static 'img/p24/logotypy-bankow/PKO Bank Polski.png' %}" alt="PKO Bank Polski" class="kk-payment-logo">
+                    <img src="{% static 'img/p24/logotypy-bankow/ING.png' %}" alt="ING" class="kk-payment-logo">
+                    <img src="{% static 'img/p24/logotypy-bankow/mBank .png' %}" alt="mBank" class="kk-payment-logo">
+                    <img src="{% static 'img/p24/logotypy-bankow/Millenium.png' %}" alt="Millennium" class="kk-payment-logo">
+                    <img src="{% static 'img/p24/logotypy-bankow/santander.png' %}" alt="Santander" class="kk-payment-logo">
+                </div>
             </div>
         </div>
     </div>

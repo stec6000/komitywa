@@ -133,6 +133,46 @@ h3, h4, h5, h6 {
     outline-offset: 2px;
 }
 
+/* Footer NIP */
+.kk-footer-nip {
+    font-size: 12px;
+    color: var(--kk-text-light);
+    opacity: 0.7;
+}
+
+/* Footer payment logos section */
+.kk-footer-payments {
+    border-top: 1px solid var(--kk-beige);
+}
+
+.kk-footer-payments-label {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--kk-text-light);
+    opacity: 0.6;
+    margin-bottom: 10px;
+}
+
+.kk-payment-logos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.kk-payment-logo {
+    height: 28px;
+    width: auto;
+    opacity: 0.8;
+    transition: opacity 150ms ease;
+}
+
+.kk-payment-logo:hover {
+    opacity: 1;
+}
+
 /* Cookie consent banner (per D-05, D-06, D-07, LEGAL-03) */
 .cookie-banner {
     display: none;
