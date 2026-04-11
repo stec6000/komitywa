@@ -100,3 +100,15 @@ Plans:
 | 8. Database & SSL | v1.1 | 1/2 | In Progress|  |
 | 9. Email | v1.1 | 1/2 | In Progress | - |
 | 10. Payments & Verification | v1.1 | 0/? | Not started | - |
+
+
+## Backlog
+
+### Phase 999.1: Panel klienta z historią zamówień (BACKLOG)
+
+**Goal:** Logowanie i rejestracja przez HTML (allauth widoki), powiązanie zamówień z kontami użytkowników, strona "Moje zamówienia", podstawowe dane konta
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
