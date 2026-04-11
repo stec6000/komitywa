@@ -84,7 +84,10 @@ Plans:
   2. Ebook PDFs are uploaded through Django admin on production and are accessible for delivery
   3. Full end-to-end flow works: browse products, add to cart, checkout, pay via P24 sandbox, receive confirmation email with ebook PDF attachment
   4. `python manage.py check --deploy` reports no security warnings
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 10-01-PLAN.md — settings.py fixes, deploy, P24 sandbox config, check --deploy
+- [ ] 10-02-PLAN.md — E2E purchase flow verification, requirements sign-off
 
 ## Progress
 
