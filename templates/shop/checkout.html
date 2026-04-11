@@ -11,6 +11,7 @@
         <form method="post" class="kk-checkout-form">
           {% csrf_token %}
           {% for field in form %}
+          {% if not ebook_only or field.html_name != 'pickup_date' %}
           <div class="mb-3{% if field.field.widget.input_type == 'checkbox' %} form-check{% endif %}">
             {% if field.field.widget.input_type == 'checkbox' %}
             {{ field }}
@@ -28,6 +29,7 @@
             {% endfor %}
             {% endif %}
           </div>
+          {% endif %}
           {% endfor %}
           <button type="submit" class="kk-btn-primary w-100 mt-3">Przejdz do platnosci</button>
         </form>

@@ -189,11 +189,16 @@ def checkout(request):
             })
 
     total = cart.get_total_price()
+    ebook_only = all(
+        products_map.get(pid, None) and products_map[pid].type == "ebook"
+        for pid in cart.cart
+    )
 
     return render(request, "shop/checkout.html", {
         "form": form,
         "cart_items": cart_items,
         "total": total,
+        "ebook_only": ebook_only,
     })
 
 

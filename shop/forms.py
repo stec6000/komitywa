@@ -20,6 +20,7 @@ class CheckoutForm(forms.Form):
     )
     pickup_date = forms.CharField(
         max_length=100,
+        required=False,
         label="Preferowana data odbioru",
         help_text="np. piatek 10 stycznia, godziny popoludniowe",
         widget=forms.TextInput(attrs={"class": "form-control"}),
