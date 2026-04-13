@@ -18,6 +18,20 @@ class TestEnvironmentConfig(TestCase):
         content = settings_path.read_text()
         self.assertIn('env("DEBUG")', content)
 
+    def test_production_domains_included(self):
+        self.assertIn("kuchennakomitywa.pl", settings.ALLOWED_HOSTS)
+        self.assertIn("www.kuchennakomitywa.pl", settings.ALLOWED_HOSTS)
+
+    def test_production_csrf_origins_included(self):
+        self.assertIn(
+            "https://kuchennakomitywa.pl",
+            settings.CSRF_TRUSTED_ORIGINS,
+        )
+        self.assertIn(
+            "https://www.kuchennakomitywa.pl",
+            settings.CSRF_TRUSTED_ORIGINS,
+        )
+
     def test_env_example_exists(self):
         env_example = Path(settings.BASE_DIR) / ".env.example"
         self.assertTrue(env_example.exists())
@@ -97,7 +111,10 @@ class TestResponsiveLayout(TestCase):
 
     def test_static_css_included(self):
         response = self.client.get("/")
-        self.assertContains(response, "main.css")
+        self.assertRegex(
+            response.content.decode(),
+            r"/static/css/main(?:\.[0-9a-f]+)?\.css",
+        )
 
 
 class TestCookieBanner(TestCase):
@@ -123,7 +140,10 @@ class TestCookieBanner(TestCase):
 
     def test_cookie_consent_js_included(self):
         response = self.client.get("/")
-        self.assertContains(response, "cookie_consent.js")
+        self.assertRegex(
+            response.content.decode(),
+            r"/static/js/cookie_consent(?:\.[0-9a-f]+)?\.js",
+        )
 
 
 class TestHeroSection(TestCase):
@@ -188,11 +208,13 @@ class TestContactPage(TestCase):
 
     def test_contact_has_address(self):
         response = self.client.get("/kontakt/")
-        self.assertContains(response, "Kwiatowa")
+        self.assertContains(response, "Bukowa 14")
 
-    def test_contact_has_hours(self):
+    def test_contact_has_company_details(self):
         response = self.client.get("/kontakt/")
-        self.assertContains(response, "10:00")
+        self.assertContains(response, "TOMASZ STECKIEWICZ")
+        self.assertContains(response, "5423485438")
+        self.assertContains(response, "511 562 100")
 
 
 class TestPrivacyPage(TestCase):
@@ -206,6 +228,11 @@ class TestPrivacyPage(TestCase):
         response = self.client.get("/polityka-prywatnosci/")
         self.assertContains(response, "Polityka prywatno\u015bci")
 
+    def test_privacy_has_full_company_name(self):
+        response = self.client.get("/polityka-prywatnosci/")
+        self.assertContains(response, "TOMASZ STECKIEWICZ")
+        self.assertContains(response, "5423485438")
+
 
 class TestRegulationsPage(TestCase):
     """LEGAL-02: Regulations page accessible."""
@@ -217,6 +244,15 @@ class TestRegulationsPage(TestCase):
     def test_regulations_has_heading(self):
         response = self.client.get("/regulamin/")
         self.assertContains(response, "Regulamin")
+
+    def test_regulations_has_full_company_name(self):
+        response = self.client.get("/regulamin/")
+        self.assertContains(response, "TOMASZ STECKIEWICZ")
+        self.assertContains(response, "5423485438")
+
+    def test_regulations_has_14_calendar_days_for_complaints(self):
+        response = self.client.get("/regulamin/")
+        self.assertContains(response, "14 dni kalendarzowych")
 
 
 class TestNavbarLinks(TestCase):
