@@ -18,9 +18,21 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / "subdir".
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+DEFAULT_ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "kuchennakomitywa.pl",
+    "www.kuchennakomitywa.pl",
+]
+DEFAULT_CSRF_TRUSTED_ORIGINS = [
+    "https://kuchennakomitywa.pl",
+    "https://www.kuchennakomitywa.pl",
+]
+
 env = environ.Env(
     DEBUG=(bool, False),
-    ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
+    ALLOWED_HOSTS=(list, DEFAULT_ALLOWED_HOSTS),
+    CSRF_TRUSTED_ORIGINS=(list, DEFAULT_CSRF_TRUSTED_ORIGINS),
 )
 environ.Env.read_env(BASE_DIR / ".env")
 
@@ -34,7 +46,10 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+# Always include production domains even if a local .env is copied to the server.
+ALLOWED_HOSTS = list(
+    dict.fromkeys(DEFAULT_ALLOWED_HOSTS + env.list("ALLOWED_HOSTS", default=[]))
+)
 
 SITE_ID = 1
 
@@ -255,7 +270,12 @@ CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=False)
 SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=0)
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False)
 SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD", default=False)
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+CSRF_TRUSTED_ORIGINS = list(
+    dict.fromkeys(
+        DEFAULT_CSRF_TRUSTED_ORIGINS
+        + env.list("CSRF_TRUSTED_ORIGINS", default=[])
+    )
+)
 
 # silence W008: Apache handles HTTP→HTTPS redirect, not Django
 SILENCED_SYSTEM_CHECKS = ["security.W008"]
