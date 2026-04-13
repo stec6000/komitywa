@@ -212,7 +212,7 @@ class TestContactPage(TestCase):
 
     def test_contact_has_company_details(self):
         response = self.client.get("/kontakt/")
-        self.assertContains(response, "TOMASZ STECKIEWICZ")
+        self.assertContains(response, "Tomasz Steckiewicz Kuchenna Komitywa")
         self.assertContains(response, "5423485438")
         self.assertContains(response, "511 562 100")
 
