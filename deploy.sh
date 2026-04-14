@@ -1,5 +1,8 @@
 #!/bin/bash
-set -e
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
 echo "=== Deploying Kuchenna Komitywa ==="
 
@@ -8,7 +11,7 @@ mkdir -p logs/
 
 # Pull latest code
 echo "Pulling latest code..."
-git pull origin main
+git pull --ff-only origin main
 
 # Activate virtualenv
 source ~/.virtualenvs/komitywa/bin/activate

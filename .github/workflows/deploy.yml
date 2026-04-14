@@ -1,0 +1,88 @@
+name: Deploy production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://kuchennakomitywa.pl
+    steps:
+      - name: Validate deploy configuration
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+
+          require_value() {
+            local name="$1"
+            local value="$2"
+
+            if [ -z "$value" ]; then
+              echo "::error::Missing required GitHub configuration: $name"
+              exit 1
+            fi
+          }
+
+          require_value "vars.DEPLOY_HOST" "$DEPLOY_HOST"
+          require_value "vars.DEPLOY_USER" "$DEPLOY_USER"
+          require_value "vars.DEPLOY_PATH" "$DEPLOY_PATH"
+          require_value "secrets.DEPLOY_SSH_KEY" "$DEPLOY_SSH_KEY"
+          require_value "secrets.DEPLOY_KNOWN_HOSTS" "$DEPLOY_KNOWN_HOSTS"
+
+          if [ -n "$DEPLOY_PORT" ] && ! [[ "$DEPLOY_PORT" =~ ^[0-9]+$ ]]; then
+            echo "::error::vars.DEPLOY_PORT must be numeric when provided"
+            exit 1
+          fi
+
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Run remote deploy
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+
+          SSH_PORT="${DEPLOY_PORT:-22}"
+
+          ssh \
+            -i ~/.ssh/id_ed25519 \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -p "$SSH_PORT" \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "cd \"$DEPLOY_PATH\" && bash ./deploy.sh"
