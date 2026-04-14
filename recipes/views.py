@@ -21,7 +21,7 @@ def recipe_list(request):
             Q(title__icontains=query) | Q(ingredients_text__icontains=query)
         )
 
-    paginator = Paginator(recipes, 9)
+    paginator = Paginator(recipes, 12)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 

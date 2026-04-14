@@ -105,8 +105,14 @@ class TestRecipeDetail(TestCase):
 class TestCategoryFilter(TestCase):
 
     def setUp(self):
-        self.desery = Category.objects.create(name="Desery", slug="desery")
-        self.obiady = Category.objects.create(name="Obiady", slug="obiady")
+        self.desery, _ = Category.objects.get_or_create(
+            name="Desery",
+            slug="desery",
+        )
+        self.obiady, _ = Category.objects.get_or_create(
+            name="Obiady",
+            slug="obiady",
+        )
         self.recipe1 = Recipe.objects.create(
             title="Brownie Deser",
             slug="brownie-deser",
