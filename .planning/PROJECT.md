@@ -6,16 +6,14 @@ Strona informacyjna i sklep online dla firmy Kuchenna Komitywa — wegańskiej/r
 
 v1.0 MVP dostarczył kompletny serwis: od fundacji szablonów przez sklep, płatności Przelewy24 po newsletter z double opt-in.
 
-## Current Milestone: v1.1 Wdrożenie Produkcyjne
+## Current Milestone: v1.2 Infrastruktura & Bezpieczeństwo
 
-**Goal:** Przenieść aplikację z dev na MyDevil.net z pełną konfiguracją produkcyjną (PostgreSQL, Brevo SMTP, HTTPS, P24 sandbox).
+**Goal:** Domknąć pozostałą infrastrukturę produkcyjną — HTTPS, weryfikacja emaila i stabilność serwera.
 
 **Target features:**
-- Konfiguracja środowiska produkcyjnego na MyDevil.net (WSGI/Passenger, settings prod, static/media files)
-- Migracja bazy danych z SQLite na PostgreSQL
-- Konfiguracja emaila przez Brevo SMTP
-- HTTPS + domena (certyfikat SSL na MyDevil)
-- P24 skonfigurowane w trybie sandbox na produkcji
+- HTTPS z Let's Encrypt + przekierowanie HTTP→HTTPS + security headers + cookie Secure/HttpOnly
+- SPF/DKIM w Brevo — weryfikacja domeny nadawcy emaila
+- Cron keep-alive (ping co 12h, zapobieganie auto-shutdown na MyDevil)
 
 ## Core Value
 
@@ -23,11 +21,11 @@ Klienci mogą przeglądać przepisy, kupować ebooki i zamawiać gotowe wegańsk
 
 ## Current State
 
-**Shipped: v1.0 MVP (2026-04-04)**
+**Shipped: v1.1 Wdrożenie Produkcyjne (2026-04-16)**
 
-- 6 phases, 16 plans, 30 tasks delivered
-- ~3,600 Python LOC + Django templates
-- Stack: Django 5.2, Bootstrap 5, SQLite (dev), django-environ, Przelewy24
+- Produkcja na MyDevil.net: Passenger WSGI, PostgreSQL, Brevo SMTP, P24 sandbox
+- Fazy 7-10, pełny flow zakupu zweryfikowany end-to-end na produkcji
+- Stack: Django 5.2, Bootstrap 5, PostgreSQL (prod), django-environ, Przelewy24 sandbox
 
 ## Requirements
 
@@ -57,12 +55,10 @@ Klienci mogą przeglądać przepisy, kupować ebooki i zamawiać gotowe wegańsk
 
 <!-- Next milestone scope. -->
 
-- [ ] Konfiguracja środowiska MyDevil.net (Passenger WSGI, settings prod, static/media) — v1.1
-- [ ] Migracja bazy z SQLite na PostgreSQL — v1.1
-- [ ] Konfiguracja Brevo SMTP na produkcji — v1.1
-- [ ] HTTPS + domena z certyfikatem SSL (MyDevil) — v1.1
-- [ ] P24 sandbox na środowisku produkcyjnym — v1.1
-- [ ] Panel do wysyłania newsletterów (kampanie, baza subskrybentów) — odłożone (v1.2)
+- [ ] HTTPS z Let's Encrypt + HTTP→HTTPS redirect + security headers + cookie Secure/HttpOnly — v1.2
+- [ ] SPF/DKIM weryfikacja domeny nadawcy w Brevo — v1.2
+- [ ] Cron keep-alive co 12h (MyDevil auto-shutdown prevention) — v1.2
+- [ ] Panel do wysyłania newsletterów (kampanie, baza subskrybentów) — odłożone (v1.3)
 
 ### Out of Scope
 
@@ -129,4 +125,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-10 — v1.1 milestone started (production deployment: MyDevil.net, PostgreSQL, Brevo, HTTPS)*
+*Last updated: 2026-04-16 — v1.2 milestone started (infra: HTTPS, SPF/DKIM, cron keep-alive)*
