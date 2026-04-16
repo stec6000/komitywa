@@ -2,13 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Infrastruktura & Bezpieczeństwo
+current_phase: 11
 current_plan: 0
 status: planning
 stopped_at: ~
 last_updated: "2026-04-16T00:00:00.000Z"
-last_activity: 2026-04-16 -- Milestone v1.2 started
+last_activity: 2026-04-16 -- Roadmap created for v1.2 (Phases 11-12)
 progress:
-  total_phases: 0
+  total_phases: 2
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -22,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-16)
 
 **Core value:** Klienci mogą przeglądać przepisy, kupować ebooki i zamawiać gotowe wegańskie produkty z odbiorem osobistym — w jednym miejscu.
-**Current focus:** Defining requirements for v1.2
+**Current focus:** Phase 11 — HTTPS & Bezpieczeństwo
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 11 — HTTPS & Bezpieczeństwo
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-16 — Milestone v1.2 started
+Status: Not started (roadmap defined, awaiting plan)
+Last activity: 2026-04-16 — v1.2 roadmap created (Phases 11-12)
 
 ## Milestone Status
 
@@ -42,12 +43,17 @@ Previous:
 
 ## Current Phase
 
-**Phase:** Not started
-**Status:** Defining requirements
+**Phase 11: HTTPS & Bezpieczeństwo**
+**Status:** Not started
 
-🔄 **v1.2 Infrastruktura & Bezpieczeństwo — starting**
+Requirements: HTTPS-01, HTTPS-02, HTTPS-03, HTTPS-04, HTTPS-05
 
-- Target: HTTPS, SPF/DKIM, cron keep-alive
+Success criteria:
+1. Certyfikat Let's Encrypt aktywny — przeglądarka pokazuje kłódkę, adres `https://`
+2. HTTP → HTTPS redirect działa — żadna strona niedostępna przez HTTP
+3. Formularze POST działają pod HTTPS bez błędów CSRF
+4. Cookies sesji i CSRF mają flagi `Secure` i `HttpOnly`
+5. Nagłówki bezpieczeństwa (HSTS, X-Content-Type-Options, X-Frame-Options) aktywne
 
 ## Accumulated Context
 
@@ -74,7 +80,8 @@ v1.1 key decisions:
 
 ### Pending Todos
 
-None for Phase 7.
+- Phase 11: activate HTTPS env vars in .env on server after Let's Encrypt cert is installed
+- Phase 12: add SPF/DKIM DNS records early — propagation can take up to 48h
 
 ### Blockers/Concerns
 
@@ -91,6 +98,6 @@ None for Phase 7.
 
 ## Session Continuity
 
-Last session: 2026-04-10T18:00:00.000Z
-Stopped at: Completed 08-02-PLAN.md — Phase 08 (Database & SSL) fully complete
+Last session: 2026-04-16T00:00:00.000Z
+Stopped at: v1.2 roadmap created — Phase 11 ready for planning
 Resume file: None

@@ -45,18 +45,18 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HTTPS-01 | TBD | Pending |
-| HTTPS-02 | TBD | Pending |
-| HTTPS-03 | TBD | Pending |
-| HTTPS-04 | TBD | Pending |
-| HTTPS-05 | TBD | Pending |
-| EMAIL-01 | TBD | Pending |
-| OPS-01 | TBD | Pending |
+| HTTPS-01 | Phase 11 | Pending |
+| HTTPS-02 | Phase 11 | Pending |
+| HTTPS-03 | Phase 11 | Pending |
+| HTTPS-04 | Phase 11 | Pending |
+| HTTPS-05 | Phase 11 | Pending |
+| EMAIL-01 | Phase 12 | Pending |
+| OPS-01 | Phase 12 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 7 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 7
+- Mapped to phases: 7
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-16*

@@ -4,6 +4,7 @@
 
 - ✅ **v1.0 MVP** — Phases 1-6 (shipped 2026-04-04) → [archive](milestones/v1.0-ROADMAP.md)
 - ✅ **v1.1 Wdrożenie Produkcyjne** — Phases 7-10 (shipped 2026-04-16)
+- 🚧 **v1.2 Infrastruktura & Bezpieczeństwo** — Phases 11-12 (in progress)
 
 ## Phases
 
@@ -19,14 +20,22 @@
 
 </details>
 
-### 🚧 v1.1 Wdrożenie Produkcyjne (In Progress)
-
-**Milestone Goal:** Przenieść aplikację z dev na MyDevil.net z pełną konfiguracją produkcyjną (PostgreSQL, Brevo SMTP, HTTPS, P24 sandbox).
+<details>
+<summary>✅ v1.1 Wdrożenie Produkcyjne (Phases 7-10) — SHIPPED 2026-04-16</summary>
 
 - [x] **Phase 7: Server Foundation** - Passenger WSGI, virtualenv, production settings, static/media, deploy script, logging
-- [ ] **Phase 8: Database & SSL** - PostgreSQL migration, superuser, Let's Encrypt HTTPS, security headers, keep-alive cron
-- [ ] **Phase 9: Email** - Brevo SMTP configuration, SPF/DKIM DNS verification, all email flows tested on production
+- [x] **Phase 8: Database & SSL** - PostgreSQL migration, superuser, Let's Encrypt HTTPS, security headers, keep-alive cron
+- [x] **Phase 9: Email** - Brevo SMTP configuration, SPF/DKIM DNS verification, all email flows tested on production
 - [x] **Phase 10: Payments & Verification** - P24 sandbox webhook on production domain, ebook upload, end-to-end purchase test, deploy check
+
+</details>
+
+### 🚧 v1.2 Infrastruktura & Bezpieczeństwo (In Progress)
+
+**Milestone Goal:** Domknąć pozostałą infrastrukturę produkcyjną — HTTPS, weryfikacja emaila i stabilność serwera.
+
+- [ ] **Phase 11: HTTPS & Bezpieczeństwo** - Let's Encrypt cert, HTTP→HTTPS redirect, CSRF trusted origins, secure cookies, security headers
+- [ ] **Phase 12: Email & Stabilność** - SPF/DKIM DNS verification in Brevo, cron keep-alive for MyDevil auto-shutdown prevention
 
 ## Phase Details
 
@@ -89,6 +98,29 @@ Plans:
 - [x] 10-01-PLAN.md — settings.py fixes, deploy, P24 sandbox config, check --deploy
 - [x] 10-02-PLAN.md — E2E purchase flow verification, requirements sign-off
 
+### Phase 11: HTTPS & Bezpieczeństwo
+**Goal**: Strona działa wyłącznie przez HTTPS z poprawną konfiguracją bezpieczeństwa Django
+**Depends on**: Phase 10
+**Requirements**: HTTPS-01, HTTPS-02, HTTPS-03, HTTPS-04, HTTPS-05
+**Success Criteria** (what must be TRUE):
+  1. Certyfikat Let's Encrypt jest aktywny — przeglądarka pokazuje kłódkę, adres zaczyna się od `https://`
+  2. Wpisanie adresu `http://` automatycznie przekierowuje na `https://` (301/302) — żadna strona nie jest dostępna przez HTTP
+  3. Formularze POST (logowanie, checkout, newsletter) działają pod HTTPS bez błędów CSRF — `CSRF_TRUSTED_ORIGINS` zawiera domenę produkcyjną
+  4. Cookies sesji i CSRF mają flagi `Secure` i `HttpOnly` — potwierdzone przez DevTools → Application → Cookies
+  5. Nagłówki bezpieczeństwa (HSTS, X-Content-Type-Options, X-Frame-Options) zwracane przez serwer — potwierdzone przez `curl -I https://domena`
+**Plans**: TBD
+
+### Phase 12: Email & Stabilność
+**Goal**: Emaile trafiają do skrzynki odbiorczej (nie spam) a serwer nie wyłącza się automatycznie na MyDevil
+**Depends on**: Phase 11
+**Requirements**: EMAIL-01, OPS-01
+**Success Criteria** (what must be TRUE):
+  1. Rekordy SPF i DKIM są dodane do DNS domeny — status weryfikacji w panelu Brevo pokazuje "Verified"
+  2. Email testowy wysłany z aplikacji trafia do skrzynki odbiorczej (nie do folderu spam) — nagłówki emaila zawierają DKIM-Signature
+  3. Cron job na MyDevil jest skonfigurowany — widoczny w cPanel → Cron Jobs z harmonogramem co 12h
+  4. Serwer pozostaje aktywny przez minimum 24h bez ręcznego restartowania — brak auto-shutdown
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -103,6 +135,8 @@ Plans:
 | 8. Database & SSL | v1.1 | 1/2 | In Progress|  |
 | 9. Email | v1.1 | 1/2 | In Progress | - |
 | 10. Payments & Verification | v1.1 | 2/2 | Complete | 2026-04-16 |
+| 11. HTTPS & Bezpieczeństwo | v1.2 | 0/? | Not started | - |
+| 12. Email & Stabilność | v1.2 | 0/? | Not started | - |
 
 
 ## Backlog
