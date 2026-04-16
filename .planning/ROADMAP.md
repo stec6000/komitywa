@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-6 (shipped 2026-04-04) → [archive](milestones/v1.0-ROADMAP.md)
-- 🚧 **v1.1 Wdrożenie Produkcyjne** — Phases 7-10 (in progress)
+- ✅ **v1.1 Wdrożenie Produkcyjne** — Phases 7-10 (shipped 2026-04-16)
 
 ## Phases
 
@@ -26,7 +26,7 @@
 - [x] **Phase 7: Server Foundation** - Passenger WSGI, virtualenv, production settings, static/media, deploy script, logging
 - [ ] **Phase 8: Database & SSL** - PostgreSQL migration, superuser, Let's Encrypt HTTPS, security headers, keep-alive cron
 - [ ] **Phase 9: Email** - Brevo SMTP configuration, SPF/DKIM DNS verification, all email flows tested on production
-- [ ] **Phase 10: Payments & Verification** - P24 sandbox webhook on production domain, ebook upload, end-to-end purchase test, deploy check
+- [x] **Phase 10: Payments & Verification** - P24 sandbox webhook on production domain, ebook upload, end-to-end purchase test, deploy check
 
 ## Phase Details
 
@@ -86,8 +86,8 @@ Plans:
   4. `python manage.py check --deploy` reports no security warnings
 **Plans**: 2 plans
 Plans:
-- [ ] 10-01-PLAN.md — settings.py fixes, deploy, P24 sandbox config, check --deploy
-- [ ] 10-02-PLAN.md — E2E purchase flow verification, requirements sign-off
+- [x] 10-01-PLAN.md — settings.py fixes, deploy, P24 sandbox config, check --deploy
+- [x] 10-02-PLAN.md — E2E purchase flow verification, requirements sign-off
 
 ## Progress
 
@@ -102,7 +102,7 @@ Plans:
 | 7. Server Foundation | v1.1 | 2/2 | Complete | 2026-04-10 |
 | 8. Database & SSL | v1.1 | 1/2 | In Progress|  |
 | 9. Email | v1.1 | 1/2 | In Progress | - |
-| 10. Payments & Verification | v1.1 | 0/? | Not started | - |
+| 10. Payments & Verification | v1.1 | 2/2 | Complete | 2026-04-16 |
 
 
 ## Backlog

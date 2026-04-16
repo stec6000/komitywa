@@ -39,13 +39,13 @@
 
 ### Płatności (P24 Sandbox)
 
-- [ ] **P24-01**: Płatności Przelewy24 (tryb sandbox) działają na produkcji z poprawnym webhook URL wskazującym na domenę produkcyjną
-- [ ] **P24-02**: EBooki PDF są uploadowane przez panel admina na serwerze produkcyjnym
+- [x] **P24-01**: Płatności Przelewy24 (tryb sandbox) działają na produkcji z poprawnym webhook URL wskazującym na domenę produkcyjną
+- [x] **P24-02**: EBooki PDF są uploadowane przez panel admina na serwerze produkcyjnym
 
 ### Weryfikacja
 
-- [ ] **VER-01**: Pełny flow zakupu działa end-to-end: przeglądanie → koszyk → P24 sandbox → potwierdzenie → email z eBookiem
-- [ ] **VER-02**: `python manage.py check --deploy` nie wykazuje żadnych ostrzeżeń bezpieczeństwa
+- [x] **VER-01**: Pełny flow zakupu działa end-to-end: przeglądanie → koszyk → P24 sandbox → potwierdzenie → email z eBookiem
+- [x] **VER-02**: `python manage.py check --deploy` nie wykazuje żadnych ostrzeżeń bezpieczeństwa
 
 ## v2 Requirements
 
