@@ -1,61 +1,53 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Wdrożenie Produkcyjne
-current_plan: 1
-status: executing
-stopped_at: Completed 08-02-PLAN.md — Phase 08 (Database & SSL) fully complete
-last_updated: "2026-04-10T15:34:36.414Z"
-last_activity: 2026-04-10 -- Phase 09 execution started
+milestone: v1.2
+milestone_name: Infrastruktura & Bezpieczeństwo
+current_plan: 0
+status: planning
+stopped_at: ~
+last_updated: "2026-04-16T00:00:00.000Z"
+last_activity: 2026-04-16 -- Milestone v1.2 started
 progress:
-  total_phases: 4
-  completed_phases: 2
-  total_plans: 6
-  completed_plans: 4
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-10)
+See: .planning/PROJECT.md (updated 2026-04-16)
 
 **Core value:** Klienci mogą przeglądać przepisy, kupować ebooki i zamawiać gotowe wegańskie produkty z odbiorem osobistym — w jednym miejscu.
-**Current focus:** Phase 09 — email
+**Current focus:** Defining requirements for v1.2
 
 ## Current Position
 
-Phase: 09 (email) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 09
-Last activity: 2026-04-12 - Completed quick task 260412-gkc: Przepisz sekcję Nasza historia na stronie O nas — luźny ton, bez Warszawy, prosta historia prostego chłopaka
-
-Progress: [██████████] 100%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-16 — Milestone v1.2 started
 
 ## Milestone Status
 
-**v1.1 Production Deployment** — In Progress
-
-- Phase 7: Server Foundation — COMPLETE (both plans done)
-- Phase 8: Database & SSL — COMPLETE (both plans done)
-- Phase 9: Email — Not started
-- Phase 10: Payments & Verify — Not started
+**v1.2 Infrastruktura & Bezpieczeństwo** — In Progress
 
 Previous:
 
 - v1.0 MVP shipped — 2026-04-04 (archive: `.planning/milestones/v1.0-ROADMAP.md`)
+- v1.1 Wdrożenie Produkcyjne shipped — 2026-04-16
 
 ## Current Phase
 
-**Phase:** 09-email (next)
-**Current Plan:** 1
-**Status:** Executing Phase 09
+**Phase:** Not started
+**Status:** Defining requirements
 
-🔄 **v1.1 Wdrożenie Produkcyjne — in progress**
+🔄 **v1.2 Infrastruktura & Bezpieczeństwo — starting**
 
-- 4 phases (7-10), 24 requirements
-- Target: MyDevil.net, PostgreSQL, Brevo SMTP, HTTPS, P24 sandbox on prod
+- Target: HTTPS, SPF/DKIM, cron keep-alive
 
 ## Accumulated Context
 
