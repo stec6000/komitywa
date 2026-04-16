@@ -108,7 +108,9 @@ Plans:
   3. Formularze POST (logowanie, checkout, newsletter) działają pod HTTPS bez błędów CSRF — `CSRF_TRUSTED_ORIGINS` zawiera domenę produkcyjną
   4. Cookies sesji i CSRF mają flagi `Secure` i `HttpOnly` — potwierdzone przez DevTools → Application → Cookies
   5. Nagłówki bezpieczeństwa (HSTS, X-Content-Type-Options, X-Frame-Options) zwracane przez serwer — potwierdzone przez `curl -I https://domena`
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 11-01-PLAN.md — Weryfikacja produkcyjna HTTPS + aktualizacja .env.example
 
 ### Phase 12: Email & Stabilność
 **Goal**: Emaile trafiają do skrzynki odbiorczej (nie spam) a serwer nie wyłącza się automatycznie na MyDevil
@@ -135,7 +137,7 @@ Plans:
 | 8. Database & SSL | v1.1 | 1/2 | In Progress|  |
 | 9. Email | v1.1 | 1/2 | In Progress | - |
 | 10. Payments & Verification | v1.1 | 2/2 | Complete | 2026-04-16 |
-| 11. HTTPS & Bezpieczeństwo | v1.2 | 0/? | Not started | - |
+| 11. HTTPS & Bezpieczeństwo | v1.2 | 0/1 | Not started | - |
 | 12. Email & Stabilność | v1.2 | 0/? | Not started | - |
 
 
