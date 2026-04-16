@@ -1,112 +1,62 @@
-# Requirements: Kuchenna Komitywa v1.1 Wdrożenie Produkcyjne
+# Requirements: Kuchenna Komitywa v1.2 Infrastruktura & Bezpieczeństwo
 
-**Defined:** 2026-04-10
+**Defined:** 2026-04-16
 **Core Value:** Klienci mogą przeglądać przepisy, kupować ebooki i zamawiać gotowe wegańskie produkty z odbiorem osobistym — w jednym miejscu.
 
-## v1.1 Requirements
+## v1.2 Requirements
 
-### Infrastruktura serwera (MyDevil.net)
+### HTTPS & Bezpieczeństwo
 
-- [x] **INFRA-01**: Operator może uruchomić Django na MyDevil.net przez Passenger WSGI z dedykowanym virtualenv
-- [x] **INFRA-02**: Operator może zarządzać całą konfiguracją produkcyjną przez plik `.env` bez zmian w kodzie
-- [x] **INFRA-03**: Strona serwuje poprawnie pliki statyczne (CSS, JS, ikony) z `public/static/`
-- [x] **INFRA-04**: Pliki media (ebooki PDF) są dostępne przez `public/media/` na serwerze produkcyjnym
-- [x] **INFRA-05**: Operator może wdrożyć nową wersję przez skrypt `deploy.sh` (pull, install, migrate, collectstatic, restart)
-- [x] **INFRA-06**: Błędy aplikacji Django są zapisywane do pliku `logs/django.log`
+- [ ] **HTTPS-01**: Strona jest dostępna wyłącznie przez HTTPS z certyfikatem Let's Encrypt
+- [ ] **HTTPS-02**: Wszystkie żądania HTTP są automatycznie przekierowywane na HTTPS
+- [ ] **HTTPS-03**: Formularze POST (logowanie, checkout, newsletter) działają poprawnie pod HTTPS bez błędów CSRF (`CSRF_TRUSTED_ORIGINS` skonfigurowane)
+- [ ] **HTTPS-04**: Pliki cookie sesji i CSRF mają flagi `Secure` i `HttpOnly`
+- [ ] **HTTPS-05**: Django security headers są aktywne (HSTS, X-Content-Type-Options, X-Frame-Options)
 
-### Baza danych (PostgreSQL)
+### Weryfikacja domeny email
 
-- [x] **DB-01**: Aplikacja używa PostgreSQL jako bazy danych na produkcji (zamiast SQLite)
-- [x] **DB-02**: Wszystkie migracje Django są wykonane poprawnie na bazie PostgreSQL
-- [x] **DB-03**: Operator może zalogować się do panelu administracyjnego Django po uruchomieniu produkcji
+- [ ] **EMAIL-01**: Domena nadawcy jest zweryfikowana w Brevo przez rekordy SPF i DKIM w DNS — emaile trafiają do skrzynki odbiorczej (nie spam)
 
-### Bezpieczeństwo i HTTPS (SSL)
+### Stabilność serwera
 
-- [ ] **SSL-01**: Strona jest dostępna wyłącznie przez HTTPS z certyfikatem Let's Encrypt
-- [ ] **SSL-02**: Wszystkie żądania HTTP są automatycznie przekierowywane na HTTPS
-- [ ] **SSL-03**: Formularze POST (logowanie, checkout, newsletter) działają poprawnie pod HTTPS — `CSRF_TRUSTED_ORIGINS` skonfigurowane
-- [ ] **SSL-04**: Pliki cookie sesji i CSRF są zabezpieczone flagami Secure i HttpOnly
-- [ ] **SSL-05**: Cron job pinguje stronę co 12h aby zapobiec 24h auto-shutdown na shared hostingu
+- [ ] **OPS-01**: Cron job na MyDevil pinguje stronę co 12h, zapobiegając auto-shutdown serwera (MyDevil wyłącza procesy po 24h braku aktywności)
 
-### Email (Brevo SMTP)
+## Future Requirements
 
-- [x] **EMAIL-01**: Aplikacja wysyła emaile przez Brevo SMTP (nie console backend)
-- [ ] **EMAIL-02**: Domena nadawcy jest zweryfikowana w Brevo przez rekordy SPF/DKIM w DNS
-- [x] **EMAIL-03**: Email rejestracji + weryfikacji email działa na produkcji
-- [x] **EMAIL-04**: Email resetowania hasła działa na produkcji
-- [x] **EMAIL-05**: Email potwierdzenia zamówienia z załączonym eBookiem PDF działa na produkcji
-- [x] **EMAIL-06**: Email double opt-in dla newslettera działa na produkcji
+### Monitoring
 
-### Płatności (P24 Sandbox)
-
-- [x] **P24-01**: Płatności Przelewy24 (tryb sandbox) działają na produkcji z poprawnym webhook URL wskazującym na domenę produkcyjną
-- [x] **P24-02**: EBooki PDF są uploadowane przez panel admina na serwerze produkcyjnym
-
-### Weryfikacja
-
-- [x] **VER-01**: Pełny flow zakupu działa end-to-end: przeglądanie → koszyk → P24 sandbox → potwierdzenie → email z eBookiem
-- [x] **VER-02**: `python manage.py check --deploy` nie wykazuje żadnych ostrzeżeń bezpieczeństwa
-
-## v2 Requirements
-
-### Płatności produkcyjne
-
-- **P24-03**: Aplikacja przyjmuje płatności przez Przelewy24 na produkcji (nie sandbox) — zależne od dostarczenia danych sprzedawcy przez klienta
-
-### Operacyjne
-
-- **OPS-01**: Automatyczne backupy PostgreSQL przez cron (`pg_dump`) — defer do po launch
-- **OPS-02**: Monitoring błędów przez Sentry — defer do v1.2 gdy jest realy traffic
+- **OPS-02**: Monitoring błędów przez Sentry — po osiągnięciu realnego ruchu
+- **OPS-03**: Automatyczne backupy PostgreSQL przez cron (`pg_dump`)
 
 ### Newsletter campaigns
 
-- **CAMP-01**: Admin może tworzyć i wysyłać kampanie emailowe do bazy subskrybentów — odłożone do v1.2
+- **CAMP-01**: Admin może tworzyć i wysyłać kampanie emailowe do bazy subskrybentów — v1.3
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| CI/CD pipeline | Manual SSH deployment wystarczający dla tego rozmiaru projektu |
-| Docker / nginx / gunicorn | Niedostępne na MyDevil shared hosting (Passenger WSGI) |
-| CDN dla static files | Zbędne przy aktualnym ruchu, MyDevil Apache wystarczy |
-| Migracja danych z SQLite | Brak danych produkcyjnych do przeniesienia (nowy sklep) |
-| Split settings (base/dev/prod) | django-environ + .env na środowisko to właściwy wzorzec |
-| Redis / Celery | Zbędne na shared hostingu, brak asynchronicznych tasków |
+| P24 produkcyjne kredencjały | Zależne od dostarczenia danych sprzedawcy przez klienta — nie blokuje v1.2 |
+| CI/CD pipeline | Manual deploy wystarczający dla tego rozmiaru projektu |
+| CDN dla static files | Zbędne przy aktualnym ruchu |
+| Redis / Celery | Zbędne na shared hostingu |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 7 | Complete |
-| INFRA-02 | Phase 7 | Complete |
-| INFRA-03 | Phase 7 | Complete |
-| INFRA-04 | Phase 7 | Complete |
-| INFRA-05 | Phase 7 | Complete |
-| INFRA-06 | Phase 7 | Complete |
-| DB-01 | Phase 8 | Complete |
-| DB-02 | Phase 8 | Complete |
-| DB-03 | Phase 8 | Complete |
-| SSL-01 | Phase 8 | Pending |
-| SSL-02 | Phase 8 | Pending |
-| SSL-03 | Phase 8 | Pending |
-| SSL-04 | Phase 8 | Pending |
-| SSL-05 | Phase 8 | Pending |
-| EMAIL-01 | Phase 9 | Complete |
-| EMAIL-02 | Phase 9 | Pending |
-| EMAIL-03 | Phase 9 | Complete |
-| EMAIL-04 | Phase 9 | Complete |
-| EMAIL-05 | Phase 9 | Complete |
-| EMAIL-06 | Phase 9 | Complete |
-| P24-01 | Phase 10 | Pending |
-| P24-02 | Phase 10 | Pending |
-| VER-01 | Phase 10 | Pending |
-| VER-02 | Phase 10 | Pending |
+| HTTPS-01 | TBD | Pending |
+| HTTPS-02 | TBD | Pending |
+| HTTPS-03 | TBD | Pending |
+| HTTPS-04 | TBD | Pending |
+| HTTPS-05 | TBD | Pending |
+| EMAIL-01 | TBD | Pending |
+| OPS-01 | TBD | Pending |
 
 **Coverage:**
-- v1.1 requirements: 24 total
-- Mapped to phases: 24
-- Unmapped: 0
+- v1.2 requirements: 7 total
+- Mapped to phases: 0 (pending roadmap)
+- Unmapped: 7
 
 ---
-*Requirements defined: 2026-04-10*
-*Last updated: 2026-04-10 after roadmap creation — all 24 requirements mapped to Phases 7-10*
+*Requirements defined: 2026-04-16*
