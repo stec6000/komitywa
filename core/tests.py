@@ -148,6 +148,16 @@ class TestHomeView(TestCase):
         self.assertNotContains(response, "Starszy przepis")
         self.assertNotContains(response, "Ukryty przepis")
 
+    def test_home_story_section_has_founder_photo(self):
+        response = self.client.get("/")
+        self.assertRegex(
+            response.content.decode(),
+            r"/static/img/nasza-historia(?:\.[0-9a-f]+)?\.jpg",
+        )
+        self.assertContains(response, "Portret założyciela Kuchennej Komitywy")
+        self.assertContains(response, "Od domowej kuchni do własnej marki")
+        self.assertContains(response, "Przepisy, dania i ebooki")
+
 
 class TestBaseTemplate(TestCase):
     """FOUND-02: base.html renders with nav, footer."""
