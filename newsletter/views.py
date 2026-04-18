@@ -22,7 +22,7 @@ def subscribe(request):
 
         if existing:
             if existing.is_confirmed and not existing.is_unsubscribed:
-                # Already confirmed -- silent redirect
+                # Already confirmed - silent redirect
                 return redirect(reverse("newsletter:check_email"))
 
             if existing.is_unsubscribed:
@@ -40,7 +40,7 @@ def subscribe(request):
                 send_confirmation_email(existing, request)
                 return redirect(reverse("newsletter:check_email"))
 
-            # Pending (unconfirmed) -- resend confirmation
+            # Pending (unconfirmed) - resend confirmation
             send_confirmation_email(existing, request)
             return redirect(reverse("newsletter:check_email"))
 

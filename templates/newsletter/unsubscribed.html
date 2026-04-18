@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Wypisano z newslettera -- Kuchenna Komitywa{% endblock %}
+{% block title %}Wypisano z newslettera - Kuchenna Komitywa{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="Wypisano z newslettera">
@@ -8,13 +8,13 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 text-center">
                 {% if already_unsubscribed %}
-                <h1 style="font-family: var(--kk-font-heading);">Juz wypisany/a</h1>
-                <p>Ten adres email zostal juz wczesniej wypisany z newslettera.</p>
+                <h1 style="font-family: var(--kk-font-heading);">Już wypisany/a</h1>
+                <p>Ten adres email został już wcześniej wypisany z newslettera.</p>
                 {% else %}
                 <h1 style="font-family: var(--kk-font-heading);">Wypisano z newslettera</h1>
-                <p>Zostales/as wypisany/a z newslettera Kuchennej Komitywy. Szkoda, ze odchodzisz!</p>
+                <p>Zostałeś/aś wypisany/a z newslettera Kuchennej Komitywy. Szkoda, że odchodzisz!</p>
                 {% endif %}
-                <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wroc do strony glownej</a>
+                <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wróć do strony głównej</a>
             </div>
         </div>
     </div>

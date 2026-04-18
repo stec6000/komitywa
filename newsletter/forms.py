@@ -7,15 +7,15 @@ class NewsletterSignupForm(forms.Form):
         widget=forms.EmailInput(
             attrs={
                 "class": "form-control",
-                "placeholder": "Twoj adres email",
+                "placeholder": "Twój adres email",
             }
         ),
     )
     consent_newsletter = forms.BooleanField(
         label=(
-            "Wyrazam zgode na otrzymywanie newslettera. "
+            "Wyrażam zgodę na otrzymywanie newslettera. "
             '<a href="/polityka-prywatnosci/" target="_blank">'
-            "Polityka prywatnosci</a>"
+            "Polityka prywatności</a>"
         ),
         widget=forms.CheckboxInput(
             attrs={"class": "form-check-input"}

@@ -15,12 +15,12 @@ def send_order_confirmation(order):
             product = Product.objects.get(id=int(pid))
             items_text += (
                 f"- {product.title} x{item['quantity']}"
-                f" \u2014 {item['price']} z\u0142\n"
+                f" - {item['price']} z\u0142\n"
             )
         except Product.DoesNotExist:
             items_text += (
                 f"- Produkt #{pid} x{item['quantity']}"
-                f" \u2014 {item['price']} z\u0142\n"
+                f" - {item['price']} z\u0142\n"
             )
 
     body = (
@@ -38,7 +38,7 @@ def send_order_confirmation(order):
 
     email = EmailMessage(
         subject=f"Potwierdzenie zam\u00f3wienia #{order.id}"
-        f" \u2014 Kuchenna Komitywa",
+        f" - Kuchenna Komitywa",
         body=body,
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[order.email],
@@ -69,7 +69,7 @@ def send_ebook_delivery(order):
     )
 
     email = EmailMessage(
-        subject="Twoje ebooki \u2014 Kuchenna Komitywa",
+        subject="Twoje ebooki - Kuchenna Komitywa",
         body=body,
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[order.email],

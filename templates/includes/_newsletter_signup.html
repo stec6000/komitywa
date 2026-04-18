@@ -3,23 +3,23 @@
     <div class="container">
         <div class="row">
             <div class="col-md-6 mx-auto">
-                <h3>Zapisz sie do newslettera</h3>
-                <p>Otrzymuj przepisy i nowosci prosto na maila</p>
+                <h3>Zapisz się do newslettera</h3>
+                <p>Otrzymuj przepisy i nowości prosto na maila</p>
                 <form method="POST" action="{% url 'newsletter:subscribe' %}">
                     {% csrf_token %}
                     <div class="mb-3">
                         <input type="email" name="email" class="form-control"
-                               placeholder="Twoj adres email" required>
+                               placeholder="Twój adres email" required>
                     </div>
                     <div class="form-check mb-3 text-start">
                         <input type="checkbox" name="consent_newsletter"
                                class="form-check-input" id="id_consent_newsletter" required>
                         <label class="form-check-label" for="id_consent_newsletter">
-                            Wyrazam zgode na otrzymywanie newslettera.
-                            <a href="{% url 'privacy-policy' %}" target="_blank">Polityka prywatnosci</a>
+                            Wyrażam zgodę na otrzymywanie newslettera.
+                            <a href="{% url 'privacy-policy' %}" target="_blank">Polityka prywatności</a>
                         </label>
                     </div>
-                    <button type="submit" class="btn kk-btn-primary">Zapisz sie</button>
+                    <button type="submit" class="btn kk-btn-primary">Zapisz się</button>
                 </form>
             </div>
         </div>
