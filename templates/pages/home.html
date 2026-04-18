@@ -9,37 +9,66 @@
 <section class="kk-hero" aria-label="Powitanie">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-6">
+            <div class="col-lg-6 kk-home-hero-copy">
+                <div class="kk-home-hero-kicker">
+                    <i class="bi bi-flower1" aria-hidden="true"></i>
+                    <span>Roślinna kuchnia z Białegostoku</span>
+                </div>
                 <h1>Gotujemy z sercem</h1>
                 <p class="lead">Wegańska kuchnia stworzona z miłości do roślin i dobrego jedzenia. Odkryj nasze przepisy, zamów gotowe dania lub pobierz ebooka z ulubionymi recepturami.</p>
-                <a href="/przepisy/" class="kk-btn-primary">Zobacz przepisy</a>
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <a href="/przepisy/" class="kk-btn-primary">Zobacz przepisy</a>
+                    <a href="{% url 'shop:list' %}" class="kk-link-arrow">Zobacz sklep <i class="bi bi-arrow-right"></i></a>
+                </div>
+                <div class="kk-home-hero-chips" aria-label="Atuty oferty">
+                    <span class="kk-home-hero-chip">Lokalne składniki</span>
+                    <span class="kk-home-hero-chip">Odbiór osobisty</span>
+                    <span class="kk-home-hero-chip">Ebooki PDF</span>
+                </div>
             </div>
-            <div class="col-lg-6">
-                <img src="{% static 'img/hero.jpg' %}" class="img-fluid rounded" alt="Kolorowe wegańskie danie na talerzu" width="1200" height="800">
+            <div class="col-lg-6 kk-home-hero-media">
+                <div class="kk-home-hero-visual">
+                    <img src="{% static 'img/hero.jpg' %}" class="img-fluid rounded" alt="Kolorowe wegańskie danie na talerzu" width="1200" height="800">
+                    <div class="kk-home-hero-card kk-home-hero-card--bottom">
+                        <i class="bi bi-heart-fill" aria-hidden="true"></i>
+                        <div>
+                            <strong>Świeżo i sezonowo</strong>
+                            <p>Tworzone z uważnością, bez zbędnego kombinowania.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 {# Feature cards section - 3 value propositions (D-04) #}
-<section class="kk-section-alt" aria-label="Dlaczego my">
+<section class="kk-section-alt kk-home-values" aria-label="Dlaczego my">
     <div class="container">
-        <h2 class="text-center mb-5">Dlaczego my?</h2>
+        <div class="text-center mb-5 kk-home-section-heading kk-home-reveal" style="--kk-delay: 0.12s;">
+            <h2>Dlaczego my?</h2>
+        </div>
         <div class="row g-4">
-            <div class="col-md-4 text-center" style="padding: 32px;">
-                <i class="bi bi-flower1 kk-feature-icon"></i>
-                <h3 class="mt-3">100% Roślinne</h3>
-                <p>Wszystkie nasze dania są w pełni roślinne. Gotujemy z miłością do natury i zwierząt.</p>
+            <div class="col-md-4">
+                <div class="text-center kk-home-feature kk-home-reveal" style="--kk-delay: 0.18s;">
+                    <i class="bi bi-flower1 kk-feature-icon"></i>
+                    <h3 class="mt-3">100% Roślinne</h3>
+                    <p>Wszystkie nasze dania są w pełni roślinne. Gotujemy z miłością do natury i zwierząt.</p>
+                </div>
             </div>
-            <div class="col-md-4 text-center" style="padding: 32px;">
-                <i class="bi bi-geo-alt kk-feature-icon"></i>
-                <h3 class="mt-3">Lokalne Składniki</h3>
-                <p>Współpracujemy z lokalnymi rolnikami i dostawcami, by zapewnić najświeższe składniki.</p>
+            <div class="col-md-4">
+                <div class="text-center kk-home-feature kk-home-reveal" style="--kk-delay: 0.26s;">
+                    <i class="bi bi-geo-alt kk-feature-icon"></i>
+                    <h3 class="mt-3">Lokalne Składniki</h3>
+                    <p>Współpracujemy z lokalnymi rolnikami i dostawcami, by zapewnić najświeższe składniki.</p>
+                </div>
             </div>
-            <div class="col-md-4 text-center" style="padding: 32px;">
-                <i class="bi bi-shop kk-feature-icon"></i>
-                <h3 class="mt-3">Odbiór Osobisty</h3>
-                <p>Zamów online i odbierz gotowe danie bezpośrednio od nas - świeże i pełne smaku.</p>
+            <div class="col-md-4">
+                <div class="text-center kk-home-feature kk-home-reveal" style="--kk-delay: 0.34s;">
+                    <i class="bi bi-shop kk-feature-icon"></i>
+                    <h3 class="mt-3">Odbiór Osobisty</h3>
+                    <p>Zamów online i odbierz gotowe danie bezpośrednio od nas - świeże i pełne smaku.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -50,9 +79,11 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8">
-                <h2>Nasza historia</h2>
-                <p>Za Kuchenną Komitywą stoi pasja do roślinnej kuchni i wiara, że dobre jedzenie może zmienić świat. Zaczęłyśmy w domowej kuchni, a dziś dzielimy się naszymi przepisami z całym miastem.</p>
-                <a href="{% url 'about' %}" class="kk-link-arrow">Poznaj nas bliżej <i class="bi bi-arrow-right"></i></a>
+                <div class="kk-home-story kk-home-reveal" style="--kk-delay: 0.18s;">
+                    <h2>Nasza historia</h2>
+                    <p>Za Kuchenną Komitywą stoi pasja do roślinnej kuchni i wiara, że dobre jedzenie może zmienić świat. Zaczęłyśmy w domowej kuchni, a dziś dzielimy się naszymi przepisami z całym miastem.</p>
+                    <a href="{% url 'about' %}" class="kk-link-arrow">Poznaj nas bliżej <i class="bi bi-arrow-right"></i></a>
+                </div>
             </div>
         </div>
     </div>
@@ -61,7 +92,7 @@
 {# Secondary CTA section (D-03) #}
 <section class="kk-section-alt" aria-label="Przepisy">
     <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-5 kk-home-section-heading kk-home-reveal" style="--kk-delay: 0.14s;">
             <h2>Najnowsze przepisy</h2>
             <p class="text-muted">Zobacz 3 najnowsze przepisy prosto z naszej kuchni.</p>
         </div>
@@ -70,7 +101,8 @@
         <div class="row gy-4">
             {% for recipe in latest_recipes %}
             <div class="col-lg-4 col-md-6 col-12">
-                <div class="card h-100 kk-recipe-card">
+                <div class="card h-100 kk-recipe-card kk-home-reveal {% cycle 'kk-home-delay-1' 'kk-home-delay-2' 'kk-home-delay-3' %}"
+                     style="{% if forloop.counter == 1 %}--kk-delay: 0.22s;{% elif forloop.counter == 2 %}--kk-delay: 0.3s;{% else %}--kk-delay: 0.38s;{% endif %}">
                     <div class="kk-recipe-card__img-wrapper">
                         {% if recipe.image %}
                         <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="kk-recipe-card__img">
@@ -103,7 +135,7 @@
         </div>
         {% endif %}
 
-        <div class="text-center mt-5">
+        <div class="text-center mt-5 kk-home-reveal" style="--kk-delay: 0.44s;">
             <a href="{% url 'recipes:list' %}" class="kk-btn-primary">Zobacz wszystkie przepisy</a>
         </div>
     </div>

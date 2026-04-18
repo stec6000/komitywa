@@ -17,6 +17,72 @@
     /* Typography (per D-10) */
     --kk-font-heading: "Lora", serif;
     --kk-font-body: "Nunito", sans-serif;
+
+    /* Motion */
+    --kk-shadow-soft: 0 18px 40px rgba(74, 90, 64, 0.08);
+    --kk-shadow-strong: 0 24px 52px rgba(74, 90, 64, 0.16);
+    --kk-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes kkFadeLift {
+    from {
+        opacity: 0;
+        transform: translateY(32px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes kkSoftFloat {
+    0%, 100% {
+        transform: translate3d(0, 0, 0);
+    }
+    50% {
+        transform: translate3d(0, -10px, 0);
+    }
+}
+
+@keyframes kkAuraDrift {
+    0%, 100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(16px, -18px, 0) scale(1.05);
+    }
+}
+
+@keyframes kkIconPulse {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-4px) scale(1.08);
+    }
+}
+
+@keyframes kkFeatureGlow {
+    0% {
+        transform: translateX(-120%) rotate(8deg);
+        opacity: 0;
+    }
+    25% {
+        opacity: 0.32;
+    }
+    100% {
+        transform: translateX(180%) rotate(8deg);
+        opacity: 0;
+    }
+}
+
+@keyframes kkIconOrbit {
+    0%, 100% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(6deg) scale(1.06);
+    }
 }
 
 /* Base styles */
@@ -266,8 +332,42 @@ h3, h4, h5, h6 {
 
 /* Hero section */
 .kk-hero {
+    position: relative;
     padding: 80px 0;
-    background-color: var(--kk-warm-white);
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        radial-gradient(circle at top left, rgba(156, 175, 136, 0.16), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(212, 197, 169, 0.2), transparent 38%),
+        var(--kk-warm-white);
+}
+
+.kk-hero::before,
+.kk-hero::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    border-radius: 999px;
+    filter: blur(10px);
+    opacity: 0.65;
+    animation: kkAuraDrift 16s ease-in-out infinite;
+}
+
+.kk-hero::before {
+    width: 220px;
+    height: 220px;
+    top: -80px;
+    left: -70px;
+    background: rgba(156, 175, 136, 0.18);
+}
+
+.kk-hero::after {
+    width: 180px;
+    height: 180px;
+    right: 4%;
+    bottom: 6%;
+    background: rgba(212, 197, 169, 0.24);
+    animation-delay: 1.8s;
 }
 
 .kk-hero h1 {
@@ -278,10 +378,111 @@ h3, h4, h5, h6 {
     line-height: 1.6;
 }
 
+.kk-home-hero-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 8px 14px;
+    border: 1px solid rgba(107, 127, 94, 0.16);
+    border-radius: 999px;
+    background: rgba(253, 251, 247, 0.8);
+    box-shadow: 0 12px 28px rgba(74, 90, 64, 0.06);
+    color: var(--kk-olive-dark);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.kk-home-hero-kicker .bi {
+    color: var(--kk-olive);
+    font-size: 16px;
+}
+
 .kk-hero img {
     max-height: 480px;
     object-fit: cover;
     width: 100%;
+    border-radius: 20px;
+    box-shadow: var(--kk-shadow-soft);
+}
+
+.kk-home-hero-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.kk-home-hero-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(245, 240, 232, 0.88);
+    border: 1px solid rgba(107, 127, 94, 0.12);
+    color: var(--kk-text);
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 10px 20px rgba(74, 90, 64, 0.05);
+}
+
+.kk-home-hero-visual {
+    position: relative;
+    padding: 24px 18px 28px;
+}
+
+.kk-home-hero-visual::before {
+    content: "";
+    position: absolute;
+    inset: 18px 0 0 32px;
+    border-radius: 28px;
+    background: linear-gradient(
+        135deg,
+        rgba(245, 240, 232, 0.95),
+        rgba(212, 197, 169, 0.35)
+    );
+    z-index: -1;
+}
+
+.kk-home-hero-card {
+    position: absolute;
+    max-width: 240px;
+    padding: 16px 18px;
+    border-radius: 20px;
+    background: rgba(253, 251, 247, 0.94);
+    border: 1px solid rgba(107, 127, 94, 0.12);
+    box-shadow: var(--kk-shadow-soft);
+    backdrop-filter: blur(10px);
+}
+
+.kk-home-hero-card strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--kk-olive-dark);
+    font-size: 16px;
+}
+
+.kk-home-hero-card p {
+    margin: 0;
+    color: var(--kk-text-light);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.kk-home-hero-card--bottom {
+    right: -6px;
+    bottom: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.kk-home-hero-card--bottom .bi {
+    color: #b75a4c;
+    font-size: 18px;
+    margin-top: 2px;
 }
 
 @media (max-width: 767.98px) {
@@ -297,6 +498,24 @@ h3, h4, h5, h6 {
         max-height: 320px;
         margin-top: 32px;
     }
+
+    .kk-home-hero-kicker {
+        margin-bottom: 14px;
+    }
+
+    .kk-home-hero-visual {
+        padding: 12px 0 0;
+    }
+
+    .kk-home-hero-visual::before {
+        inset: 44px 12px 0 12px;
+    }
+
+    .kk-home-hero-card {
+        position: static;
+        max-width: none;
+        margin-top: 16px;
+    }
 }
 
 /* Primary CTA button */
@@ -311,12 +530,18 @@ h3, h4, h5, h6 {
     border-radius: 4px;
     text-decoration: none;
     display: inline-block;
-    transition: background-color 200ms ease;
+    box-shadow: 0 10px 24px rgba(74, 90, 64, 0.14);
+    transition:
+        background-color 220ms ease,
+        transform 220ms var(--kk-ease-smooth),
+        box-shadow 220ms var(--kk-ease-smooth);
 }
 
 .kk-btn-primary:hover {
     background-color: var(--kk-olive-dark);
     color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(74, 90, 64, 0.2);
 }
 
 .kk-btn-primary:focus-visible {
@@ -326,12 +551,14 @@ h3, h4, h5, h6 {
 
 .kk-btn-primary:active {
     background-color: var(--kk-olive-dark);
+    transform: translateY(0);
 }
 
 /* Feature card icons */
 .kk-feature-icon {
     font-size: 48px;
     color: var(--kk-olive);
+    transition: transform 260ms var(--kk-ease-smooth);
 }
 
 /* Text link with arrow */
@@ -341,12 +568,18 @@ h3, h4, h5, h6 {
     font-size: 16px;
     font-weight: 700;
     text-decoration: none;
-    transition: color 200ms ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition:
+        color 200ms ease,
+        transform 220ms var(--kk-ease-smooth);
 }
 
 .kk-link-arrow:hover {
     color: var(--kk-olive-dark);
     text-decoration: underline;
+    transform: translateX(4px);
 }
 
 /* Contact info labels */
@@ -378,12 +611,17 @@ h3, h4, h5, h6 {
     border: 1px solid var(--kk-beige);
     border-radius: 4px;
     overflow: hidden;
-    transition: box-shadow 200ms ease;
+    transition:
+        transform 260ms var(--kk-ease-smooth),
+        box-shadow 260ms var(--kk-ease-smooth),
+        border-color 260ms var(--kk-ease-smooth);
     background-color: var(--kk-warm-white);
 }
 
 .kk-recipe-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-8px);
+    box-shadow: var(--kk-shadow-strong);
+    border-color: rgba(107, 127, 94, 0.28);
 }
 
 /* Card image wrapper -- 4:3 aspect ratio (UI-SPEC: padding-top 75% trick) */
@@ -400,6 +638,12 @@ h3, h4, h5, h6 {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 700ms var(--kk-ease-smooth), filter 700ms ease;
+}
+
+.kk-recipe-card:hover .kk-recipe-card__img {
+    transform: scale(1.05);
+    filter: saturate(1.05);
 }
 
 .kk-recipe-card__img-placeholder {
@@ -536,11 +780,16 @@ h3, h4, h5, h6 {
     border: 1px solid var(--kk-beige);
     border-radius: 4px;
     background: var(--kk-warm-white);
-    transition: box-shadow 200ms ease;
+    transition:
+        transform 260ms var(--kk-ease-smooth),
+        box-shadow 260ms var(--kk-ease-smooth),
+        border-color 260ms var(--kk-ease-smooth);
     overflow: hidden;
 }
 .kk-product-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-8px);
+    box-shadow: var(--kk-shadow-strong);
+    border-color: rgba(107, 127, 94, 0.28);
 }
 .kk-product-card__img-wrapper {
     position: relative;
@@ -555,6 +804,11 @@ h3, h4, h5, h6 {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 700ms var(--kk-ease-smooth), filter 700ms ease;
+}
+.kk-product-card:hover .kk-product-card__img {
+    transform: scale(1.05);
+    filter: saturate(1.05);
 }
 .kk-product-card__img-placeholder {
     position: absolute;
@@ -580,6 +834,245 @@ h3, h4, h5, h6 {
     font-weight: 700;
     border-radius: 20px;
     padding: 4px 10px;
+}
+
+/* Home page motion */
+.kk-home-reveal {
+    opacity: 0;
+    animation: kkFadeLift 0.85s var(--kk-delay, 0s) var(--kk-ease-smooth) forwards;
+}
+
+.kk-home-hero-copy > * {
+    opacity: 0;
+    animation: kkFadeLift 0.85s var(--kk-ease-smooth) forwards;
+}
+
+.kk-home-hero-copy h1 {
+    animation-delay: 0.08s;
+}
+
+.kk-home-hero-copy .lead {
+    animation-delay: 0.2s;
+}
+
+.kk-home-hero-copy .d-flex {
+    opacity: 0;
+    animation: kkFadeLift 0.85s 0.32s var(--kk-ease-smooth) forwards;
+}
+
+.kk-home-hero-copy .kk-home-hero-chips {
+    opacity: 0;
+    animation: kkFadeLift 0.85s 0.42s var(--kk-ease-smooth) forwards;
+}
+
+.kk-home-hero-copy .kk-btn-primary {
+    animation-delay: 0.32s;
+}
+
+.kk-home-hero-media {
+    opacity: 0;
+    animation: kkFadeLift 0.95s 0.2s var(--kk-ease-smooth) forwards;
+}
+
+.kk-home-hero-media img {
+    animation: kkSoftFloat 7s 1.4s ease-in-out infinite;
+}
+
+.kk-home-hero-card--bottom {
+    animation: kkFadeLift 0.9s 0.62s var(--kk-ease-smooth) forwards;
+}
+
+.kk-home-feature {
+    position: relative;
+    height: 100%;
+    padding: 36px 30px 32px;
+    border-radius: 28px;
+    border: 1px solid rgba(107, 127, 94, 0.1);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.68), rgba(253, 251, 247, 0.94)),
+        rgba(253, 251, 247, 0.78);
+    box-shadow: 0 22px 42px rgba(74, 90, 64, 0.08);
+    transition:
+        transform 320ms var(--kk-ease-smooth),
+        box-shadow 320ms var(--kk-ease-smooth),
+        border-color 320ms var(--kk-ease-smooth),
+        background 320ms var(--kk-ease-smooth);
+    overflow: hidden;
+}
+
+.kk-home-feature::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at top center, rgba(156, 175, 136, 0.34), transparent 48%);
+    opacity: 0;
+    transition: opacity 320ms var(--kk-ease-smooth);
+}
+
+.kk-home-feature::after {
+    content: "";
+    position: absolute;
+    top: -26%;
+    left: -55%;
+    width: 42%;
+    height: 140%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.62),
+        transparent
+    );
+    transform: translateX(-120%) rotate(8deg);
+    pointer-events: none;
+}
+
+.kk-home-feature:hover {
+    transform: translateY(-14px) scale(1.02);
+    border-color: rgba(107, 127, 94, 0.26);
+    box-shadow: 0 30px 60px rgba(74, 90, 64, 0.16);
+}
+
+.kk-home-feature:hover::before {
+    opacity: 1;
+}
+
+.kk-home-feature:hover::after {
+    animation: kkFeatureGlow 1050ms var(--kk-ease-smooth) 1;
+}
+
+.kk-home-feature .kk-feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 84px;
+    height: 84px;
+    margin-inline: auto;
+    border-radius: 26px;
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.85), transparent 42%),
+        linear-gradient(135deg, rgba(156, 175, 136, 0.26), rgba(107, 127, 94, 0.08));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.72),
+        0 18px 30px rgba(74, 90, 64, 0.12);
+    font-size: 42px;
+    transition:
+        transform 320ms var(--kk-ease-smooth),
+        box-shadow 320ms var(--kk-ease-smooth),
+        background 320ms var(--kk-ease-smooth);
+}
+
+.kk-home-feature:hover .kk-feature-icon {
+    animation:
+        kkIconPulse 820ms ease-in-out infinite,
+        kkIconOrbit 1.6s ease-in-out infinite;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.82),
+        0 24px 38px rgba(74, 90, 64, 0.16);
+}
+
+.kk-home-feature h3 {
+    transition: transform 320ms var(--kk-ease-smooth), color 320ms ease;
+}
+
+.kk-home-feature p {
+    transition: transform 320ms var(--kk-ease-smooth), color 320ms ease;
+}
+
+.kk-home-feature:hover h3,
+.kk-home-feature:hover p {
+    transform: translateY(-2px);
+}
+
+.kk-home-values .col-md-4:nth-child(1) .kk-home-feature {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(249, 252, 247, 0.96)),
+        rgba(253, 251, 247, 0.8);
+}
+
+.kk-home-values .col-md-4:nth-child(2) .kk-home-feature {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(251, 247, 240, 0.98)),
+        rgba(253, 251, 247, 0.82);
+}
+
+.kk-home-values .col-md-4:nth-child(3) .kk-home-feature {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(247, 250, 244, 0.98)),
+        rgba(253, 251, 247, 0.82);
+}
+
+.kk-home-values .col-md-4:nth-child(2) .kk-home-feature .kk-feature-icon {
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.88), transparent 42%),
+        linear-gradient(135deg, rgba(212, 197, 169, 0.34), rgba(139, 115, 85, 0.1));
+}
+
+.kk-home-values .col-md-4:nth-child(3) .kk-home-feature .kk-feature-icon {
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.88), transparent 42%),
+        linear-gradient(135deg, rgba(107, 127, 94, 0.24), rgba(74, 90, 64, 0.1));
+}
+
+.kk-home-feature h3,
+.kk-home-feature p,
+.kk-home-feature .kk-feature-icon {
+    position: relative;
+    z-index: 1;
+}
+
+.kk-home-story {
+    position: relative;
+    max-width: 720px;
+    padding: 28px 32px;
+    border-left: 4px solid rgba(107, 127, 94, 0.35);
+    background: linear-gradient(
+        135deg,
+        rgba(245, 240, 232, 0.92),
+        rgba(253, 251, 247, 0.98)
+    );
+    box-shadow: var(--kk-shadow-soft);
+    border-radius: 0 24px 24px 0;
+}
+
+.kk-home-story p:last-of-type {
+    margin-bottom: 0;
+}
+
+.kk-home-section-heading {
+    max-width: 680px;
+    margin-inline: auto;
+}
+
+@media (max-width: 767.98px) {
+    .kk-home-feature {
+        padding: 24px;
+    }
+
+    .kk-home-story {
+        padding: 24px;
+        border-radius: 0 18px 18px 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .kk-home-reveal,
+    .kk-home-hero-copy > *,
+    .kk-home-hero-copy .d-flex,
+    .kk-home-hero-copy .kk-home-hero-chips,
+    .kk-home-hero-media {
+        opacity: 1;
+        transform: none;
+    }
 }
 
 /* ===== Shop: Price ===== */
