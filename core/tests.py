@@ -1,7 +1,11 @@
 from pathlib import Path
+from datetime import timedelta
 
 from django.conf import settings
 from django.test import TestCase
+from django.utils import timezone
+
+from recipes.models import Category, Recipe
 
 
 class TestEnvironmentConfig(TestCase):
@@ -71,6 +75,78 @@ class TestHomeView(TestCase):
     def test_home_returns_200(self):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
+
+    def test_home_shows_three_latest_published_recipes(self):
+        category, _ = Category.objects.get_or_create(
+            name="Obiady",
+            slug="obiady",
+        )
+        older = Recipe.objects.create(
+            title="Starszy przepis",
+            slug="starszy-przepis",
+            category=category,
+            description="Starszy opis",
+            ingredients_text="skladnik 1",
+            steps_text="krok 1",
+            prep_time=15,
+        )
+        newest = Recipe.objects.create(
+            title="Najnowszy przepis",
+            slug="najnowszy-przepis",
+            category=category,
+            description="Najnowszy opis",
+            ingredients_text="skladnik 1",
+            steps_text="krok 1",
+            prep_time=20,
+        )
+        middle = Recipe.objects.create(
+            title="Srodkowy przepis",
+            slug="srodkowy-przepis",
+            category=category,
+            description="Srodkowy opis",
+            ingredients_text="skladnik 1",
+            steps_text="krok 1",
+            prep_time=25,
+        )
+        third = Recipe.objects.create(
+            title="Trzeci przepis",
+            slug="trzeci-przepis",
+            category=category,
+            description="Trzeci opis",
+            ingredients_text="skladnik 1",
+            steps_text="krok 1",
+            prep_time=30,
+        )
+        hidden = Recipe.objects.create(
+            title="Ukryty przepis",
+            slug="ukryty-przepis-home",
+            category=category,
+            description="Ukryty opis",
+            ingredients_text="skladnik 1",
+            steps_text="krok 1",
+            prep_time=35,
+            is_published=False,
+        )
+
+        now = timezone.now()
+        Recipe.objects.filter(pk=older.pk).update(created_at=now + timedelta(days=1))
+        Recipe.objects.filter(pk=third.pk).update(created_at=now + timedelta(days=2))
+        Recipe.objects.filter(pk=middle.pk).update(created_at=now + timedelta(days=3))
+        Recipe.objects.filter(pk=newest.pk).update(created_at=now + timedelta(days=4))
+        Recipe.objects.filter(pk=hidden.pk).update(created_at=now + timedelta(days=5))
+
+        response = self.client.get("/")
+
+        latest_titles = [recipe.title for recipe in response.context["latest_recipes"]]
+        self.assertEqual(
+            latest_titles,
+            ["Najnowszy przepis", "Srodkowy przepis", "Trzeci przepis"],
+        )
+        self.assertContains(response, "Najnowszy przepis")
+        self.assertContains(response, "Srodkowy przepis")
+        self.assertContains(response, "Trzeci przepis")
+        self.assertNotContains(response, "Starszy przepis")
+        self.assertNotContains(response, "Ukryty przepis")
 
 
 class TestBaseTemplate(TestCase):
