@@ -36,7 +36,7 @@ def register_transaction(order, url_return, url_status):
         "sessionId": order.p24_session_id,
         "amount": int(order.total * 100),
         "currency": "PLN",
-        "description": f"Zamowienie #{order.id}",
+        "description": f"Zamówienie #{order.id}",
         "email": order.email,
         "country": "PL",
         "language": "pl",

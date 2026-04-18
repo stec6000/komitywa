@@ -258,12 +258,12 @@ LOGGING = {
     },
 }
 
-# Security settings — safe before HTTPS
+# Security settings - safe before HTTPS
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 X_FRAME_OPTIONS = "DENY"
 
-# Security settings — enable in .env AFTER HTTPS is active (Phase 8)
+# Security settings - enable in .env AFTER HTTPS is active (Phase 8)
 SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=False)
 SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=False)
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=False)

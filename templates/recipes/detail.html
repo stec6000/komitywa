@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ recipe.title }} -- Kuchenna Komitywa{% endblock %}
+{% block title %}{{ recipe.title }} - Kuchenna Komitywa{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -49,10 +49,10 @@
 
         <p class="my-4">{{ recipe.description }}</p>
 
-        <h2>Skladniki</h2>
+        <h2>Składniki</h2>
         <div class="kk-ingredients">{{ recipe.ingredients_text|linebreaksbr }}</div>
 
-        <h2>Sposob przygotowania</h2>
+        <h2>Sposób przygotowania</h2>
         <div class="kk-steps">{{ recipe.steps_text|linebreaksbr }}</div>
       </div>
 
@@ -62,7 +62,7 @@
           {% if recipe.category %}
           <div class="mb-3"><strong>Kategoria:</strong><br>{{ recipe.category.name }}</div>
           {% endif %}
-          <a href="{% url 'recipes:list' %}" class="kk-link-arrow">&larr; Wroc do przepisow</a>
+          <a href="{% url 'recipes:list' %}" class="kk-link-arrow">&larr; Wróć do przepisów</a>
         </div>
       </div>
     </div>

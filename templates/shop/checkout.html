@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Zamowienie -- Kuchenna Komitywa{% endblock %}
+{% block title %}Zamówienie - Kuchenna Komitywa{% endblock %}
 
 {% block content %}
 <section class="kk-section">
   <div class="container">
-    <h1>Zamowienie</h1>
+    <h1>Zamówienie</h1>
     <div class="row">
       <div class="col-lg-8">
         <form method="post" class="kk-checkout-form">
@@ -31,12 +31,12 @@
           </div>
           {% endif %}
           {% endfor %}
-          <button type="submit" class="kk-btn-primary w-100 mt-3">Przejdz do platnosci</button>
+          <button type="submit" class="kk-btn-primary w-100 mt-3">Przejdź do płatności</button>
         </form>
       </div>
       <div class="col-lg-4">
         <div class="kk-order-summary mt-4 mt-lg-0">
-          <h3 class="mb-3">Podsumowanie zamowienia</h3>
+          <h3 class="mb-3">Podsumowanie zamówienia</h3>
           {% for item in cart_items %}
           <div class="d-flex justify-content-between mb-2">
             <span>{{ item.product.title }} x {{ item.quantity }}</span>
@@ -45,7 +45,7 @@
           {% endfor %}
           <hr>
           <div class="d-flex justify-content-between">
-            <strong>Do zaplaty</strong>
+            <strong>Do zapłaty</strong>
             <span class="kk-price">{{ total }} zl</span>
           </div>
         </div>

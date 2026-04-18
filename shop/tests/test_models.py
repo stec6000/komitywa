@@ -81,16 +81,16 @@ class TestOrder(TestCase):
             cart_snapshot={"items": []},
         )
         self.assertEqual(
-            str(order), f"Zamowienie #{order.id} - test@example.com"
+            str(order), f"Zamówienie #{order.id} - test@example.com"
         )
         self.assertEqual(order.status, "pending")
 
     def test_status_choices(self):
         self.assertIn(
-            ("pending", "Oczekujace na platnosc"),
+            ("pending", "Oczekujące na płatność"),
             Order.STATUS_CHOICES,
         )
-        self.assertIn(("paid", "Oplacone"), Order.STATUS_CHOICES)
+        self.assertIn(("paid", "Opłacone"), Order.STATUS_CHOICES)
         self.assertIn(
             ("completed", "Zrealizowane"), Order.STATUS_CHOICES
         )

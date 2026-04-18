@@ -9,7 +9,7 @@ class CheckoutForm(forms.Form):
     )
     name = forms.CharField(
         max_length=200,
-        label="Imie i nazwisko",
+        label="Imię i nazwisko",
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
     phone = forms.CharField(
@@ -22,12 +22,12 @@ class CheckoutForm(forms.Form):
         max_length=100,
         required=False,
         label="Preferowana data odbioru",
-        help_text="np. piatek 10 stycznia, godziny popoludniowe",
+        help_text="np. piątek 10 stycznia, godziny popołudniowe",
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
     consent_data = forms.BooleanField(
-        label="Wyrazam zgode na przetwarzanie moich danych osobowych "
-        "w celu realizacji zamowienia",
+        label="Wyrażam zgodę na przetwarzanie moich danych osobowych "
+        "w celu realizacji zamówienia",
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
     consent_terms = forms.BooleanField(
