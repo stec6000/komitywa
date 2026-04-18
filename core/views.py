@@ -1,8 +1,15 @@
 from django.shortcuts import render
 
+from recipes.models import Recipe
+
 
 def home(request):
-    return render(request, "pages/home.html")
+    latest_recipes = Recipe.objects.filter(
+        is_published=True
+    ).select_related("category")[:3]
+    return render(request, "pages/home.html", {
+        "latest_recipes": latest_recipes,
+    })
 
 
 def about(request):

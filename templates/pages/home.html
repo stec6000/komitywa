@@ -59,11 +59,53 @@
 </section>
 
 {# Secondary CTA section (D-03) #}
-<section class="kk-section-alt text-center" aria-label="Przepisy">
+<section class="kk-section-alt" aria-label="Przepisy">
     <div class="container">
-        <h2>Spróbuj naszych przepisów</h2>
-        <p class="text-muted">Setki sprawdzonych receptur roślinnych - od śniadania po deser.</p>
-        <a href="/przepisy/" class="kk-btn-primary">Zobacz przepisy</a>
+        <div class="text-center mb-5">
+            <h2>Najnowsze przepisy</h2>
+            <p class="text-muted">Zobacz 3 najnowsze przepisy prosto z naszej kuchni.</p>
+        </div>
+
+        {% if latest_recipes %}
+        <div class="row gy-4">
+            {% for recipe in latest_recipes %}
+            <div class="col-lg-4 col-md-6 col-12">
+                <div class="card h-100 kk-recipe-card">
+                    <div class="kk-recipe-card__img-wrapper">
+                        {% if recipe.image %}
+                        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="kk-recipe-card__img">
+                        {% else %}
+                        <div class="kk-recipe-card__img-placeholder">
+                            <i class="bi bi-image" aria-hidden="true"></i>
+                        </div>
+                        {% endif %}
+                        {% if recipe.category %}
+                        <span class="kk-category-badge">{{ recipe.category.name }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h3 class="card-title">{{ recipe.title }}</h3>
+                        <p class="card-text flex-grow-1">{{ recipe.description|truncatechars:120 }}</p>
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                            <span class="kk-prep-time">
+                                <i class="bi bi-clock" aria-hidden="true"></i> {{ recipe.prep_time }} min
+                            </span>
+                            <a href="{% url 'recipes:detail' slug=recipe.slug %}" class="kk-link-arrow">Czytaj więcej &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center">
+            <p class="text-muted">Setki sprawdzonych receptur roślinnych - od śniadania po deser.</p>
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-5">
+            <a href="{% url 'recipes:list' %}" class="kk-btn-primary">Zobacz wszystkie przepisy</a>
+        </div>
     </div>
 </section>
 
