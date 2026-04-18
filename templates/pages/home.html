@@ -77,12 +77,37 @@
 {# About teaser section (D-06) #}
 <section class="kk-section" aria-label="O nas">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-8">
+        <div class="row align-items-center g-4 kk-home-story-row">
+            <div class="col-lg-7">
                 <div class="kk-home-story kk-home-reveal" style="--kk-delay: 0.18s;">
+                    <div class="kk-home-story-kicker">Od domowej kuchni do własnej marki</div>
                     <h2>Nasza historia</h2>
-                    <p>Za Kuchenną Komitywą stoi pasja do roślinnej kuchni i wiara, że dobre jedzenie może zmienić świat. Zaczęłyśmy w domowej kuchni, a dziś dzielimy się naszymi przepisami z całym miastem.</p>
+                    <p class="kk-home-story-lead">Zaczęło się od gotowania dla bliskich i szukania roślinnych smaków, do których naprawdę chce się wracać. Dziś Kuchenną Komitywą dzielimy się szerzej - przez przepisy, gotowe dania i autorskie ebooki.</p>
+                    <p>Lubimy sezonowe składniki, proste rozwiązania i jedzenie, które daje przyjemność bez zbędnego zadęcia. Na stronie znajdziesz więc zarówno inspiracje do codziennego gotowania, jak i coś gotowego na dni, kiedy chcesz po prostu dobrze zjeść.</p>
+                    <div class="kk-home-story-points" aria-label="Co tworzymy">
+                        <div class="kk-home-story-point">
+                            <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                            <span>Białystok i lokalne składniki</span>
+                        </div>
+                        <div class="kk-home-story-point">
+                            <i class="bi bi-journal-richtext" aria-hidden="true"></i>
+                            <span>Przepisy, dania i ebooki</span>
+                        </div>
+                        <div class="kk-home-story-point">
+                            <i class="bi bi-flower1" aria-hidden="true"></i>
+                            <span>Roślinnie i sezonowo</span>
+                        </div>
+                    </div>
                     <a href="{% url 'about' %}" class="kk-link-arrow">Poznaj nas bliżej <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="kk-home-story-media kk-home-reveal" style="--kk-delay: 0.26s;">
+                    <img src="{% static 'img/nasza-historia.jpg' %}"
+                         alt="Portret założyciela Kuchennej Komitywy"
+                         class="kk-home-story-photo"
+                         width="1100"
+                         height="1210">
                 </div>
             </div>
         </div>
