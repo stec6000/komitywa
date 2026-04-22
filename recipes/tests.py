@@ -57,6 +57,11 @@ class TestRecipeList(TestCase):
         response = self.client.get("/przepisy/")
         self.assertTemplateUsed(response, "recipes/list.html")
 
+    def test_list_recipe_cards_are_fully_clickable_without_read_more_text(self):
+        response = self.client.get("/przepisy/")
+        self.assertContains(response, 'href="/przepisy/brownie/"')
+        self.assertNotContains(response, "Czytaj więcej")
+
 
 class TestRecipeDetail(TestCase):
 

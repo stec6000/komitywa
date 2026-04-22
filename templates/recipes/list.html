@@ -52,10 +52,12 @@
           <div class="card-body d-flex flex-column">
             <h3 class="card-title">{{ recipe.title }}</h3>
             <p class="card-text flex-grow-1">{{ recipe.description|truncatechars:120 }}</p>
-            <div class="d-flex justify-content-between align-items-center mt-auto">
+            <div class="d-flex align-items-center mt-auto">
               <span class="kk-prep-time"><i class="bi bi-clock" aria-hidden="true"></i> {{ recipe.prep_time }} min</span>
-              <a href="{% url 'recipes:detail' slug=recipe.slug %}" class="kk-link-arrow">Czytaj więcej &rarr;</a>
             </div>
+            <a href="{% url 'recipes:detail' slug=recipe.slug %}" class="stretched-link kk-card-link">
+              <span class="visually-hidden">Otwórz przepis: {{ recipe.title }}</span>
+            </a>
           </div>
         </div>
       </div>

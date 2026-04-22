@@ -158,6 +158,23 @@ class TestHomeView(TestCase):
         self.assertContains(response, "Od domowej kuchni do własnej marki")
         self.assertContains(response, "Przepisy, dania i ebooki")
 
+    def test_home_recipe_cards_are_fully_clickable_without_read_more_text(self):
+        category = Category.objects.create(name="Desery", slug="desery-home")
+        Recipe.objects.create(
+            title="Domowy hummus",
+            slug="domowy-hummus",
+            category=category,
+            description="Krotki opis przepisu",
+            ingredients_text="ciecierzyca",
+            steps_text="zmiksuj",
+            prep_time=10,
+        )
+
+        response = self.client.get("/")
+
+        self.assertContains(response, 'href="/przepisy/domowy-hummus/"')
+        self.assertNotContains(response, "Czytaj więcej")
+
 
 class TestBaseTemplate(TestCase):
     """FOUND-02: base.html renders with nav, footer."""
