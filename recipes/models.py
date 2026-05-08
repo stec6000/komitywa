@@ -15,6 +15,19 @@ class Category(models.Model):
         return self.name
 
 
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
+
+    class Meta:
+        verbose_name = "Tag"
+        verbose_name_plural = "Tagi"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class Recipe(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
@@ -22,6 +35,11 @@ class Recipe(models.Model):
         Category,
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
+        related_name="recipes",
+    )
+    tags = models.ManyToManyField(
+        Tag,
         blank=True,
         related_name="recipes",
     )
@@ -36,6 +54,24 @@ class Recipe(models.Model):
     )
     prep_time = models.PositiveSmallIntegerField(
         help_text="Czas przygotowania w minutach"
+    )
+    servings = models.PositiveSmallIntegerField(
+        default=1,
+        help_text="Liczba porcji",
+    )
+    difficulty = models.CharField(
+        max_length=10,
+        choices=[
+            ("latwy", "latwy"),
+            ("sredni", "sredni"),
+            ("trudny", "trudny"),
+        ],
+        default="latwy",
+    )
+    notes = models.TextField(
+        blank=True,
+        default="",
+        help_text="Opcjonalne notatki autora",
     )
     image = models.ImageField(
         upload_to="recipes/",
