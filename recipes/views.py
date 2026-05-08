@@ -5,15 +5,26 @@ from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from django.utils.safestring import mark_safe
 
-from .models import Category, Recipe
+from .models import Category, Recipe, Tag
 
 
 def recipe_list(request):
-    recipes = Recipe.objects.filter(is_published=True).select_related("category")
+    recipes = (
+        Recipe.objects.filter(is_published=True)
+        .select_related("category")
+        .prefetch_related("tags")
+    )
 
     active_category = request.GET.get("kategoria", "")
     if active_category:
         recipes = recipes.filter(category__slug=active_category)
+
+    active_tags = [t for t in request.GET.getlist("tag") if t]
+    # AND semantics: chain .filter() per tag so each must match.
+    for tag_slug in active_tags:
+        recipes = recipes.filter(tags__slug=tag_slug)
+    if active_tags:
+        recipes = recipes.distinct()
 
     query = request.GET.get("q", "").strip()
     if query:
@@ -26,17 +37,24 @@ def recipe_list(request):
     page_obj = paginator.get_page(page_number)
 
     categories = Category.objects.all()
+    tags = Tag.objects.all()
 
     return render(request, "recipes/list.html", {
         "page_obj": page_obj,
         "categories": categories,
+        "tags": tags,
         "active_category": active_category,
+        "active_tags": active_tags,
         "query": query,
     })
 
 
 def recipe_detail(request, slug):
-    recipe = get_object_or_404(Recipe, slug=slug, is_published=True)
+    recipe = get_object_or_404(
+        Recipe.objects.prefetch_related("tags"),
+        slug=slug,
+        is_published=True,
+    )
 
     schema = {
         "@context": "https://schema.org",
@@ -44,6 +62,7 @@ def recipe_detail(request, slug):
         "name": recipe.title,
         "description": recipe.description,
         "prepTime": f"PT{recipe.prep_time}M",
+        "recipeYield": str(recipe.servings),
         "recipeIngredient": [
             line.strip()
             for line in recipe.ingredients_text.splitlines()
@@ -59,6 +78,10 @@ def recipe_detail(request, slug):
     }
     if recipe.image:
         schema["image"] = request.build_absolute_uri(recipe.image.url)
+
+    tag_names = list(recipe.tags.values_list("name", flat=True))
+    if tag_names:
+        schema["keywords"] = ", ".join(tag_names)
 
     schema_json = mark_safe(json.dumps(schema, ensure_ascii=False))
 
