@@ -223,6 +223,161 @@ class TestSchemaOrgMarkup(TestCase):
         self.assertContains(response, "Brownie Testowe")
 
 
+class TestRecipeTags(TestCase):
+
+    def setUp(self):
+        from recipes.models import Tag
+        self.tofu = Tag.objects.create(name="tofu-tag", slug="tofu-tag")
+        self.szybkie = Tag.objects.create(name="szybkie-tag", slug="szybkie-tag")
+        self.cat = Category.objects.create(name="Obiady-tags", slug="obiady-tags")
+
+        self.r_tofu_szybkie = Recipe.objects.create(
+            title="Tofu Szybkie",
+            slug="tofu-szybkie",
+            category=self.cat,
+            description="oba tagi",
+            ingredients_text="x",
+            steps_text="y",
+            prep_time=10,
+            servings=2,
+            difficulty="latwy",
+        )
+        self.r_tofu_szybkie.tags.add(self.tofu, self.szybkie)
+
+        self.r_tofu_only = Recipe.objects.create(
+            title="Tofu Wolne",
+            slug="tofu-wolne",
+            category=self.cat,
+            description="tylko tofu",
+            ingredients_text="x",
+            steps_text="y",
+            prep_time=40,
+            servings=2,
+            difficulty="latwy",
+        )
+        self.r_tofu_only.tags.add(self.tofu)
+
+        self.r_szybkie_only = Recipe.objects.create(
+            title="Szybkie Bez Tofu",
+            slug="szybkie-bez-tofu",
+            category=self.cat,
+            description="tylko szybkie",
+            ingredients_text="x",
+            steps_text="y",
+            prep_time=8,
+            servings=1,
+            difficulty="latwy",
+        )
+        self.r_szybkie_only.tags.add(self.szybkie)
+
+    def test_single_tag_filter(self):
+        response = self.client.get("/przepisy/?tag=tofu-tag")
+        self.assertContains(response, "Tofu Szybkie")
+        self.assertContains(response, "Tofu Wolne")
+        self.assertNotContains(response, "Szybkie Bez Tofu")
+
+    def test_multi_tag_filter_uses_and(self):
+        response = self.client.get("/przepisy/?tag=tofu-tag&tag=szybkie-tag")
+        self.assertContains(response, "Tofu Szybkie")
+        self.assertNotContains(response, "Tofu Wolne")
+        self.assertNotContains(response, "Szybkie Bez Tofu")
+
+    def test_tag_filter_combines_with_category_via_and(self):
+        other_cat = Category.objects.create(name="Salatki-tags", slug="salatki-tags")
+        Recipe.objects.create(
+            title="Tofu z innej kategorii",
+            slug="tofu-inna-kategoria",
+            category=other_cat,
+            description="x",
+            ingredients_text="x",
+            steps_text="y",
+            prep_time=10,
+            servings=1,
+            difficulty="latwy",
+        ).tags.add(self.tofu)
+        response = self.client.get("/przepisy/?tag=tofu-tag&kategoria=obiady-tags")
+        self.assertContains(response, "Tofu Szybkie")
+        self.assertContains(response, "Tofu Wolne")
+        self.assertNotContains(response, "Tofu z innej kategorii")
+
+
+class TestRecipeBackfill(TestCase):
+    """Verifies that migration 0004 backfilled the locked values on real seeded recipes."""
+
+    def test_krem_z_bialej_fasoli_backfill(self):
+        recipe = Recipe.objects.get(slug="krem-z-bialej-fasoli-ze-szparagami")
+        self.assertEqual(recipe.servings, 2)
+        self.assertEqual(recipe.difficulty, "latwy")
+        self.assertEqual(
+            set(recipe.tags.values_list("slug", flat=True)),
+            {"fasola", "tofu", "pieczone", "bezglutenowe"},
+        )
+
+    def test_chlebek_bananowy_backfill(self):
+        recipe = Recipe.objects.get(slug="chlebek-bananowy-z-orzechami-wloskimi")
+        self.assertEqual(recipe.servings, 8)
+        self.assertEqual(recipe.difficulty, "sredni")
+        self.assertEqual(
+            set(recipe.tags.values_list("slug", flat=True)),
+            {"pieczone"},
+        )
+
+    def test_starter_tags_seeded(self):
+        from recipes.models import Tag
+        slugs = set(Tag.objects.values_list("slug", flat=True))
+        for required in [
+            "tofu", "bezglutenowe", "szybkie", "pieczone",
+            "na-zimno", "ciecierzyca", "fasola", "soczewica",
+        ]:
+            self.assertIn(required, slugs)
+
+
+class TestSchemaOrgExtras(TestCase):
+
+    def setUp(self):
+        from recipes.models import Tag
+        self.cat = Category.objects.create(name="Desery-extras", slug="desery-extras")
+        self.tag = Tag.objects.create(name="szybkie-extras", slug="szybkie-extras")
+        self.with_tags = Recipe.objects.create(
+            title="Z Tagami",
+            slug="z-tagami-schema",
+            category=self.cat,
+            description="x",
+            ingredients_text="a",
+            steps_text="b",
+            prep_time=15,
+            servings=4,
+            difficulty="latwy",
+        )
+        self.with_tags.tags.add(self.tag)
+        self.without_tags = Recipe.objects.create(
+            title="Bez Tagow",
+            slug="bez-tagow-schema",
+            category=self.cat,
+            description="x",
+            ingredients_text="a",
+            steps_text="b",
+            prep_time=10,
+            servings=2,
+            difficulty="latwy",
+        )
+
+    def test_recipe_yield_present(self):
+        response = self.client.get("/przepisy/z-tagami-schema/")
+        self.assertContains(response, '"recipeYield": "4"')
+
+    def test_keywords_present_when_tags(self):
+        response = self.client.get("/przepisy/z-tagami-schema/")
+        self.assertContains(response, '"keywords"')
+        self.assertContains(response, "szybkie-extras")
+
+    def test_keywords_absent_when_no_tags(self):
+        response = self.client.get("/przepisy/bez-tagow-schema/")
+        self.assertNotContains(response, '"keywords"')
+        # recipeYield should still be present.
+        self.assertContains(response, '"recipeYield": "2"')
+
+
 class TestRecipeAdmin(TestCase):
 
     def setUp(self):
