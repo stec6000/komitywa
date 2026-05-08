@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Koszyk — Kuchenna Komitywa{% endblock %}
+{% block title %}Koszyk - Kuchenna Komitywa{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="Koszyk">
     <div class="wrap">
         <div class="section-head">
             <div>
-                <div class="section-number">— twój zeszyt zakupów</div>
+                <div class="section-number">- twój zeszyt zakupów</div>
                 <h2 class="section-title">Koszyk</h2>
             </div>
             {% if cart_items %}
@@ -51,7 +51,7 @@
 
                         <form method="post" action="{% url 'shop:cart_remove' product_id=item.product.id %}">
                             {% csrf_token %}
-                            <button type="submit" class="kk-cart-remove" aria-label="Usuń z koszyka">— usuń</button>
+                            <button type="submit" class="kk-cart-remove" aria-label="Usuń z koszyka">- usuń</button>
                         </form>
                     </div>
                 </div>
@@ -82,7 +82,7 @@
         {% else %}
         <div class="kk-empty-state">
             <h2>jeszcze pusty</h2>
-            <p>Dodaj ebooka albo coś z półki sklepu — wszystko poczeka tu na Ciebie.</p>
+            <p>Dodaj ebooka albo coś z półki sklepu - wszystko poczeka tu na Ciebie.</p>
             <p style="margin-top: 24px;">
                 <a href="{% url 'shop:list' %}" class="btn btn-accent">do sklepu →</a>
             </p>

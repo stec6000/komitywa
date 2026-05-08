@@ -69,6 +69,6 @@ class RecipeAdmin(admin.ModelAdmin):
                 '<img src="{}" style="max-height:60px;">',
                 obj.image.url,
             )
-        return "---"
+        return "--"
 
     image_preview.short_description = "Podglad"

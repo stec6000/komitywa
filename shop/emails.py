@@ -31,7 +31,7 @@ def send_order_confirmation(order):
         f"Suma: {order.total} z\u0142\n"
         f"Data odbioru: {order.pickup_date}\n\n"
         f"Do zobaczenia!\n\n"
-        f"-- \n"
+        f"- \n"
         f"Kuchenna Komitywa\n"
         f"https://kuchennakomitywa.pl"
     )
@@ -63,7 +63,7 @@ def send_ebook_delivery(order):
         f"Cze\u015b\u0107 {order.name}!\n\n"
         f"W za\u0142\u0105czniku znajdziesz zakupione ebooki.\n"
         f"\u017byczymy smacznej lektury!\n\n"
-        f"-- \n"
+        f"- \n"
         f"Kuchenna Komitywa\n"
         f"https://kuchennakomitywa.pl"
     )

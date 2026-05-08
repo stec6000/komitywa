@@ -29,10 +29,10 @@ def send_confirmation_email(subscriber, request):
         f"Link jest wa\u017cny przez 24 godziny.\n\n"
         f"Je\u015bli to nie Ty si\u0119 zapisa\u0142e\u015b/a\u015b, zignoruj "
         f"t\u0119 wiadomo\u015b\u0107.\n\n"
-        f"---\n"
+        f"--\n"
         f"Je\u015bli chcesz zrezygnowa\u0107 z newslettera:\n"
         f"{unsubscribe_url}\n\n"
-        f"-- \n"
+        f"- \n"
         f"Kuchenna Komitywa\n"
         f"https://kuchennakomitywa.pl"
     )

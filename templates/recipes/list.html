@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Przepiśnik — Kuchenna Komitywa{% endblock %}
+{% block title %}Przepiśnik - Kuchenna Komitywa{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="Przepiśnik">
@@ -8,7 +8,7 @@
         <div class="section-head">
             <div>
                 <div class="section-number">II. · przepiśnik</div>
-                <h2 class="section-title">Przepisy z zeszytu<span class="section-annotation">— klikaj żeby otworzyć</span></h2>
+                <h2 class="section-title">Przepisy z zeszytu<span class="section-annotation">- klikaj żeby otworzyć</span></h2>
             </div>
             <div class="section-meta">
                 {{ page_obj.paginator.count }} przepis{{ page_obj.paginator.count|pluralize:"y,ów" }}

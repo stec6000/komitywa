@@ -44,13 +44,13 @@ class Recipe(models.Model):
         related_name="recipes",
     )
     description = models.TextField(
-        help_text="Krotki opis (1-2 zdania) -- wyswietlany na karcie"
+        help_text="Krotki opis (1-2 zdania) - wyswietlany na karcie"
     )
     ingredients_text = models.TextField(
-        help_text="Skladniki -- kazdy w nowej linii"
+        help_text="Skladniki - kazdy w nowej linii"
     )
     steps_text = models.TextField(
-        help_text="Kroki przygotowania -- kazdy w nowej linii"
+        help_text="Kroki przygotowania - kazdy w nowej linii"
     )
     prep_time = models.PositiveSmallIntegerField(
         help_text="Czas przygotowania w minutach"
