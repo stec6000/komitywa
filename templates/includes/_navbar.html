@@ -1,27 +1,26 @@
 {% load static %}
-{# Navigation bar - Brand, nav links, cart icon (FOUND-02, UI-SPEC Component 1) #}
-<nav class="navbar navbar-expand-lg">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}">Kuchenna Komitywa</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Menu nawigacyjne">
-            <span class="navbar-toggler-icon"></span>
+<nav class="nav" aria-label="Główna nawigacja">
+    <div class="nav-inner">
+        <a class="nav-brand" href="{% url 'home' %}">
+            <span class="dot" aria-hidden="true"></span>
+            Kuchenna Komitywa
+            <span class="nav-brand-sub">— roślinna kuchnia</span>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="Menu">
+            <span class="bar" aria-hidden="true"></span>
         </button>
-        <div class="collapse navbar-collapse" id="mainNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.app_name == 'recipes' %}active{% endif %}" href="{% url 'recipes:list' %}">Przepisy</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.app_name == 'shop' %}active{% endif %}" href="{% url 'shop:list' %}">Sklep</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">O nas</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'contact' %}">Kontakt</a>
-                </li>
-            </ul>
-            <a class="nav-link position-relative ms-3" href="{% url 'shop:cart' %}" aria-label="Koszyk"><i class="bi bi-cart3"></i><span class="position-absolute top-0 start-100 translate-middle badge rounded-pill kk-badge{% if not cart_count %} kk-badge-dim{% endif %}">{{ cart_count|default:"0" }}</span></a>
+
+        <div class="nav-links" id="mainNav">
+            <a class="{% if request.resolver_match.app_name == 'recipes' %}active{% endif %}" href="{% url 'recipes:list' %}">przepiśnik</a>
+            <a class="{% if request.resolver_match.app_name == 'shop' %}active{% endif %}" href="{% url 'shop:list' %}">sklep</a>
+            <a class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">o nas</a>
+            <a class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'contact' %}">kontakt</a>
         </div>
+
+        <a class="nav-cart" href="{% url 'shop:cart' %}" aria-label="Koszyk">
+            <span class="nav-cart-label">koszyk</span>
+            <span class="nav-cart-badge{% if not cart_count %} dim{% endif %}">{{ cart_count|default:"0" }}</span>
+        </a>
     </div>
 </nav>

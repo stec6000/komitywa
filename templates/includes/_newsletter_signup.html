@@ -1,27 +1,19 @@
-{# Newsletter signup section - visible on every page above footer #}
-<section class="kk-newsletter-section">
+<section class="kk-newsletter-section" aria-label="Newsletter">
     <div class="container">
-        <div class="row">
-            <div class="col-md-6 mx-auto">
-                <h3>Zapisz się do newslettera</h3>
-                <p>Otrzymuj przepisy i nowości prosto na maila</p>
-                <form method="POST" action="{% url 'newsletter:subscribe' %}">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <input type="email" name="email" class="form-control"
-                               placeholder="Twój adres email" required>
-                    </div>
-                    <div class="form-check mb-3 text-start">
-                        <input type="checkbox" name="consent_newsletter"
-                               class="form-check-input" id="id_consent_newsletter" required>
-                        <label class="form-check-label" for="id_consent_newsletter">
-                            Wyrażam zgodę na otrzymywanie newslettera.
-                            <a href="{% url 'privacy-policy' %}" target="_blank">Polityka prywatności</a>
-                        </label>
-                    </div>
-                    <button type="submit" class="btn kk-btn-primary">Zapisz się</button>
-                </form>
+        <div class="newsletter-eyebrow">list w każdą niedzielę</div>
+        <h3>Niedzielne listy z kuchni</h3>
+        <p>Przepisy, historie. Bez spamu, bez reklam, bez linków afiliacyjnych. Tylko my, stół i zeszyt.</p>
+        <form method="POST" action="{% url 'newsletter:subscribe' %}">
+            {% csrf_token %}
+            <input type="email" name="email" placeholder="twój e-mail" required aria-label="Adres email">
+            <button type="submit" class="btn btn-accent">zapisz mnie</button>
+            <div class="form-check">
+                <input type="checkbox" name="consent_newsletter" id="id_consent_newsletter" required>
+                <label for="id_consent_newsletter">
+                    Wyrażam zgodę na otrzymywanie newslettera.
+                    <a href="{% url 'privacy-policy' %}" target="_blank" rel="noopener">Polityka prywatności</a>
+                </label>
             </div>
-        </div>
+        </form>
     </div>
 </section>

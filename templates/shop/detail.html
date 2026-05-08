@@ -1,84 +1,95 @@
 {% extends "base.html" %}
 
-{% block title %}{{ product.title }} - Kuchenna Komitywa{% endblock %}
+{% block title %}{{ product.title }} — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
-<section class="kk-section">
-  <div class="container">
-    <div class="row gy-4">
-      <!-- Main column -->
-      <div class="col-lg-8">
-        {% if product.image %}
-        <div class="kk-detail-hero mb-4">
-          <img src="{{ product.image.url }}" alt="{{ product.title }}">
+<section class="kk-section" aria-label="Produkt">
+    <div class="wrap">
+        <div class="row">
+            <div class="col-lg-8">
+                {% if product.type == "ebook" %}
+                <div style="max-width: 380px; margin: 0 auto 32px;">
+                    <div class="ebook-cover" style="--cover: #6b7a3a; aspect-ratio: 3/4;">
+                        <div class="ebook-cover-num">01</div>
+                        <div>
+                            {% if product.category %}
+                            <div class="ebook-cover-hand">{{ product.category.name|lower }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="ebook-cover-title">{{ product.title }}</div>
+                        <div class="ebook-cover-bottom">Komitywa · ebook</div>
+                    </div>
+                </div>
+                {% elif product.image %}
+                <div class="kk-detail-hero">
+                    <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                </div>
+                {% endif %}
+
+                {% if product.category %}
+                <div class="hero-eyebrow">{{ product.category.name|lower }}</div>
+                {% endif %}
+
+                <h1>{{ product.title }}</h1>
+
+                <div class="d-flex flex-wrap gap-2 mb-4" style="align-items: center;">
+                    {% if product.type == "ebook" %}
+                    <span class="kk-badge-digital">cyfrowy · PDF</span>
+                    {% else %}
+                    <span class="kk-category-badge">odbiór osobisty</span>
+                    {% endif %}
+                    <span style="font-family: var(--font-hand); font-size: 28px; color: var(--accent-2);">{{ product.price|floatformat:"0" }} zł</span>
+                </div>
+
+                <div style="margin: 24px 0;">
+                    {% if product.full_description %}
+                    {{ product.full_description|linebreaks }}
+                    {% else %}
+                    {{ product.description|linebreaks }}
+                    {% endif %}
+                </div>
+
+                <div class="belief-card">
+                    <div class="belief-card-label">jak to działa</div>
+                    <p>
+                        {% if product.type == "ebook" %}
+                        Po zakupie ebook przyjdzie automatycznie na Twój e-mail w ciągu kilku minut.
+                        {% else %}
+                        Odbiór osobisty pod adresem ul. Bukowa 14, Białystok. Termin ustalimy mailem po opłaceniu zamówienia.
+                        {% endif %}
+                    </p>
+                </div>
+
+                <form method="post" action="{% url 'shop:cart_add' product_id=product.id %}" style="margin-top: 32px;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-accent">+ dodaj do koszyka</button>
+                </form>
+            </div>
+
+            <div class="col-lg-4">
+                <aside class="kk-detail-sidebar">
+                    <div class="featured-label" style="position: static; display: inline-block; margin-bottom: 16px;">koszyk</div>
+                    <div style="font-family: var(--font-hand); font-size: 36px; color: var(--accent-2); margin-bottom: 14px;">{{ product.price|floatformat:"0" }} zł</div>
+
+                    <p style="font-size: 16px; color: var(--ink-soft);">
+                        {% if product.type == "ebook" %}
+                        Po zakupie ebook zostanie wysłany na Twój e-mail.
+                        {% else %}
+                        Odbiór osobisty w naszej kuchni — termin ustalimy po opłaceniu.
+                        {% endif %}
+                    </p>
+
+                    <form method="post" action="{% url 'shop:cart_add' product_id=product.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-accent w-100" style="margin-bottom: 16px;">dodaj do koszyka</button>
+                    </form>
+
+                    <p style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--ink-soft);">
+                        <a href="{% url 'shop:list' %}" class="kk-link-arrow">← wróć do sklepu</a>
+                    </p>
+                </aside>
+            </div>
         </div>
-        {% endif %}
-
-        <h1>{{ product.title }}</h1>
-
-        <!-- Meta row: category badge + digital badge -->
-        <div class="d-flex align-items-center gap-2 mb-3">
-          {% if product.category %}
-          <span class="kk-category-badge" style="position:static;">{{ product.category.name }}</span>
-          {% endif %}
-          {% if product.type == "ebook" %}
-          <span class="kk-badge-digital" style="position:static;">Cyfrowy</span>
-          {% endif %}
-        </div>
-
-        <p class="kk-price mb-3">{{ product.price }} zł</p>
-
-        <!-- Full description -->
-        <div class="mb-4">
-          {% if product.full_description %}
-          {{ product.full_description|linebreaks }}
-          {% else %}
-          {{ product.description|linebreaks }}
-          {% endif %}
-        </div>
-
-        <!-- Delivery note -->
-        <div class="kk-delivery-note mb-4">
-          {% if product.type == "ebook" %}
-          <i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>
-          Po zakupie ebook zostanie wysłany na Twój email.
-          {% else %}
-          <i class="bi bi-shop me-1" aria-hidden="true"></i>
-          Odbiór osobisty w naszej kuchni.
-          {% endif %}
-        </div>
-
-        <!-- Add to cart form (main column) -->
-        <form method="post" action="{% url 'shop:cart_add' product_id=product.id %}">
-          {% csrf_token %}
-          <button type="submit" class="kk-btn-primary">Dodaj do koszyka</button>
-        </form>
-      </div>
-
-      <!-- Sidebar -->
-      <div class="col-lg-4">
-        <div class="kk-detail-sidebar">
-          <p class="kk-price mb-3">{{ product.price }} zł</p>
-
-          <div class="kk-delivery-note mb-3">
-            {% if product.type == "ebook" %}
-            <i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>
-            Po zakupie ebook zostanie wysłany na Twój email.
-            {% else %}
-            <i class="bi bi-shop me-1" aria-hidden="true"></i>
-            Odbiór osobisty w naszej kuchni.
-            {% endif %}
-          </div>
-
-          <form method="post" action="{% url 'shop:cart_add' product_id=product.id %}">
-            {% csrf_token %}
-            <button type="submit" class="kk-btn-primary w-100 mb-3">Dodaj do koszyka</button>
-          </form>
-
-          <a href="{% url 'shop:list' %}" class="kk-link-arrow">&larr; Wróć do sklepu</a>
-        </div>
-      </div>
     </div>
-  </div>
 </section>
 {% endblock %}

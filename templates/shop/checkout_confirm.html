@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Potwierdzenie - Kuchenna Komitywa{% endblock %}
+{% block title %}Potwierdzenie — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
-<section class="kk-section">
-  <div class="container text-center py-5">
-    <p>Strona przeniesiona. <a href="{% url 'home' %}">Wróć na stronę główną</a>.</p>
-  </div>
+<section class="kk-section" aria-label="Potwierdzenie">
+    <div class="wrap-narrow" style="text-align: center; padding: 60px 0;">
+        <p class="lead">Strona przeniesiona.</p>
+        <a href="{% url 'home' %}" class="btn btn-accent">na stronę główną →</a>
+    </div>
 </section>
 {% endblock %}

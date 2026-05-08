@@ -10,9 +10,28 @@ from shop.payment import calculate_sign
 
 
 class TestProductList(TestCase):
+    def setUp(self):
+        self.category = ProductCategory.objects.create(
+            name="Ebooki",
+            slug="ebooki-lista",
+        )
+        self.product = Product.objects.create(
+            title="Testowy ebook",
+            slug="testowy-ebook",
+            category=self.category,
+            type="ebook",
+            description="Opis testowego ebooka",
+            price=Decimal("19.99"),
+        )
+
     def test_product_list_returns_200(self):
         response = self.client.get("/sklep/")
         self.assertEqual(response.status_code, 200)
+
+    def test_product_cards_are_fully_clickable_without_more_text(self):
+        response = self.client.get("/sklep/")
+        self.assertContains(response, 'href="/sklep/testowy-ebook/"')
+        self.assertNotContains(response, "Zobacz więcej")
 
 
 class TestProductDetail(TestCase):

@@ -1,31 +1,53 @@
-{# Footer - Copyright, legal links, P24 payment logos (FOUND-02, LEGAL-01, LEGAL-02) #}
 {% load static %}
 <footer class="kk-footer">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6 text-center text-md-start">
-                <p class="mb-1">&copy; 2026 Kuchenna Komitywa. Wszelkie prawa zastrzeżone.</p>
-                <p class="mb-0 kk-footer-nip">NIP: 5423485438</p>
-            </div>
-            <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
-                <a href="{% url 'privacy-policy' %}" class="kk-footer-link">Polityka prywatności</a>
-                <a href="{% url 'regulations' %}" class="kk-footer-link ms-3">Regulamin</a>
-            </div>
+    <div class="footer-grid">
+        <div>
+            <div class="footer-brand-title">Kuchenna Komitywa</div>
+            <div class="footer-brand-sub">roślinna kuchnia, wspólne stoły</div>
+            <p class="footer-brand-blurb">Mały projekt Tomka. Piszemy, gotujemy i jemy przy jednym stole w Białymstoku.</p>
+            <p class="footer-nip mt-2">NIP: 5423485438</p>
         </div>
-        <div class="row mt-3 pt-3 kk-footer-payments">
-            <div class="col-12 text-center">
-                <p class="kk-footer-payments-label">Metody płatności</p>
-                <div class="kk-payment-logos">
-                    <img src="{% static 'img/p24/logotypy-bankow/Blik.png' %}" alt="BLIK" class="kk-payment-logo">
-                    <img src="{% static 'img/p24/logotypy-bankow/VISA.png' %}" alt="Visa" class="kk-payment-logo">
-                    <img src="{% static 'img/p24/logotypy-bankow/mastercard.png' %}" alt="Mastercard" class="kk-payment-logo">
-                    <img src="{% static 'img/p24/logotypy-bankow/PKO Bank Polski.png' %}" alt="PKO Bank Polski" class="kk-payment-logo">
-                    <img src="{% static 'img/p24/logotypy-bankow/ING.png' %}" alt="ING" class="kk-payment-logo">
-                    <img src="{% static 'img/p24/logotypy-bankow/mBank .png' %}" alt="mBank" class="kk-payment-logo">
-                    <img src="{% static 'img/p24/logotypy-bankow/Millenium.png' %}" alt="Millennium" class="kk-payment-logo">
-                    <img src="{% static 'img/p24/logotypy-bankow/santander.png' %}" alt="Santander" class="kk-payment-logo">
-                </div>
-            </div>
+
+        <div class="footer-col">
+            <h5>strona</h5>
+            <a href="{% url 'recipes:list' %}">przepiśnik</a>
+            <a href="{% url 'shop:list' %}">sklep</a>
+            <a href="{% url 'about' %}">o nas</a>
+            <a href="{% url 'contact' %}">kontakt</a>
         </div>
+
+        <div class="footer-col">
+            <h5>pomoc</h5>
+            <a href="{% url 'shop:cart' %}">koszyk</a>
+            <a href="{% url 'regulations' %}">regulamin</a>
+            <a href="{% url 'privacy-policy' %}">prywatność</a>
+            <a href="{% url 'contact' %}">kontakt</a>
+        </div>
+
+        <div class="footer-col">
+            <h5>znajdź nas</h5>
+            <a href="https://instagram.com/kuchennakomitywa" rel="noopener" target="_blank">instagram</a>
+            <a href="https://facebook.com/kuchennakomitywa" rel="noopener" target="_blank">facebook</a>
+            <a href="tel:+48511562100">511 562 100</a>
+        </div>
+    </div>
+
+    <div class="footer-payments">
+        <p class="footer-payments-label">Metody płatności</p>
+        <div class="footer-payment-logos">
+            <img src="{% static 'img/p24/logotypy-bankow/Blik.png' %}" alt="BLIK" class="footer-payment-logo">
+            <img src="{% static 'img/p24/logotypy-bankow/VISA.png' %}" alt="Visa" class="footer-payment-logo">
+            <img src="{% static 'img/p24/logotypy-bankow/mastercard.png' %}" alt="Mastercard" class="footer-payment-logo">
+            <img src="{% static 'img/p24/logotypy-bankow/PKO Bank Polski.png' %}" alt="PKO Bank Polski" class="footer-payment-logo">
+            <img src="{% static 'img/p24/logotypy-bankow/ING.png' %}" alt="ING" class="footer-payment-logo">
+            <img src="{% static 'img/p24/logotypy-bankow/mBank .png' %}" alt="mBank" class="footer-payment-logo">
+            <img src="{% static 'img/p24/logotypy-bankow/Millenium.png' %}" alt="Millennium" class="footer-payment-logo">
+            <img src="{% static 'img/p24/logotypy-bankow/santander.png' %}" alt="Santander" class="footer-payment-logo">
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <div>© Kuchenna Komitywa {% now "Y" %} · Białystok</div>
+        <div>zrobione powoli, ręcznie</div>
     </div>
 </footer>

@@ -1,18 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Sprawdź email - Kuchenna Komitywa{% endblock %}
+{% block title %}Sprawdź e-mail — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="Sprawdź email">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 text-center">
-                <h1 style="font-family: var(--kk-font-heading);">Sprawdź swoją skrzynkę email</h1>
-                <p>Wysłaliśmy link potwierdzający. Kliknij go, żeby dokończyć zapis do newslettera.</p>
-                <p class="text-muted">Link jest ważny przez 24 godziny.</p>
-                <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wróć do strony głównej</a>
-            </div>
-        </div>
+    <div class="wrap-narrow" style="text-align: center; padding: 60px 0;">
+        <div class="hero-eyebrow" style="justify-content: center;">newsletter</div>
+        <h1>Sprawdź swoją skrzynkę</h1>
+        <p class="lead">Wysłałem link potwierdzający. Kliknij go, żeby dokończyć zapis do newslettera.</p>
+        <p style="font-family: var(--font-hand); font-size: 22px; color: var(--ink-faded);">Link jest ważny przez 24 godziny.</p>
+        <p style="margin-top: 32px;">
+            <a href="{% url 'home' %}" class="btn btn-accent">na stronę główną →</a>
+        </p>
     </div>
 </section>
 {% endblock %}

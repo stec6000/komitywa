@@ -1,168 +1,247 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Kuchenna Komitywa - Wegańska kuchnia z sercem{% endblock %}
+{% block title %}Kuchenna Komitywa — roślinny szkicownik kuchenny{% endblock %}
 
 {% block content %}
 
-{# Hero section - split layout (D-01) #}
-<section class="kk-hero" aria-label="Powitanie">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 kk-home-hero-copy">
-                <div class="kk-home-hero-kicker">
-                    <i class="bi bi-flower1" aria-hidden="true"></i>
-                    <span>Roślinna kuchnia z Białegostoku</span>
+{# Hero — eyebrow + big title + CTA + stacked polaroids #}
+<section class="hero" aria-label="Powitanie">
+    <div class="wrap">
+        <div class="hero-grid">
+            <div class="hero-copy">
+                <div class="hero-eyebrow">zeszyt wiosna 2026</div>
+                <h1 class="hero-title">
+                    Wspólnie<br>
+                    gotujemy z <em>roślin</em>
+                </h1>
+                <p class="hero-sub">
+                    Komitywa to dziennik kuchenny, zbiór przepisów i spotkania przy wspólnym stole.
+                    Piszemy ręcznie, gotujemy powoli, jemy sezonowo — bez produktów odzwierzęcych.
+                </p>
+                <div class="hero-cta-row">
+                    <a class="btn btn-accent" href="{% url 'recipes:list' %}">otwórz szkicownik →</a>
+                    <a class="btn btn-ghost" href="{% url 'shop:list' %}">sklep z ebookami</a>
+                    <span class="hero-note">— tu zaczynasz</span>
                 </div>
-                <h1>Gotujemy z sercem</h1>
-                <p class="lead">Wegańska kuchnia stworzona z miłości do roślin i dobrego jedzenia. Odkryj nasze przepisy, zamów gotowe dania lub pobierz ebooka z ulubionymi recepturami.</p>
-                <div class="d-flex flex-wrap align-items-center gap-3">
-                    <a href="/przepisy/" class="kk-btn-primary">Zobacz przepisy</a>
-                    <a href="{% url 'shop:list' %}" class="kk-link-arrow">Zobacz sklep <i class="bi bi-arrow-right"></i></a>
-                </div>
-                <div class="kk-home-hero-chips" aria-label="Atuty oferty">
-                    <span class="kk-home-hero-chip">Lokalne składniki</span>
-                    <span class="kk-home-hero-chip">Odbiór osobisty</span>
-                    <span class="kk-home-hero-chip">Ebooki PDF</span>
+
+                <div class="hero-sprig" aria-hidden="true">
+                    <svg width="70" height="70" viewBox="0 0 100 100" fill="none" style="transform: rotate(-20deg);">
+                        <path d="M50 95 Q 52 70 50 45 Q 48 25 55 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                        <path d="M55 8 Q 85 18 78 45 Q 70 68 50 45 Q 40 30 55 8 Z" fill="currentColor" opacity="0.55"/>
+                        <path d="M55 12 Q 56 28 58 42" stroke="var(--paper)" stroke-width="0.8" fill="none" opacity="0.7"/>
+                        <path d="M57 20 Q 65 22 72 24" stroke="var(--paper)" stroke-width="0.6" fill="none" opacity="0.6"/>
+                        <path d="M57 30 Q 66 32 72 35" stroke="var(--paper)" stroke-width="0.6" fill="none" opacity="0.6"/>
+                        <path d="M50 58 Q 30 55 25 40 Q 35 42 50 58 Z" fill="currentColor" opacity="0.45"/>
+                    </svg>
                 </div>
             </div>
-            <div class="col-lg-6 kk-home-hero-media">
-                <div class="kk-home-hero-visual">
-                    <img src="{% static 'img/hero.jpg' %}" class="img-fluid rounded" alt="Kolorowe wegańskie danie na talerzu" width="1200" height="800">
-                    <div class="kk-home-hero-card kk-home-hero-card--bottom">
-                        <i class="bi bi-heart-fill" aria-hidden="true"></i>
-                        <div>
-                            <strong>Świeżo i sezonowo</strong>
-                            <p>Tworzone z uważnością, bez zbędnego kombinowania.</p>
-                        </div>
-                    </div>
+
+            <div class="hero-illus">
+                <div class="polaroid">
+                    <div class="polaroid-img"></div>
+                    <div class="polaroid-caption">kuchnia marzec '26</div>
                 </div>
+                <div class="polaroid">
+                    <div class="polaroid-img"></div>
+                    <div class="polaroid-caption">dynia &amp; tymianek</div>
+                </div>
+                <div class="polaroid">
+                    <div class="polaroid-img"></div>
+                    <div class="polaroid-caption">ramen · wieczór</div>
+                </div>
+                <div class="hero-annot hero-annot--saturday">z soboty, ciepłe jeszcze</div>
             </div>
         </div>
     </div>
 </section>
 
-{# Feature cards section - 3 value propositions (D-04) #}
-<section class="kk-section-alt kk-home-values" aria-label="Dlaczego my">
-    <div class="container">
-        <div class="text-center mb-5 kk-home-section-heading kk-home-reveal" style="--kk-delay: 0.12s;">
-            <h2>Dlaczego my?</h2>
+{# I. O nas #}
+<section id="about" aria-label="O nas">
+    <div class="wrap">
+        <div class="section-head">
+            <div>
+                <div class="section-number">I. · kto gotuje</div>
+                <h2 class="section-title">O nas</h2>
+            </div>
+            <div class="section-meta">Tomek · od 2013 roku</div>
         </div>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="text-center kk-home-feature kk-home-reveal" style="--kk-delay: 0.18s;">
-                    <i class="bi bi-flower1 kk-feature-icon"></i>
-                    <h3 class="mt-3">100% Roślinne</h3>
-                    <p>Wszystkie nasze dania są w pełni roślinne. Gotujemy z miłością do natury i zwierząt.</p>
+
+        <div class="about-grid">
+            <div class="about-photos">
+                <div class="polaroid">
+                    <div class="polaroid-img"></div>
+                    <div class="polaroid-caption">kuchnia, marzec '26</div>
                 </div>
+                <div class="polaroid">
+                    <div class="polaroid-img"></div>
+                    <div class="polaroid-caption">warsztat chlebowy</div>
+                </div>
+                <div class="about-annot">— my w swojej kuchni</div>
             </div>
-            <div class="col-md-4">
-                <div class="text-center kk-home-feature kk-home-reveal" style="--kk-delay: 0.26s;">
-                    <i class="bi bi-geo-alt kk-feature-icon"></i>
-                    <h3 class="mt-3">Lokalne Składniki</h3>
-                    <p>Współpracujemy z lokalnymi rolnikami i dostawcami, by zapewnić najświeższe składniki.</p>
+
+            <div>
+                <div class="about-greeting">cześć, tu Tomasz.</div>
+                <p class="about-lead">
+                    Prowadzę <span class="scribble">Kuchenną Komitywę</span> — mały projekt
+                    o roślinnym gotowaniu, sezonowych produktach i jedzeniu przy wspólnym stole.
+                </p>
+                <p class="about-body">
+                    Zaczęło się od zeszytu z przepisami. Po kilku latach zebrało się tyle notatek,
+                    że zamieniły się w ebooki i gotowe dania. Dzisiaj dzielę się tym, czego sam
+                    się nauczyłem — powolnego fermentu, dobrego chleba, jesiennych zup i świątecznych stołów.
+                </p>
+
+                <div class="belief-card">
+                    <div class="belief-card-label">w co wierzymy</div>
+                    <p>
+                        Sezonowo, lokalnie, powoli. Bez produktów odzwierzęcych, bez ścinania dróg na skróty,
+                        bez śmiecenia. Gotowanie jako pretekst, żeby usiąść razem przy stole.
+                    </p>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="text-center kk-home-feature kk-home-reveal" style="--kk-delay: 0.34s;">
-                    <i class="bi bi-shop kk-feature-icon"></i>
-                    <h3 class="mt-3">Odbiór Osobisty</h3>
-                    <p>Zamów online i odbierz gotowe danie bezpośrednio od nas - świeże i pełne smaku.</p>
-                </div>
+
+                <p style="margin-top: 24px;">
+                    <a href="{% url 'about' %}" class="kk-link-arrow">poznaj nas bliżej →</a>
+                </p>
             </div>
         </div>
     </div>
 </section>
 
-{# About teaser section (D-06) #}
-<section class="kk-section" aria-label="O nas">
-    <div class="container">
-        <div class="row align-items-center g-4 kk-home-story-row">
-            <div class="col-lg-7">
-                <div class="kk-home-story kk-home-reveal" style="--kk-delay: 0.18s;">
-                    <div class="kk-home-story-kicker">Od domowej kuchni do własnej marki</div>
-                    <h2>Nasza historia</h2>
-                    <p class="kk-home-story-lead">Zaczęło się od gotowania dla bliskich i szukania roślinnych smaków, do których naprawdę chce się wracać. Dziś Kuchenną Komitywą dzielimy się szerzej - przez przepisy, gotowe dania i autorskie ebooki.</p>
-                    <p>Lubimy sezonowe składniki, proste rozwiązania i jedzenie, które daje przyjemność bez zbędnego zadęcia. Na stronie znajdziesz więc zarówno inspiracje do codziennego gotowania, jak i coś gotowego na dni, kiedy chcesz po prostu dobrze zjeść.</p>
-                    <div class="kk-home-story-points" aria-label="Co tworzymy">
-                        <div class="kk-home-story-point">
-                            <i class="bi bi-geo-alt" aria-hidden="true"></i>
-                            <span>Białystok i lokalne składniki</span>
-                        </div>
-                        <div class="kk-home-story-point">
-                            <i class="bi bi-journal-richtext" aria-hidden="true"></i>
-                            <span>Przepisy, dania i ebooki</span>
-                        </div>
-                        <div class="kk-home-story-point">
-                            <i class="bi bi-flower1" aria-hidden="true"></i>
-                            <span>Roślinnie i sezonowo</span>
-                        </div>
-                    </div>
-                    <a href="{% url 'about' %}" class="kk-link-arrow">Poznaj nas bliżej <i class="bi bi-arrow-right"></i></a>
-                </div>
+{# II. Przepisy #}
+<section id="recipes" aria-label="Przepisy">
+    <div class="wrap">
+        <div class="section-head">
+            <div>
+                <div class="section-number">II. · rozdział drugi</div>
+                <h2 class="section-title">Przepisy z zeszytu<span class="section-annotation">— klikaj żeby otworzyć</span></h2>
             </div>
-            <div class="col-lg-5">
-                <div class="kk-home-story-media kk-home-reveal" style="--kk-delay: 0.26s;">
-                    <img src="{% static 'img/nasza-historia.jpg' %}"
-                         alt="Portret założyciela Kuchennej Komitywy"
-                         class="kk-home-story-photo"
-                         width="1100"
-                         height="1210">
-                </div>
+            <div class="section-meta">
+                3 najnowsze · reszta w
+                <a href="{% url 'recipes:list' %}" style="color: inherit; text-decoration: underline; text-decoration-style: dotted;">przepiśniku</a>
             </div>
         </div>
-    </div>
-</section>
 
-{# Secondary CTA section (D-03) #}
-<section class="kk-section-alt" aria-label="Przepisy">
-    <div class="container">
-        <div class="text-center mb-5 kk-home-section-heading kk-home-reveal" style="--kk-delay: 0.14s;">
-            <h2>Najnowsze przepisy</h2>
-            <p class="text-muted">Zobacz 3 najnowsze przepisy prosto z naszej kuchni.</p>
-        </div>
-
-        {% if latest_recipes %}
-        <div class="row gy-4">
-            {% for recipe in latest_recipes %}
-            <div class="col-lg-4 col-md-6 col-12">
-                <div class="card h-100 kk-recipe-card kk-home-reveal {% cycle 'kk-home-delay-1' 'kk-home-delay-2' 'kk-home-delay-3' %}"
-                     style="{% if forloop.counter == 1 %}--kk-delay: 0.22s;{% elif forloop.counter == 2 %}--kk-delay: 0.3s;{% else %}--kk-delay: 0.38s;{% endif %}">
-                    <div class="kk-recipe-card__img-wrapper">
-                        {% if recipe.image %}
-                        <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="kk-recipe-card__img">
-                        {% else %}
-                        <div class="kk-recipe-card__img-placeholder">
-                            <i class="bi bi-image" aria-hidden="true"></i>
-                        </div>
-                        {% endif %}
-                        {% if recipe.category %}
-                        <span class="kk-category-badge">{{ recipe.category.name }}</span>
-                        {% endif %}
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                        <h3 class="card-title">{{ recipe.title }}</h3>
-                        <p class="card-text flex-grow-1">{{ recipe.description|truncatechars:120 }}</p>
-                        <div class="d-flex justify-content-between align-items-center mt-auto">
-                            <span class="kk-prep-time">
-                                <i class="bi bi-clock" aria-hidden="true"></i> {{ recipe.prep_time }} min
-                            </span>
-                            <a href="{% url 'recipes:detail' slug=recipe.slug %}" class="kk-link-arrow">Czytaj więcej &rarr;</a>
-                        </div>
+        {% if feed_recipes %}
+        <div class="recipe-grid">
+            {% for recipe in feed_recipes %}
+            <a class="recipe-card" href="{% url 'recipes:detail' slug=recipe.slug %}" aria-label="Otwórz przepis: {{ recipe.title }}">
+                <div class="recipe-img{% if recipe.image %} recipe-img--photo{% endif %}">
+                    <div class="num-stamp">{{ forloop.counter|stringformat:"02d" }}</div>
+                    <div class="time-stamp">{{ recipe.prep_time }} min</div>
+                    {% if recipe.image %}
+                    <img src="{{ recipe.image.url }}" alt="">
+                    {% endif %}
+                </div>
+                <div class="recipe-body">
+                    {% if recipe.category %}
+                    <div class="recipe-kicker">{{ recipe.category.name|lower }}</div>
+                    {% endif %}
+                    <div class="recipe-name">{{ recipe.title }}</div>
+                    <div class="recipe-meta">
+                        {% if recipe.category %}<span>{{ recipe.category.name|lower }}</span>{% endif %}
+                        <span>· {{ recipe.prep_time }} min</span>
                     </div>
                 </div>
-            </div>
+            </a>
             {% endfor %}
         </div>
         {% else %}
-        <div class="text-center">
-            <p class="text-muted">Setki sprawdzonych receptur roślinnych - od śniadania po deser.</p>
+        <div class="kk-empty-state">
+            <h2>Wkrótce…</h2>
+            <p>Dopisuję pierwsze przepisy. Wróć za chwilę albo zapisz się do newslettera.</p>
         </div>
         {% endif %}
+    </div>
+</section>
 
-        <div class="text-center mt-5 kk-home-reveal" style="--kk-delay: 0.44s;">
-            <a href="{% url 'recipes:list' %}" class="kk-btn-primary">Zobacz wszystkie przepisy</a>
+{# Featured weekly recipe #}
+{% if featured_recipe %}
+<section aria-label="Przepis tygodnia">
+    <div class="wrap">
+        <div class="featured">
+            <div class="featured-label">przepis tygodnia</div>
+            <div>
+                <div class="featured-date">{{ featured_recipe.created_at|date:"l, j F" }}</div>
+                <h3>{{ featured_recipe.title }}</h3>
+                <p class="featured-blurb">
+                    {{ featured_recipe.description }}
+                </p>
+                <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 24px;">
+                    <a class="btn" href="{% url 'recipes:detail' slug=featured_recipe.slug %}">cały przepis →</a>
+                    <span class="hand" style="font-size: 20px; color: var(--ink-soft);">{{ featured_recipe.prep_time }} min</span>
+                </div>
+            </div>
+            <div style="position: relative;">
+                <div class="featured-img{% if featured_recipe.image %} featured-img--photo{% endif %}">
+                    <div class="label">{{ featured_recipe.created_at|date:"d.m.y" }}</div>
+                    <div class="heart-stamp">ulubione ❤</div>
+                    {% if featured_recipe.image %}
+                    <img src="{{ featured_recipe.image.url }}" alt="{{ featured_recipe.title }}">
+                    {% endif %}
+                </div>
+            </div>
         </div>
+    </div>
+</section>
+{% endif %}
+
+{# III. Sklep / Ebooki #}
+<section id="shop" aria-label="Sklep">
+    <div class="wrap">
+        <div class="section-head">
+            <div>
+                <div class="section-number">III. · sklep</div>
+                <h2 class="section-title">Ebooki &amp; zeszyty<span class="section-annotation">— nasze ulubione</span></h2>
+            </div>
+            <div class="section-meta">PDF natychmiast na mail · darmowy fragment w stopce</div>
+        </div>
+
+        {% if featured_products %}
+        <div class="ebook-grid">
+            {% for product in featured_products %}
+            {% cycle "#6b7a3a" "#b6562e" "#8a5a2a" "#2e4a3a" as cover_color silent %}
+            {% cycle "-1deg" "1deg" "-0.5deg" "0.5deg" as cover_tilt silent %}
+            <a class="ebook" href="{% url 'shop:detail' slug=product.slug %}" aria-label="{{ product.title }}">
+                {% if product.type == "ebook" %}
+                <div class="ebook-cover" style="--cover: {{ cover_color }}; transform: rotate({{ cover_tilt }});">
+                    <div class="ebook-cover-num">{{ forloop.counter|stringformat:"02d" }}</div>
+                    <div>
+                        {% if product.category %}
+                        <div class="ebook-cover-hand">{{ product.category.name|lower }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="ebook-cover-title">{{ product.title }}</div>
+                    <div class="ebook-cover-bottom">Komitywa · ebook</div>
+                </div>
+                {% else %}
+                <div class="product-cover{% if product.image %} product-cover--photo{% endif %}" style="--img-bg: {{ cover_color }}; transform: rotate({{ cover_tilt }});">
+                    {% if product.image %}<img src="{{ product.image.url }}" alt="">{% endif %}
+                </div>
+                {% endif %}
+                <div class="ebook-info">
+                    <div>
+                        <div class="ebook-title">{{ product.title }}</div>
+                        <div class="ebook-meta">
+                            {% if product.type == "ebook" %}PDF · cyfrowy{% else %}odbiór osobisty{% endif %}
+                        </div>
+                    </div>
+                    <div class="ebook-price">{{ product.price|floatformat:"0" }} zł</div>
+                </div>
+                <div class="ebook-add">+ zobacz</div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <p style="margin-top: 36px;">
+            <a href="{% url 'shop:list' %}" class="kk-link-arrow">cały sklep →</a>
+        </p>
+        {% else %}
+        <div class="kk-empty-state">
+            <h2>Sklep w przygotowaniu</h2>
+            <p>Pracujemy nad ebookami. Zajrzyj wkrótce.</p>
+        </div>
+        {% endif %}
     </div>
 </section>
 

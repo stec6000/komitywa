@@ -1,56 +1,64 @@
 {% extends "base.html" %}
 
-{% block title %}Zamówienie - Kuchenna Komitywa{% endblock %}
+{% block title %}Zamówienie — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
-<section class="kk-section">
-  <div class="container">
-    <h1>Zamówienie</h1>
-    <div class="row">
-      <div class="col-lg-8">
-        <form method="post" class="kk-checkout-form">
-          {% csrf_token %}
-          {% for field in form %}
-          {% if not ebook_only or field.html_name != 'pickup_date' %}
-          <div class="mb-3{% if field.field.widget.input_type == 'checkbox' %} form-check{% endif %}">
-            {% if field.field.widget.input_type == 'checkbox' %}
-            {{ field }}
-            <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {% else %}
-            <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
-            {{ field }}
-            {% endif %}
-            {% if field.help_text %}
-            <div class="form-text">{{ field.help_text }}</div>
-            {% endif %}
-            {% if field.errors %}
-            {% for error in field.errors %}
-            <div class="text-danger" style="font-size:14px;">{{ error }}</div>
-            {% endfor %}
-            {% endif %}
-          </div>
-          {% endif %}
-          {% endfor %}
-          <button type="submit" class="kk-btn-primary w-100 mt-3">Przejdź do płatności</button>
-        </form>
-      </div>
-      <div class="col-lg-4">
-        <div class="kk-order-summary mt-4 mt-lg-0">
-          <h3 class="mb-3">Podsumowanie zamówienia</h3>
-          {% for item in cart_items %}
-          <div class="d-flex justify-content-between mb-2">
-            <span>{{ item.product.title }} x {{ item.quantity }}</span>
-            <span>{{ item.line_total }} zl</span>
-          </div>
-          {% endfor %}
-          <hr>
-          <div class="d-flex justify-content-between">
-            <strong>Do zapłaty</strong>
-            <span class="kk-price">{{ total }} zl</span>
-          </div>
+<section class="kk-section" aria-label="Zamówienie">
+    <div class="wrap">
+        <div class="section-head">
+            <div>
+                <div class="section-number">— ostatni krok</div>
+                <h2 class="section-title">Zamówienie</h2>
+            </div>
+            <div class="section-meta">płatność po potwierdzeniu</div>
         </div>
-      </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <form method="post" class="kk-checkout-form">
+                    {% csrf_token %}
+                    {% for field in form %}
+                    {% if not ebook_only or field.html_name != 'pickup_date' %}
+                    <div class="{% if field.field.widget.input_type == 'checkbox' %}form-check{% else %}field{% endif %}">
+                        {% if field.field.widget.input_type == 'checkbox' %}
+                        {{ field }}
+                        <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                        {% else %}
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                        {{ field }}
+                        {% endif %}
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                        {% for error in field.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    <button type="submit" class="btn btn-accent w-100" style="margin-top: 16px;">przejdź do płatności →</button>
+                </form>
+            </div>
+
+            <div class="col-lg-4">
+                <aside class="kk-order-summary">
+                    <div class="featured-label" style="position: static; display: inline-block; margin-bottom: 16px;">koszyk</div>
+                    {% for item in cart_items %}
+                    <div class="summary-row">
+                        <span style="font-size: 16px;">{{ item.product.title }} × {{ item.quantity }}</span>
+                        <span style="font-family: var(--font-hand); font-size: 20px; color: var(--accent-2);">{{ item.line_total }} zł</span>
+                    </div>
+                    {% endfor %}
+                    <hr>
+                    <div class="summary-row">
+                        <strong style="font-family: var(--font-display); font-size: 22px;">do zapłaty</strong>
+                        <span class="kk-price" style="font-size: 30px;">{{ total }} zł</span>
+                    </div>
+                </aside>
+            </div>
+        </div>
     </div>
-  </div>
 </section>
 {% endblock %}

@@ -76,47 +76,29 @@ class TestHomeView(TestCase):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
 
-    def test_home_shows_three_latest_published_recipes(self):
+    def test_home_shows_latest_published_recipes(self):
+        """Home shows 1 featured + 3 grid (top 4 latest); older + unpublished hidden."""
         category, _ = Category.objects.get_or_create(
             name="Obiady",
             slug="obiady",
         )
-        older = Recipe.objects.create(
-            title="Starszy przepis",
-            slug="starszy-przepis",
-            category=category,
-            description="Starszy opis",
-            ingredients_text="skladnik 1",
-            steps_text="krok 1",
-            prep_time=15,
-        )
-        newest = Recipe.objects.create(
-            title="Najnowszy przepis",
-            slug="najnowszy-przepis",
-            category=category,
-            description="Najnowszy opis",
-            ingredients_text="skladnik 1",
-            steps_text="krok 1",
-            prep_time=20,
-        )
-        middle = Recipe.objects.create(
-            title="Srodkowy przepis",
-            slug="srodkowy-przepis",
-            category=category,
-            description="Srodkowy opis",
-            ingredients_text="skladnik 1",
-            steps_text="krok 1",
-            prep_time=25,
-        )
-        third = Recipe.objects.create(
-            title="Trzeci przepis",
-            slug="trzeci-przepis",
-            category=category,
-            description="Trzeci opis",
-            ingredients_text="skladnik 1",
-            steps_text="krok 1",
-            prep_time=30,
-        )
+        recipes = []
+        for i, title in enumerate([
+            "Najstarszy przepis",
+            "Czwarty przepis",
+            "Trzeci przepis",
+            "Srodkowy przepis",
+            "Najnowszy przepis",
+        ]):
+            recipes.append(Recipe.objects.create(
+                title=title,
+                slug=title.lower().replace(" ", "-"),
+                category=category,
+                description=f"Opis {i}",
+                ingredients_text="skladnik 1",
+                steps_text="krok 1",
+                prep_time=15 + i * 5,
+            ))
         hidden = Recipe.objects.create(
             title="Ukryty przepis",
             slug="ukryty-przepis-home",
@@ -129,34 +111,46 @@ class TestHomeView(TestCase):
         )
 
         now = timezone.now()
-        Recipe.objects.filter(pk=older.pk).update(created_at=now + timedelta(days=1))
-        Recipe.objects.filter(pk=third.pk).update(created_at=now + timedelta(days=2))
-        Recipe.objects.filter(pk=middle.pk).update(created_at=now + timedelta(days=3))
-        Recipe.objects.filter(pk=newest.pk).update(created_at=now + timedelta(days=4))
-        Recipe.objects.filter(pk=hidden.pk).update(created_at=now + timedelta(days=5))
+        for i, r in enumerate(recipes):
+            Recipe.objects.filter(pk=r.pk).update(created_at=now + timedelta(days=i))
+        Recipe.objects.filter(pk=hidden.pk).update(created_at=now + timedelta(days=10))
 
         response = self.client.get("/")
 
-        latest_titles = [recipe.title for recipe in response.context["latest_recipes"]]
-        self.assertEqual(
-            latest_titles,
-            ["Najnowszy przepis", "Srodkowy przepis", "Trzeci przepis"],
-        )
+        # Top 4 visible: newest as featured + next 3 in grid
         self.assertContains(response, "Najnowszy przepis")
         self.assertContains(response, "Srodkowy przepis")
         self.assertContains(response, "Trzeci przepis")
-        self.assertNotContains(response, "Starszy przepis")
+        self.assertContains(response, "Czwarty przepis")
+        # Oldest + unpublished hidden
+        self.assertNotContains(response, "Najstarszy przepis")
         self.assertNotContains(response, "Ukryty przepis")
-
-    def test_home_story_section_has_founder_photo(self):
-        response = self.client.get("/")
-        self.assertRegex(
-            response.content.decode(),
-            r"/static/img/nasza-historia(?:\.[0-9a-f]+)?\.jpg",
+        # Featured contract
+        self.assertEqual(
+            response.context["featured_recipe"].title,
+            "Najnowszy przepis",
         )
-        self.assertContains(response, "Portret założyciela Kuchennej Komitywy")
-        self.assertContains(response, "Od domowej kuchni do własnej marki")
-        self.assertContains(response, "Przepisy, dania i ebooki")
+        feed_titles = [r.title for r in response.context["feed_recipes"]]
+        self.assertEqual(feed_titles, [
+            "Srodkowy przepis", "Trzeci przepis", "Czwarty przepis",
+        ])
+
+    def test_home_recipe_cards_are_fully_clickable_without_read_more_text(self):
+        category = Category.objects.create(name="Desery", slug="desery-home")
+        Recipe.objects.create(
+            title="Domowy hummus",
+            slug="domowy-hummus",
+            category=category,
+            description="Krotki opis przepisu",
+            ingredients_text="ciecierzyca",
+            steps_text="zmiksuj",
+            prep_time=10,
+        )
+
+        response = self.client.get("/")
+
+        self.assertContains(response, 'href="/przepisy/domowy-hummus/"')
+        self.assertNotContains(response, "Czytaj więcej")
 
 
 class TestBaseTemplate(TestCase):
@@ -164,20 +158,21 @@ class TestBaseTemplate(TestCase):
 
     def test_home_page_has_navbar(self):
         response = self.client.get("/")
-        self.assertContains(response, "Przepisy")
-        self.assertContains(response, "Sklep")
-        self.assertContains(response, "O nas")
-        self.assertContains(response, "Kontakt")
+        # Sketchbook nav uses lowercase handwritten labels
+        self.assertContains(response, "przepiśnik")
+        self.assertContains(response, "sklep")
+        self.assertContains(response, "o nas")
+        self.assertContains(response, "kontakt")
 
-    def test_home_page_has_cart_icon(self):
+    def test_home_page_has_cart_link(self):
         response = self.client.get("/")
-        self.assertContains(response, "bi-cart3")
         self.assertContains(response, 'aria-label="Koszyk"')
+        self.assertContains(response, "nav-cart")
 
     def test_home_page_has_footer(self):
         response = self.client.get("/")
         self.assertContains(response, "Kuchenna Komitywa")
-        self.assertContains(response, "Wszelkie prawa")
+        self.assertContains(response, "zrobione powoli, ręcznie")
 
     def test_home_page_has_skip_link(self):
         response = self.client.get("/")
@@ -185,11 +180,7 @@ class TestBaseTemplate(TestCase):
 
 
 class TestResponsiveLayout(TestCase):
-    """FOUND-03: Pages are responsive with Bootstrap 5."""
-
-    def test_bootstrap_css_included(self):
-        response = self.client.get("/")
-        self.assertContains(response, "bootstrap")
+    """FOUND-03: Pages are responsive (custom CSS + viewport meta)."""
 
     def test_viewport_meta_tag(self):
         response = self.client.get("/")
@@ -201,6 +192,11 @@ class TestResponsiveLayout(TestCase):
             response.content.decode(),
             r"/static/css/main(?:\.[0-9a-f]+)?\.css",
         )
+
+    def test_brand_fonts_loaded(self):
+        response = self.client.get("/")
+        self.assertContains(response, "DM+Serif+Display")
+        self.assertContains(response, "Caveat")
 
 
 class TestCookieBanner(TestCase):
@@ -237,36 +233,39 @@ class TestHeroSection(TestCase):
 
     def test_home_has_hero_section(self):
         response = self.client.get("/")
-        self.assertContains(response, "kk-hero")
+        self.assertContains(response, 'class="hero"')
+        self.assertContains(response, "hero-grid")
 
     def test_hero_has_headline(self):
         response = self.client.get("/")
-        self.assertContains(response, "Gotujemy z sercem")
+        # Sketchbook headline: "Wsp\u00f3lnie gotujemy z ro\u015blin"
+        self.assertContains(response, "Wsp\u00f3lnie")
+        self.assertContains(response, "gotujemy")
+        self.assertContains(response, "ro\u015blin")
 
     def test_hero_has_cta_button(self):
         response = self.client.get("/")
-        self.assertContains(response, "Zobacz przepisy")
-        self.assertContains(response, "kk-btn-primary")
+        self.assertContains(response, "otw\u00f3rz szkicownik")
+        self.assertContains(response, "btn-accent")
 
-    def test_hero_has_split_layout(self):
+    def test_hero_has_polaroid_stack(self):
         response = self.client.get("/")
-        self.assertContains(response, "col-lg-6")
+        self.assertContains(response, "hero-illus")
+        self.assertContains(response, "polaroid")
 
 
-class TestFeatureCards(TestCase):
-    """LAND-01: Feature cards section."""
+class TestAboutTeaser(TestCase):
+    """LAND-01: Sketchbook about teaser replaces feature cards."""
 
-    def test_feature_cards_present(self):
+    def test_about_teaser_present(self):
         response = self.client.get("/")
-        self.assertContains(response, "100% Ro\u015blinne")
-        self.assertContains(response, "Lokalne Sk\u0142adniki")
-        self.assertContains(response, "Odbi\u00f3r Osobisty")
+        self.assertContains(response, "I. \u00b7 kto gotuje")
+        self.assertContains(response, "cze\u015b\u0107, tu Tomasz")
 
-    def test_feature_icons_present(self):
+    def test_belief_card_present(self):
         response = self.client.get("/")
-        self.assertContains(response, "bi-flower1")
-        self.assertContains(response, "bi-geo-alt")
-        self.assertContains(response, "bi-shop")
+        self.assertContains(response, "w co wierzymy")
+        self.assertContains(response, "Sezonowo, lokalnie, powoli")
 
 
 class TestAboutPage(TestCase):

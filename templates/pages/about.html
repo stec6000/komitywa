@@ -1,32 +1,70 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}O nas - Kuchenna Komitywa{% endblock %}
+{% block title %}O nas — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="O nas">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <h1>O nas</h1>
+    <div class="wrap">
+        <div class="section-head">
+            <div>
+                <div class="section-number">I. · kto gotuje</div>
+                <h2 class="section-title">O nas</h2>
+            </div>
+            <div class="section-meta">Tomek · od 2013 roku</div>
+        </div>
 
-                <p>Kuchenna Komitywa to miejsce, gdzie miłość do roślin spotyka się z pasją do gotowania. Zaczęliśmy od prostego marzenia - udowodnić, że kuchnia roślinna może być smaczna, syta i pełna życia.</p>
+        <div class="about-grid">
+            <div class="about-photos">
+                <div class="polaroid">
+                    <div class="polaroid-img polaroid-img--photo">
+                        <img src="{% static 'img/nasza-historia.jpg' %}" alt="Tomek w swojej kuchni">
+                    </div>
+                    <div class="polaroid-caption">kuchnia, nasza historia</div>
+                </div>
+                <div class="polaroid">
+                    <div class="polaroid-img"></div>
+                    <div class="polaroid-caption">warsztat chlebowy</div>
+                </div>
+                <div class="about-annot">— my w swojej kuchni</div>
+            </div>
 
-                <h2>Nasza historia</h2>
-                <p>Zaczęło się tak, jak chyba u większości - od gotowania dla siebie i dla bliskich. Żadnego planu, żadnego biznesplanu, po prostu kuchnia, garnek i ciekawość, czy da się zrobić coś dobrego bez mięsa. Wyszło, że tak. I że najwyraźniej nie tylko mnie to smakuje.</p>
-                <p>Dziś Kuchenna Komitywa to moja kuchnia przeniesiona trochę dalej - w słoiki, w ciasta na zamówienie i w ebooki, które możesz ściągnąć i gotować u siebie. Wszystko robię ręcznie, z lokalnych produktów, bez kombinowania. Prosto i smacznie - tyle i aż tyle.</p>
+            <div>
+                <div class="about-greeting">cześć, tu Tomasz.</div>
+                <p class="about-lead">
+                    Prowadzę <span class="scribble">Kuchenną Komitywę</span> — miejsce, gdzie miłość do roślin spotyka się z pasją do gotowania.
+                    Zaczęło się od prostego marzenia: udowodnić, że kuchnia roślinna może być smaczna, syta i pełna życia.
+                </p>
 
-                <h2>Nasza misja</h2>
-                <p>Wierzymy, że dobre jedzenie może zmieniać świat - krok po kroku, talerz po talerzu. Chcemy pokazać, że kuchnia roślinna to nie wyrzeczenie, a odkrycie. Każdy nasz przepis to zaproszenie do wspólnego stołu.</p>
+                <h2 style="margin-top: 32px;">Nasza historia</h2>
+                <p class="about-body">
+                    Zaczęło się tak, jak chyba u większości — od gotowania dla siebie i dla bliskich. Żadnego planu, żadnego biznesplanu,
+                    po prostu kuchnia, garnek i ciekawość, czy da się zrobić coś dobrego bez mięsa. Wyszło, że tak. I że najwyraźniej nie tylko mnie to smakuje.
+                </p>
+                <p class="about-body">
+                    Dziś Kuchenna Komitywa to moja kuchnia przeniesiona trochę dalej — w słoiki, w ciasta na zamówienie i w ebooki, które
+                    możesz ściągnąć i gotować u siebie. Wszystko robię ręcznie, z lokalnych produktów, bez kombinowania.
+                </p>
 
-                <h2>Co nas wyróżnia</h2>
-                <ul>
-                    <li><strong>100% roślinne składniki</strong> - bez kompromisów, bez produktów odzwierzęcych</li>
-                    <li><strong>Lokalne źródła</strong> - współpracujemy z okolicznymi rolnikami i dostawcami</li>
-                    <li><strong>Ręczna produkcja</strong> - każde danie przygotowujemy z serca, nie na taśmie</li>
-                    <li><strong>Sezonowość</strong> - gotujemy z tym, co natura daje w danym momencie</li>
+                <div class="belief-card">
+                    <div class="belief-card-label">w co wierzymy</div>
+                    <p>
+                        Sezonowo, lokalnie, powoli. Bez produktów odzwierzęcych, bez ścinania dróg na skróty,
+                        bez śmiecenia. Gotowanie jako pretekst, żeby usiąść razem przy stole.
+                    </p>
+                </div>
+
+                <h2 style="margin-top: 32px;">Co nas wyróżnia</h2>
+                <ul class="about-body">
+                    <li><strong>100% roślinne składniki</strong> — bez kompromisów, bez produktów odzwierzęcych</li>
+                    <li><strong>Lokalne źródła</strong> — współpracujemy z okolicznymi rolnikami i dostawcami</li>
+                    <li><strong>Ręczna produkcja</strong> — każde danie przygotowuję z serca, nie na taśmie</li>
+                    <li><strong>Sezonowość</strong> — gotuję z tym, co natura daje w danym momencie</li>
                 </ul>
 
-                <p>Zapraszamy do naszej kuchni - wirtualnie i na żywo!</p>
+                <p style="margin-top: 32px;">
+                    <a href="{% url 'recipes:list' %}" class="btn btn-accent">otwórz przepiśnik →</a>
+                </p>
             </div>
         </div>
     </div>

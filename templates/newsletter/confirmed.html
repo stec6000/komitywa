@@ -1,18 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Zapis potwierdzony - Kuchenna Komitywa{% endblock %}
+{% block title %}Zapis potwierdzony — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="Zapis potwierdzony">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 text-center">
-                <i class="bi bi-check-circle" style="font-size: 3rem; color: var(--kk-sage);"></i>
-                <h1 style="font-family: var(--kk-font-heading);">Zapis potwierdzony!</h1>
-                <p>Dziękujemy! Twój zapis do newslettera Kuchennej Komitywy został potwierdzony.</p>
-                <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wróć do strony głównej</a>
-            </div>
-        </div>
+    <div class="wrap-narrow" style="text-align: center; padding: 60px 0;">
+        <div style="font-size: 64px; color: var(--accent); margin-bottom: 24px;" aria-hidden="true">✓</div>
+        <h1>jesteś w komitywie!</h1>
+        <p class="lead">Twój zapis do newslettera Kuchennej Komitywy został potwierdzony. Do niedzieli — pierwszy list już idzie.</p>
+        <p style="margin-top: 32px;">
+            <a href="{% url 'home' %}" class="btn btn-accent">na stronę główną →</a>
+        </p>
     </div>
 </section>
 {% endblock %}

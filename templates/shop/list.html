@@ -1,87 +1,99 @@
 {% extends "base.html" %}
 
-{% block title %}Sklep - Kuchenna Komitywa{% endblock %}
+{% block title %}Sklep — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
-<section class="kk-section">
-  <div class="container">
-    <h1>Sklep</h1>
-    <p class="mb-4">Nasze produkty - ebooki, dania w słoiku i ciasta</p>
-
-    <!-- Filter pills (reuse kk-filter-bar + kk-filter-pill from Phase 3) -->
-    <div class="kk-filter-bar mb-4">
-      <a href="{% url 'shop:list' %}" class="kk-filter-pill {% if not active_category %}kk-filter-pill--active{% endif %}">Wszystkie</a>
-      {% for cat in categories %}
-      <a href="{% url 'shop:list' %}?kategoria={{ cat.slug }}"
-         class="kk-filter-pill {% if active_category == cat.slug %}kk-filter-pill--active{% endif %}"
-         {% if active_category == cat.slug %}aria-current="page"{% endif %}>{{ cat.name }}</a>
-      {% endfor %}
-    </div>
-
-    {% if page_obj.object_list %}
-    <div class="row gy-4">
-      {% for product in page_obj %}
-      <div class="col-lg-4 col-md-6 col-12">
-        <!-- Product card per UI-SPEC Component 1 -->
-        <div class="card h-100 kk-product-card">
-          <div class="kk-product-card__img-wrapper">
-            {% if product.image %}
-            <img src="{{ product.image.url }}" alt="{{ product.title }}" class="kk-product-card__img">
-            {% else %}
-            <div class="kk-product-card__img-placeholder"><i class="bi bi-image" aria-hidden="true"></i></div>
-            {% endif %}
-            {% if product.category %}
-            <span class="kk-category-badge">{{ product.category.name }}</span>
-            {% endif %}
-            {% if product.type == "ebook" %}
-            <span class="kk-badge-digital">Cyfrowy</span>
-            {% endif %}
-          </div>
-          <div class="card-body d-flex flex-column">
-            <h3 class="card-title">{{ product.title }}</h3>
-            <p class="card-text flex-grow-1">{{ product.description|truncatechars:120 }}</p>
-            <div class="d-flex justify-content-between align-items-center mt-auto">
-              <span class="kk-price">{{ product.price }} zł</span>
-              <a href="{% url 'shop:detail' slug=product.slug %}" class="kk-link-arrow">Zobacz więcej &rarr;</a>
+<section class="kk-section" aria-label="Sklep">
+    <div class="wrap">
+        <div class="section-head">
+            <div>
+                <div class="section-number">III. · sklep</div>
+                <h2 class="section-title">Ebooki &amp; produkty<span class="section-annotation">— nasze ulubione</span></h2>
             </div>
-          </div>
+            <div class="section-meta">PDF natychmiast na mail · produkty z odbiorem osobistym</div>
         </div>
-      </div>
-      {% endfor %}
-    </div>
 
-    <!-- Pagination (same pattern as recipes) -->
-    {% if page_obj.has_other_pages %}
-    <nav aria-label="Paginacja produktów" class="mt-4">
-      <ul class="pagination kk-pagination justify-content-center">
-        {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?{% if active_category %}kategoria={{ active_category }}&{% endif %}page={{ page_obj.previous_page_number }}">Poprzednia</a></li>
-        {% endif %}
-        {% for num in page_obj.paginator.page_range %}
-        <li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?{% if active_category %}kategoria={{ active_category }}&{% endif %}page={{ num }}">{{ num }}</a></li>
-        {% endfor %}
-        {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?{% if active_category %}kategoria={{ active_category }}&{% endif %}page={{ page_obj.next_page_number }}">Następna</a></li>
-        {% endif %}
-      </ul>
-    </nav>
-    {% endif %}
+        <div class="tag-row" role="navigation" aria-label="Filtr kategorii">
+            <a href="{% url 'shop:list' %}"
+               class="tag {% if not active_category %}active{% endif %}"
+               {% if not active_category %}aria-current="page"{% endif %}>wszystko</a>
+            {% for cat in categories %}
+            <a href="{% url 'shop:list' %}?kategoria={{ cat.slug }}"
+               class="tag {% if active_category == cat.slug %}active{% endif %}"
+               {% if active_category == cat.slug %}aria-current="page"{% endif %}>{{ cat.name|lower }}</a>
+            {% endfor %}
+        </div>
 
-    {% else %}
-    <!-- Empty state per UI-SPEC Page States -->
-    <div class="text-center py-5">
-      {% if active_category %}
-      <i class="bi bi-shop d-block mb-3" style="font-size:64px;color:var(--kk-sage);" aria-hidden="true"></i>
-      <h2>Brak produktów w tej kategorii</h2>
-      <p>Ta kategoria jest jeszcze pusta. Sprawdź inne kategorie lub wróć do wszystkich produktów.</p>
-      <a href="{% url 'shop:list' %}" class="kk-link-arrow">Wszystkie produkty &rarr;</a>
-      {% else %}
-      <i class="bi bi-shop d-block mb-3" style="font-size:64px;color:var(--kk-sage);" aria-hidden="true"></i>
-      <h2>Sklep w przygotowaniu</h2>
-      <p>Pracujemy nad naszymi produktami. Wróć wkrótce - szykujemy dla Ciebie coś pysznego!</p>
-      {% endif %}
+        {% if page_obj.object_list %}
+        <div class="ebook-grid">
+            {% for product in page_obj %}
+            {% cycle "#6b7a3a" "#b6562e" "#8a5a2a" "#2e4a3a" "#a4762a" "#4a6b3a" "#7a3a3a" "#3a4a6b" as cover_color silent %}
+            {% cycle "-1deg" "1deg" "-0.5deg" "0.5deg" "-1.5deg" "1.5deg" "0deg" "-0.8deg" as cover_tilt silent %}
+            <a class="ebook" href="{% url 'shop:detail' slug=product.slug %}" aria-label="{{ product.title }}">
+                {% if product.type == "ebook" %}
+                <div class="ebook-cover" style="--cover: {{ cover_color }}; transform: rotate({{ cover_tilt }});">
+                    <div class="ebook-cover-num">{{ forloop.counter|stringformat:"02d" }}</div>
+                    <div>
+                        {% if product.category %}
+                        <div class="ebook-cover-hand">{{ product.category.name|lower }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="ebook-cover-title">{{ product.title }}</div>
+                    <div class="ebook-cover-bottom">Komitywa · ebook</div>
+                </div>
+                {% else %}
+                <div class="product-cover{% if product.image %} product-cover--photo{% endif %}" style="--img-bg: {{ cover_color }}; transform: rotate({{ cover_tilt }});">
+                    {% if product.image %}<img src="{{ product.image.url }}" alt="">{% endif %}
+                </div>
+                {% endif %}
+                <div class="ebook-info">
+                    <div>
+                        <div class="ebook-title">{{ product.title }}</div>
+                        <div class="ebook-meta">
+                            {% if product.type == "ebook" %}PDF · cyfrowy{% else %}odbiór osobisty{% endif %}
+                        </div>
+                    </div>
+                    <div class="ebook-price">{{ product.price|floatformat:"0" }} zł</div>
+                </div>
+                <div class="ebook-add">+ zobacz</div>
+            </a>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginacja produktów">
+            <ul class="kk-pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if active_category %}kategoria={{ active_category }}&{% endif %}page={{ page_obj.previous_page_number }}">«</a>
+                </li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?{% if active_category %}kategoria={{ active_category }}&{% endif %}page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% if active_category %}kategoria={{ active_category }}&{% endif %}page={{ page_obj.next_page_number }}">»</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="kk-empty-state">
+            {% if active_category %}
+            <h2>Pusta kategoria</h2>
+            <p>Tu jeszcze nic nie ma.</p>
+            <a href="{% url 'shop:list' %}" class="kk-link-arrow">wszystkie produkty →</a>
+            {% else %}
+            <h2>Sklep w przygotowaniu</h2>
+            <p>Pracujemy nad ebookami i produktami. Zajrzyj wkrótce.</p>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
-  </div>
 </section>
 {% endblock %}

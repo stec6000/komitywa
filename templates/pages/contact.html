@@ -1,42 +1,58 @@
 {% extends "base.html" %}
 
-{% block title %}Kontakt - Kuchenna Komitywa{% endblock %}
+{% block title %}Kontakt — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="Kontakt">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <h1>Kontakt</h1>
-                <p>Masz pytania? Chcesz złożyć zamówienie na ciasto lub dowiedzieć się więcej o naszej ofercie? Skontaktuj się z nami!</p>
+    <div class="wrap">
+        <div class="section-head">
+            <div>
+                <div class="section-number">— napisz, zadzwoń</div>
+                <h2 class="section-title">Kontakt</h2>
+            </div>
+            <div class="section-meta">odpowiadamy w 1-2 dni</div>
+        </div>
 
-                <div class="mt-4">
-                    <div class="mb-4">
-                        <div class="kk-contact-label mb-1">Firma</div>
-                        <div>Tomasz Steckiewicz Kuchenna Komitywa</div>
-                    </div>
+        <div class="row">
+            <div class="col-lg-7">
+                <p class="lead">
+                    Masz pytania? Chcesz złożyć zamówienie na ciasto lub dowiedzieć się więcej o naszej ofercie?
+                    Napisz lub zadzwoń.
+                </p>
 
-                    <div class="mb-4">
-                        <div class="kk-contact-label mb-1">NIP</div>
-                        <div>5423485438</div>
-                    </div>
+                <div style="display: grid; grid-template-columns: auto 1fr; gap: 14px 24px; margin-top: 24px;">
+                    <div class="kk-contact-label">firma</div>
+                    <div>Tomasz Steckiewicz Kuchenna Komitywa</div>
 
-                    <div class="mb-4">
-                        <div class="kk-contact-label mb-1">Adres</div>
-                        <div>ul. Bukowa 14</div>
-                        <div>15-796 Białystok</div>
-                    </div>
+                    <div class="kk-contact-label">NIP</div>
+                    <div class="mono">5423485438</div>
 
-                    <div class="mb-4">
-                        <div class="kk-contact-label mb-1">Telefon</div>
-                        <div><a href="tel:+48511562100" class="text-decoration-none" style="color: var(--kk-text);">511 562 100</a></div>
-                    </div>
+                    <div class="kk-contact-label">adres</div>
+                    <div>ul. Bukowa 14<br>15-796 Białystok</div>
 
-                    <div class="mb-4">
-                        <div class="kk-contact-label mb-1">Email</div>
-                        <div><a href="mailto:kontakt@kuchennakomitywa.pl" class="text-decoration-none" style="color: var(--kk-text);">kontakt@kuchennakomitywa.pl</a></div>
-                    </div>
+                    <div class="kk-contact-label">telefon</div>
+                    <div><a href="tel:+48511562100" style="text-decoration: none; color: inherit;">511 562 100</a></div>
+
+                    <div class="kk-contact-label">e-mail</div>
+                    <div><a href="mailto:kontakt@kuchennakomitywa.pl" style="text-decoration: none; color: inherit;">kontakt@kuchennakomitywa.pl</a></div>
                 </div>
+            </div>
+
+            <div class="col-lg-5">
+                <aside class="belief-card" style="margin-top: 0;">
+                    <div class="belief-card-label">odbiór osobisty</div>
+                    <p>
+                        Dania w słoiku i ciasta odbierasz pod adresem ul. Bukowa 14, Białystok.
+                        Termin ustalimy mailem zaraz po opłaceniu zamówienia.
+                    </p>
+                </aside>
+
+                <aside class="belief-card">
+                    <div class="belief-card-label">ebooki</div>
+                    <p>
+                        PDF przyjdzie automatycznie na Twój e-mail w ciągu kilku minut od zaksięgowania płatności.
+                    </p>
+                </aside>
             </div>
         </div>
     </div>

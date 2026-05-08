@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}Wypisano z newslettera - Kuchenna Komitywa{% endblock %}
+{% block title %}Wypisano z newslettera — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="Wypisano z newslettera">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 text-center">
-                {% if already_unsubscribed %}
-                <h1 style="font-family: var(--kk-font-heading);">Już wypisany/a</h1>
-                <p>Ten adres email został już wcześniej wypisany z newslettera.</p>
-                {% else %}
-                <h1 style="font-family: var(--kk-font-heading);">Wypisano z newslettera</h1>
-                <p>Zostałeś/aś wypisany/a z newslettera Kuchennej Komitywy. Szkoda, że odchodzisz!</p>
-                {% endif %}
-                <a href="{% url 'home' %}" class="btn kk-btn-primary mt-3">Wróć do strony głównej</a>
-            </div>
-        </div>
+    <div class="wrap-narrow" style="text-align: center; padding: 60px 0;">
+        {% if already_unsubscribed %}
+        <div class="hero-eyebrow" style="justify-content: center;">już bez listów</div>
+        <h1>Już wypisany/a</h1>
+        <p class="lead">Ten adres został już wcześniej wypisany z newslettera.</p>
+        {% else %}
+        <div class="hero-eyebrow" style="justify-content: center;">do zobaczenia</div>
+        <h1>Wypisano z newslettera</h1>
+        <p class="lead">Zostałeś/aś wypisany/a z newslettera Kuchennej Komitywy. Szkoda, że odchodzisz!</p>
+        {% endif %}
+        <p style="margin-top: 32px;">
+            <a href="{% url 'home' %}" class="btn btn-accent">na stronę główną →</a>
+        </p>
     </div>
 </section>
 {% endblock %}
