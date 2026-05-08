@@ -16,3 +16,4 @@ Assets:
 - `krem-pomidorowy.jpg` - https://images.pexels.com/photos/27098514/pexels-photo-27098514.jpeg?auto=compress&cs=tinysrgb&w=1400
 - `chlebek-bananowy.jpg` - https://images.pexels.com/photos/4114120/pexels-photo-4114120.jpeg?auto=compress&cs=tinysrgb&w=1400
 - `makaron-z-pesto.jpg` - https://images.pexels.com/photos/6327594/pexels-photo-6327594.jpeg?auto=compress&cs=tinysrgb&w=1400
+- `krem-z-bialej-fasoli.jpg` - User-supplied image (ChatGPT-generated, 2026-05-08).
