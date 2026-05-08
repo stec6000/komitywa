@@ -640,6 +640,16 @@ section { padding: 70px 0; position: relative; z-index: 2; }
 .recipe-img--photo img {
     width: 100%; height: 100%;
     object-fit: cover;
+    transition: transform 700ms var(--kk-ease-smooth), filter 700ms ease;
+}
+.kk-product-card:hover .kk-product-card__img {
+    transform: scale(1.05);
+    filter: saturate(1.05);
+}
+
+.kk-product-card:focus-within .kk-product-card__img {
+    transform: scale(1.05);
+    filter: saturate(1.05);
 }
 .num-stamp {
     position: absolute;
