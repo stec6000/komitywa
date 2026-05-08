@@ -7,7 +7,7 @@ current_plan: 0
 status: planning
 stopped_at: ~
 last_updated: "2026-04-16T00:00:00.000Z"
-last_activity: 2026-05-08 -- Completed quick task 260508-hne: dodaj przepis krem z bialej fasoli
+last_activity: 2026-05-08 -- Completed quick task 260508-ibb: tagi + servings + difficulty + notes na Recipe
 progress:
   total_phases: 2
   completed_phases: 0
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 11 — HTTPS & Bezpieczeństwo
 Plan: —
 Status: Not started (roadmap defined, awaiting plan)
-Last activity: 2026-05-08 — Completed quick task 260508-hne: dodaj przepis krem z bialej fasoli ze szparagami i pomidorkami
+Last activity: 2026-05-08 — Completed quick task 260508-ibb: system tagów (M2M) + servings + difficulty + notes na Recipe
 
 ## Milestone Status
 
@@ -91,11 +91,12 @@ v1.1 key decisions:
 
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260412-g5k | Zaktualizuj stronę kontakt: adres ul. Bukowa 14 15-796 Białystok, telefon 511562100, usuń godziny otwarcia | 2026-04-12 | ffff1d3 | [260412-g5k-zaktualizuj-stron-kontakt-adres-ul-bukow](.planning/quick/260412-g5k-zaktualizuj-stron-kontakt-adres-ul-bukow/) |
-| 260412-gkc | Przepisz sekcję Nasza historia na stronie O nas — luźny ton, bez Warszawy, prosta historia prostego chłopaka | 2026-04-12 | b4964a0 | [260412-gkc-przepisz-sekcj-nasza-historia-na-stronie](.planning/quick/260412-gkc-przepisz-sekcj-nasza-historia-na-stronie/) |
-| 260508-hne | Dodaj przepis: krem z białej fasoli ze szparagami i pomidorkami | 2026-05-08 | b1bb24e | [260508-hne-dodaj-przepis-krem-z-bia-ej-fasoli-ze-sz](.planning/quick/260508-hne-dodaj-przepis-krem-z-bia-ej-fasoli-ze-sz/) |
+| # | Description | Date | Commit | Status | Directory |
+|---|-------------|------|--------|--------|-----------|
+| 260412-g5k | Zaktualizuj stronę kontakt: adres ul. Bukowa 14 15-796 Białystok, telefon 511562100, usuń godziny otwarcia | 2026-04-12 | ffff1d3 | — | [260412-g5k-zaktualizuj-stron-kontakt-adres-ul-bukow](.planning/quick/260412-g5k-zaktualizuj-stron-kontakt-adres-ul-bukow/) |
+| 260412-gkc | Przepisz sekcję Nasza historia na stronie O nas — luźny ton, bez Warszawy, prosta historia prostego chłopaka | 2026-04-12 | b4964a0 | — | [260412-gkc-przepisz-sekcj-nasza-historia-na-stronie](.planning/quick/260412-gkc-przepisz-sekcj-nasza-historia-na-stronie/) |
+| 260508-hne | Dodaj przepis: krem z białej fasoli ze szparagami i pomidorkami | 2026-05-08 | b1bb24e | — | [260508-hne-dodaj-przepis-krem-z-bia-ej-fasoli-ze-sz](.planning/quick/260508-hne-dodaj-przepis-krem-z-bia-ej-fasoli-ze-sz/) |
+| 260508-ibb | Recipe: tagi (M2M Tag), servings, difficulty, notes + filtr tagów + frontend | 2026-05-08 | ffa99b0 | Verified | [260508-ibb-recipe-dodaj-tagi-m2m-tag-servings-diffi](.planning/quick/260508-ibb-recipe-dodaj-tagi-m2m-tag-servings-diffi/) |
 
 ## Session Continuity
 
