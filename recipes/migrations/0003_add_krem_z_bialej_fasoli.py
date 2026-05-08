@@ -14,7 +14,7 @@ RECIPE = {
     "slug": "krem-z-bialej-fasoli-ze-szparagami",
     "category_slug": "przekaski",
     "description": (
-        "Aksamitny krem z bialej fasoli i tofu z odswiezajaca nuta cytryny i mietta, "
+        "Aksamitny krem z bialej fasoli i tofu z odswiezajaca nuta cytryny i miety, "
         "podany z pieczonymi szparagami, pomidorkami i prazonymi migdalami. "
         "Najlepiej smakuje z chrupiacym pieczywem -- jako lekka kolacja albo elegancka przekaska na stol."
     ),
