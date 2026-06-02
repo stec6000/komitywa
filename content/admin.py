@@ -5,6 +5,7 @@ from .models import WeeklyResearch
 
 @admin.register(WeeklyResearch)
 class WeeklyResearchAdmin(admin.ModelAdmin):
+    change_form_template = "admin/content/weeklyresearch/change_form.html"
     list_display = ("week_label", "date_from", "date_to", "status", "created_at")
     list_filter = ("status",)
     search_fields = ("week_label",)

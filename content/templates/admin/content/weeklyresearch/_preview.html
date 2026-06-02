@@ -1,0 +1,98 @@
+{% load content_extras %}
+<div class="kk-preview">
+  <h2 class="kk-preview-heading">Gotowy content do skopiowania</h2>
+  <div class="kk-tabs">
+    <input type="radio" id="kk-tab-blog" name="kk-tab" checked>
+    <input type="radio" id="kk-tab-posts" name="kk-tab">
+    <input type="radio" id="kk-tab-stories" name="kk-tab">
+    <label for="kk-tab-blog">Blog</label>
+    <label for="kk-tab-posts">IG Posty ({{ data.instagram_posts|length }})</label>
+    <label for="kk-tab-stories">IG Stories ({{ data.instagram_stories|length }})</label>
+
+    {# ===== BLOG ===== #}
+    <div class="kk-panel kk-panel-blog">
+      {% with b=data.blog %}
+        <h1 class="kk-blog-title">{{ b.title }}</h1>
+        <button type="button" class="kk-copy-btn" data-copy-text="{{ b.title }}">Skopiuj tytuł</button>
+
+        <p class="kk-blog-intro">{{ b.intro|linebreaksbr }}</p>
+        <button type="button" class="kk-copy-btn" data-copy-text="{{ b.intro }}">Skopiuj intro</button>
+
+        {% for s in b.sections %}
+          <section class="kk-blog-section">
+            <h3>{{ s.heading }}</h3>
+            <p>{{ s.body|linebreaksbr }}</p>
+            <button type="button" class="kk-copy-btn" data-copy-text="## {{ s.heading }}&#10;&#10;{{ s.body }}">Skopiuj sekcję</button>
+          </section>
+        {% endfor %}
+
+        <div class="kk-tags-chips">
+          {% for t in b.tags %}<span class="kk-chip">{{ t }}</span>{% endfor %}
+        </div>
+
+        <div class="kk-meta-box">
+          <strong>Meta description:</strong> {{ b.meta_description }}
+        </div>
+        <button type="button" class="kk-copy-btn" data-copy-text="{{ b.meta_description }}">Skopiuj meta</button>
+
+        <div class="kk-bulk-actions">
+          <button type="button" class="kk-copy-btn kk-copy-btn-primary"
+                  data-copy-text="# {{ b.title }}&#10;&#10;{{ b.intro }}&#10;&#10;{% for s in b.sections %}## {{ s.heading }}&#10;&#10;{{ s.body }}&#10;&#10;{% endfor %}**Tagi:** {% for t in b.tags %}#{{ t }} {% endfor %}&#10;&#10;_{{ b.meta_description }}_">
+            Skopiuj całość bloga (Markdown)
+          </button>
+        </div>
+      {% endwith %}
+    </div>
+
+    {# ===== POSTS ===== #}
+    <div class="kk-panel kk-panel-posts">
+      {% for p in data.instagram_posts %}
+        <article class="kk-post-card">
+          <div class="kk-post-number">Post {{ forloop.counter }}/{{ data.instagram_posts|length }}</div>
+          <div class="kk-post-caption">{{ p.caption }}</div>
+          <div class="kk-post-hashtags">
+            {% for h in p.hashtags %}<span>#{{ h }}</span> {% endfor %}
+          </div>
+          <div class="kk-post-visual-hint">{{ p.visual_hint }}</div>
+          <div class="kk-post-actions">
+            <button type="button" class="kk-copy-btn"
+                    data-copy-text="{{ p.caption }}&#10;&#10;{% for h in p.hashtags %}#{{ h }} {% endfor %}">
+              Skopiuj post
+            </button>
+            <button type="button" class="kk-copy-btn" data-copy-text="{{ p.visual_hint }}">Skopiuj wizualkę</button>
+          </div>
+        </article>
+      {% endfor %}
+      <div class="kk-bulk-actions">
+        <button type="button" class="kk-copy-btn kk-copy-btn-primary"
+                data-copy-text="{% for p in data.instagram_posts %}{% if not forloop.first %}&#10;&#10;----&#10;&#10;{% endif %}{{ p.caption }}&#10;&#10;{% for h in p.hashtags %}#{{ h }} {% endfor %}&#10;&#10;Wizualka: {{ p.visual_hint }}{% endfor %}">
+          Skopiuj wszystkie posty
+        </button>
+      </div>
+    </div>
+
+    {# ===== STORIES ===== #}
+    <div class="kk-panel kk-panel-stories">
+      <div class="kk-stories-grid">
+        {% for s in data.instagram_stories %}
+          <div class="kk-story-wrapper">
+            <div class="kk-story-card"
+                 style="background-color: {{ s.bg_color }}; color: {{ s.bg_color|text_color_for_bg }};">
+              <div class="kk-story-emoji">{{ s.emoji }}</div>
+              <div class="kk-story-text">{{ s.text }}</div>
+              <div class="kk-story-type">{{ s.slide_type }}</div>
+            </div>
+            <div class="kk-story-hex">{{ s.bg_color }}</div>
+            <button type="button" class="kk-copy-btn" data-copy-text="{{ s.text }}">Tekst</button>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="kk-bulk-actions">
+        <button type="button" class="kk-copy-btn kk-copy-btn-primary"
+                data-copy-text="{% for s in data.instagram_stories %}{{ forloop.counter }}. [{{ s.slide_type }}] {{ s.emoji }} {{ s.text }}&#10;{% endfor %}">
+          Skopiuj wszystkie teksty stories
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
