@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     "recipes",
     "shop",
     "newsletter",
+    "content",
 ]
 
 MIDDLEWARE = [
@@ -232,6 +233,9 @@ DEFAULT_FROM_EMAIL = env(
     "DEFAULT_FROM_EMAIL",
     default="Kuchenna Komitywa <noreply@kuchennakomitywa.pl>",
 )
+
+# Anthropic (weekly research pipeline — content app)
+ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
 
 # Logging
 os.makedirs(BASE_DIR / "logs", exist_ok=True)
