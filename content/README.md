@@ -9,6 +9,8 @@ Komenda `python manage.py run_weekly_research` wykonuje dwa kroki:
 1. **Research (call 1)** — Claude przeczesuje sieć w poszukiwaniu konkretów z 7 ostatnich dni: nowinki wegańskiego cukiernictwa, sezonowość, food tech, polski rynek wegański, ciekawostki kulinarne. Wynik to surowy tekst (~15-25k znaków, po polsku).
 2. **Format (call 2)** — Drugi call Claude'a (bez web searcha) przerabia surowy research na gotowy JSON: artykuł na blog (600-900 słów, 3-4 sekcje), 5 postów na Instagram (z hashtagami i podpowiedziami zdjęciowymi), 6-7 slajdów stories (z kolorami marki).
 
+Pomiędzy call 1 a call 2 komenda czeka 60s, żeby nie wpaść w rate limit Anthropic Tier 1. Na auto-retry call 2 (1×) komenda również czeka 60s przed drugą próbą.
+
 Wynik trafia do modelu `content.WeeklyResearch` w bazie. Klucz to `week_label` (np. `2026-W22`) — tydzień researchu to **poprzedni tydzień ISO** względem dnia uruchomienia (poniedziałek-niedziela).
 
 ## Gdzie to oglądać
@@ -50,6 +52,11 @@ cd ~/domains/kuchennakomitywa.pl/public_python
 ~/.virtualenvs/komitywa/bin/python manage.py run_weekly_research --force
 ```
 
+**Z `--retry-format`** — pomija call 1, robi tylko call 2 na istniejącym `raw_research`:
+```bash
+~/.virtualenvs/komitywa/bin/python manage.py run_weekly_research --retry-format
+```
+
 **Lokalnie** (do testów):
 ```bash
 .venv/bin/python manage.py run_weekly_research
@@ -59,7 +66,15 @@ cd ~/domains/kuchennakomitywa.pl/public_python
 
 Najczęstsza przyczyna: skończyło się saldo na koncie Anthropic. Doładuj kredyty na <https://console.anthropic.com/settings/billing>, potem **`--force`** — komenda przerobi obie fazy od nowa.
 
-> ⚠️ `--force` aktualnie powtarza też call 1 (z web searchem — droższy). Jeśli chcesz tylko powtórzyć formatowanie istniejącego researchu (~10× taniej), trzeba dopisać flagę `--retry-format` do komendy — daj znać, dorobię.
+**Tańsza opcja — `--retry-format`:** jeśli `raw_research` w bazie jest OK, a padło tylko formatowanie, użyj:
+
+```bash
+~/.virtualenvs/komitywa/bin/python manage.py run_weekly_research --retry-format
+```
+
+Komenda pomija drogi call 1 (web search), używa istniejącego `raw_research` z bazy i robi tylko call 2 (format). Koszt: ~$0.02-0.05 zamiast pełnych $0.10-0.20.
+
+`--retry-format` jest mutually exclusive z `--force` (nie ma sensu wymuszać call 1 i jednocześnie go pomijać).
 
 ## Idempotencja
 

@@ -1,4 +1,5 @@
 import json
+import time
 from datetime import date, timedelta
 
 from django.conf import settings
@@ -90,6 +91,29 @@ Research:
 """
 
 
+# Obserwowane fail-e Sonnet 4.6 — model zwraca nieescape'owane cudzysłowy
+# w polskich tekstach (np. „brownie"), co rozwala json.loads(). Dodajemy w runtime,
+# zeby nie modyfikowac VERBATIM FORMAT_PROMPT (verbatim z briefu, patrz PROMPTS-VERBATIM.md).
+JSON_STRICTNESS_ADDENDUM = (
+    "\n\nKRYTYCZNE: zwroc WYLACZNIE prawidlowy, parsowalny JSON. "
+    "Kazdy cudzyslow wewnatrz stringa MUSI byc escapowany jako \\\". "
+    "Zadnych komentarzy, zadnego tekstu poza JSON-em."
+)
+
+
+def _strip_markdown_fences(raw_format: str) -> str:
+    """Sciagamy ewentualne fence'y markdown z odpowiedzi modelu."""
+    if raw_format.startswith("```"):
+        raw_format = raw_format.split("\n", 1)[1] if "\n" in raw_format else raw_format
+        if raw_format.endswith("```"):
+            raw_format = raw_format.rsplit("```", 1)[0]
+        raw_format = raw_format.strip()
+        # Usun ewentualny prefix "json" po pierwszym fence:
+        if raw_format.startswith("json\n"):
+            raw_format = raw_format[5:].strip()
+    return raw_format
+
+
 class Command(BaseCommand):
     help = "Uruchamia tygodniowy research + format na contentu (call 1 + call 2 do Anthropic)."
 
@@ -99,8 +123,65 @@ class Command(BaseCommand):
             action="store_true",
             help="Wymus ponowne wygenerowanie nawet jesli status to 'formatted'.",
         )
+        parser.add_argument(
+            "--retry-format",
+            action="store_true",
+            help="Pomija call 1, uzywa istniejacego raw_research i robi tylko call 2 (format).",
+        )
+
+    def _call_format(self, client, prompt: str) -> dict:
+        """Wykonuje call 2 (format) z auto-retry na json.JSONDecodeError.
+
+        Logika:
+        1. call → ekstrakcja text → strip fence → json.loads. Sukces → return.
+        2. json.JSONDecodeError → warning z pos/lineno/colno + 100 znakow kontekstu
+           → sleep 60s → drugi call z TYM SAMYM promptem → strip fence → json.loads.
+        3. Drugi tez pada → CommandError z fragmentami obu blędow.
+        """
+
+        def _do_call() -> str:
+            response = client.messages.create(
+                model="claude-sonnet-4-6",
+                max_tokens=8000,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            text = "".join(
+                block.text
+                for block in response.content
+                if getattr(block, "type", None) == "text"
+            ).strip()
+            return _strip_markdown_fences(text)
+
+        text = _do_call()
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError as exc:
+            context = text[max(0, exc.pos - 50):exc.pos + 50]
+            self.stderr.write(self.style.WARNING(
+                f"[2/2] JSONDecodeError na 1. probie: {exc} "
+                f"(pos={exc.pos}, lineno={exc.lineno}, colno={exc.colno}). "
+                f"Kontekst (~100 znakow wokol pos): {context!r}"
+            ))
+            self.stderr.write(self.style.WARNING("[2/2] Retry za 60s..."))
+            time.sleep(60)
+            text2 = _do_call()
+            try:
+                return json.loads(text2)
+            except json.JSONDecodeError as exc2:
+                raise CommandError(
+                    f"call 2 (format) JSON parse FAIL po 2 probach. "
+                    f"1: {exc} | pos={exc.pos}. "
+                    f"2: {exc2} | pos={exc2.pos}. "
+                    f"Raw2 (truncated 2000): {text2[:2000]}"
+                ) from exc2
 
     def handle(self, *args, **options):
+        # Walidacja konfliktu flag:
+        if options["force"] and options["retry_format"]:
+            raise CommandError(
+                "--force i --retry-format jednoczesnie nie ma sensu — wybierz jedno."
+            )
+
         today = date.today()
         # Poniedzialek tego tygodnia:
         current_monday = today - timedelta(days=today.weekday())
@@ -113,7 +194,12 @@ class Command(BaseCommand):
         week_label = f"{iso_year}-W{iso_week:02d}"
 
         existing = WeeklyResearch.objects.filter(week_label=week_label).first()
-        if existing and existing.status == "formatted" and not options["force"]:
+        if (
+            existing
+            and existing.status == "formatted"
+            and not options["force"]
+            and not options["retry_format"]
+        ):
             self.stdout.write(
                 self.style.WARNING(
                     f"WeeklyResearch dla {week_label} juz istnieje ze statusem 'formatted'. "
@@ -128,21 +214,6 @@ class Command(BaseCommand):
                 "ANTHROPIC_API_KEY nie jest ustawiony (settings/.env)."
             )
 
-        row, _ = WeeklyResearch.objects.get_or_create(
-            week_label=week_label,
-            defaults={
-                "date_from": date_from,
-                "date_to": date_to,
-                "status": "pending",
-            },
-        )
-        # Reset stanu przy --force lub po failed:
-        row.date_from = date_from
-        row.date_to = date_to
-        row.status = "pending"
-        row.error_message = ""
-        row.save(update_fields=["date_from", "date_to", "status", "error_message", "updated_at"])
-
         try:
             from anthropic import Anthropic
         except ImportError as exc:
@@ -152,85 +223,94 @@ class Command(BaseCommand):
 
         client = Anthropic(api_key=api_key)
 
-        self.stdout.write(self.style.NOTICE(
-            f"[1/2] Research dla {week_label} ({date_from} – {date_to})..."
-        ))
-        try:
-            research_response = client.messages.create(
-                model="claude-sonnet-4-6",
-                max_tokens=8000,
-                tools=[{"type": "web_search_20250305", "name": "web_search"}],
-                messages=[
-                    {
-                        "role": "user",
-                        "content": RESEARCH_PROMPT.format(
-                            date_from=date_from.isoformat(),
-                            date_to=date_to.isoformat(),
-                        ),
-                    }
-                ],
-            )
-            raw_research = "".join(
-                block.text
-                for block in research_response.content
-                if getattr(block, "type", None) == "text"
-            ).strip()
-            if not raw_research:
-                raise RuntimeError("Pusty research po wyfiltrowaniu blokow text.")
-            row.raw_research = raw_research
-            row.status = "research_done"
-            row.save(update_fields=["raw_research", "status", "updated_at"])
-            self.stdout.write(self.style.SUCCESS(
-                f"[1/2] OK — {len(raw_research)} znakow researchu."
-            ))
-        except Exception as exc:
-            row.status = "failed"
-            row.error_message = f"call 1 (research): {exc}"
-            row.save(update_fields=["status", "error_message", "updated_at"])
-            self.stderr.write(self.style.ERROR(f"[1/2] FAIL: {exc}"))
-            raise
-
-        self.stdout.write(self.style.NOTICE(f"[2/2] Formatowanie JSON dla {week_label}..."))
-        try:
-            format_message = FORMAT_PROMPT.replace("{raw_research}", raw_research)
-            format_response = client.messages.create(
-                model="claude-sonnet-4-6",
-                max_tokens=8000,
-                messages=[{"role": "user", "content": format_message}],
-            )
-            raw_format = "".join(
-                block.text
-                for block in format_response.content
-                if getattr(block, "type", None) == "text"
-            ).strip()
-            # Sciagamy ewentualne fence'y markdown:
-            if raw_format.startswith("```"):
-                raw_format = raw_format.split("\n", 1)[1] if "\n" in raw_format else raw_format
-                if raw_format.endswith("```"):
-                    raw_format = raw_format.rsplit("```", 1)[0]
-                raw_format = raw_format.strip()
-                # Usun ewentualny prefix "json" po pierwszym fence:
-                if raw_format.startswith("json\n"):
-                    raw_format = raw_format[5:].strip()
-            try:
-                parsed = json.loads(raw_format)
-            except json.JSONDecodeError as exc:
-                truncated = raw_format[:2000]
-                row.status = "failed"
-                row.error_message = (
-                    f"call 2 (format) JSON parse error: {exc}. "
-                    f"Raw (truncated 2000): {truncated}"
+        if options["retry_format"]:
+            # Galaz A: pomijamy call 1, ladujemy istniejacy raw_research.
+            row = WeeklyResearch.objects.filter(week_label=week_label).first()
+            if row is None:
+                raise CommandError(
+                    f"Brak rekordu WeeklyResearch dla tygodnia {week_label}, "
+                    f"nie ma czego retry-owac."
                 )
-                row.save(update_fields=["status", "error_message", "updated_at"])
-                self.stderr.write(self.style.ERROR(f"[2/2] FAIL: nie udalo sie sparsowac JSON: {exc}"))
-                raise CommandError("Format JSON parse error.") from exc
-            row.formatted_json = parsed
-            row.status = "formatted"
-            row.save(update_fields=["formatted_json", "status", "updated_at"])
-            self.stdout.write(self.style.SUCCESS(
-                f"[2/2] OK — JSON zapisany ({len(raw_format)} znakow surowych)."
+            if not row.raw_research:
+                raise CommandError(
+                    f"raw_research dla {week_label} jest pusty, nie ma czego formatowac."
+                )
+            raw_research = row.raw_research
+            self.stdout.write(self.style.NOTICE(
+                f"[--retry-format] Pomijam call 1, uzywam istniejacego raw_research "
+                f"({len(raw_research)} znakow)."
             ))
-        except CommandError:
+        else:
+            # Galaz B: normalny flow — get_or_create + reset + call 1.
+            row, _ = WeeklyResearch.objects.get_or_create(
+                week_label=week_label,
+                defaults={
+                    "date_from": date_from,
+                    "date_to": date_to,
+                    "status": "pending",
+                },
+            )
+            # Reset stanu przy --force lub po failed:
+            row.date_from = date_from
+            row.date_to = date_to
+            row.status = "pending"
+            row.error_message = ""
+            row.save(update_fields=["date_from", "date_to", "status", "error_message", "updated_at"])
+
+            self.stdout.write(self.style.NOTICE(
+                f"[1/2] Research dla {week_label} ({date_from} – {date_to})..."
+            ))
+            try:
+                research_response = client.messages.create(
+                    model="claude-sonnet-4-6",
+                    max_tokens=8000,
+                    tools=[{"type": "web_search_20250305", "name": "web_search"}],
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": RESEARCH_PROMPT.format(
+                                date_from=date_from.isoformat(),
+                                date_to=date_to.isoformat(),
+                            ),
+                        }
+                    ],
+                )
+                raw_research = "".join(
+                    block.text
+                    for block in research_response.content
+                    if getattr(block, "type", None) == "text"
+                ).strip()
+                if not raw_research:
+                    raise RuntimeError("Pusty research po wyfiltrowaniu blokow text.")
+                row.raw_research = raw_research
+                row.status = "research_done"
+                row.save(update_fields=["raw_research", "status", "updated_at"])
+                self.stdout.write(self.style.SUCCESS(
+                    f"[1/2] OK — {len(raw_research)} znakow researchu."
+                ))
+            except Exception as exc:
+                row.status = "failed"
+                row.error_message = f"call 1 (research): {exc}"
+                row.save(update_fields=["status", "error_message", "updated_at"])
+                self.stderr.write(self.style.ERROR(f"[1/2] FAIL: {exc}"))
+                raise
+
+            # Pauza 60s miedzy call 1 a call 2 — Tier 1 rate limit safety.
+            self.stdout.write(self.style.NOTICE(
+                "Pauza 60s przed call 2 (Tier 1 rate limit safety)..."
+            ))
+            time.sleep(60)
+
+        # Wspolny blok call 2 (oba galezie laduja tu z raw_research zdefiniowanym).
+        self.stdout.write(self.style.NOTICE(f"[2/2] Formatowanie JSON dla {week_label}..."))
+        prompt = FORMAT_PROMPT.replace("{raw_research}", raw_research) + JSON_STRICTNESS_ADDENDUM
+        try:
+            parsed = self._call_format(client, prompt)
+        except CommandError as exc:
+            row.status = "failed"
+            row.error_message = str(exc)
+            row.save(update_fields=["status", "error_message", "updated_at"])
+            self.stderr.write(self.style.ERROR(f"[2/2] FAIL: {exc}"))
             raise
         except Exception as exc:
             row.status = "failed"
@@ -238,5 +318,11 @@ class Command(BaseCommand):
             row.save(update_fields=["status", "error_message", "updated_at"])
             self.stderr.write(self.style.ERROR(f"[2/2] FAIL: {exc}"))
             raise
+
+        row.formatted_json = parsed
+        row.status = "formatted"
+        row.error_message = ""
+        row.save(update_fields=["formatted_json", "status", "error_message", "updated_at"])
+        self.stdout.write(self.style.SUCCESS(f"[2/2] OK — JSON zapisany."))
 
         self.stdout.write(self.style.SUCCESS(f"Pipeline ukonczony dla {week_label}."))
