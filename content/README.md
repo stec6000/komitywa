@@ -80,29 +80,33 @@ Faktyczny koszt sprawdzisz na <https://console.anthropic.com/settings/usage>.
 
 ## Czy odpala się sam?
 
-**Aktualnie: NIE.** Komenda jest dostępna, ale nie ma jeszcze wpisu w cronie. Trzeba ją uruchamiać ręcznie albo dorzucić cron na serwerze.
+**TAK — co poniedziałek o 06:00 CEST.** Cron jest aktywny na serwerze `panel84.mydevil.net`. Pierwsze automatyczne uruchomienie: najbliższy poniedziałek 06:00 (czas polski).
 
-### Jak włączyć automat (cron na MyDevil)
-
-Logujesz się na serwer i:
-```bash
-# 1. Otwórz crontab edytora (vi)
-crontab -e
-
-# 2. Dorzuć linię (każdy poniedziałek o 7:00 rano)
-0 7 * * 1 cd ~/domains/kuchennakomitywa.pl/public_python && ~/.virtualenvs/komitywa/bin/python manage.py run_weekly_research >> ~/domains/kuchennakomitywa.pl/logs/weekly_research.log 2>&1
-
-# 3. Zapisz i wyjdź (vi: ESC, :wq, Enter)
-
-# Podejrzyj listę:
-crontab -l
+Aktualny wpis crontab:
+```
+0 6 * * 1 cd /usr/home/jem3pizze/domains/kuchennakomitywa.pl/public_python && /usr/home/jem3pizze/.virtualenvs/komitywa/bin/python manage.py run_weekly_research >> /usr/home/jem3pizze/domains/kuchennakomitywa.pl/logs/weekly_research.log 2>&1
 ```
 
-MyDevil ma też GUI: <https://panel.mydevil.net/> → CRON → Dodaj.
+Output (stdout + stderr) ląduje w `~/domains/kuchennakomitywa.pl/logs/weekly_research.log`.
 
-**Sugerowany czas:** poniedziałek rano (07:00). Wtedy `week_label` = `YYYY-Www` ostatniego tygodnia, który właśnie się skończył (niedziela), więc research dotyczy "ostatnich 7 dni" sensownie.
+### Jak sprawdzić / zmienić harmonogram
 
-Jeśli zlecisz, mogę dopisać cron przy następnej okazji — wymaga to tylko `crontab -e` przez SSH.
+```bash
+# Lista zaplanowanych zadań
+crontab -l
+
+# Edycja w vi (zmiana godziny, wyłączenie itd.)
+crontab -e
+
+# Podgląd logu z ostatnich automatycznych uruchomień
+tail -n 100 ~/domains/kuchennakomitywa.pl/logs/weekly_research.log
+```
+
+Albo przez GUI MyDevil: <https://panel.mydevil.net/> → CRON.
+
+### Dlaczego poniedziałek 06:00
+
+Cron odpala się **na początku tygodnia** — wtedy `week_label` to dopiero co zakończony tydzień ISO (pon-niedz), więc research jest świeży. 06:00 polskiego czasu to przed startem dnia roboczego, gotowy materiał czeka rano w adminie.
 
 ## Co można z tym dalej zrobić
 
