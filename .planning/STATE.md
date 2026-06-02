@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 11 — HTTPS & Bezpieczeństwo
 Plan: —
 Status: Not started (roadmap defined, awaiting plan)
-Last activity: 2026-05-08 — Completed quick task 260508-ibb: system tagów (M2M) + servings + difficulty + notes na Recipe
+Last activity: 2026-06-02 — Completed quick task 260602-i1r: nowy app content/ + weekly research pipeline (Anthropic SDK)
 
 ## Milestone Status
 
@@ -97,6 +97,7 @@ v1.1 key decisions:
 | 260412-gkc | Przepisz sekcję Nasza historia na stronie O nas — luźny ton, bez Warszawy, prosta historia prostego chłopaka | 2026-04-12 | b4964a0 | — | [260412-gkc-przepisz-sekcj-nasza-historia-na-stronie](.planning/quick/260412-gkc-przepisz-sekcj-nasza-historia-na-stronie/) |
 | 260508-hne | Dodaj przepis: krem z białej fasoli ze szparagami i pomidorkami | 2026-05-08 | b1bb24e | — | [260508-hne-dodaj-przepis-krem-z-bia-ej-fasoli-ze-sz](.planning/quick/260508-hne-dodaj-przepis-krem-z-bia-ej-fasoli-ze-sz/) |
 | 260508-ibb | Recipe: tagi (M2M Tag), servings, difficulty, notes + filtr tagów + frontend | 2026-05-08 | ffa99b0 | Verified | [260508-ibb-recipe-dodaj-tagi-m2m-tag-servings-diffi](.planning/quick/260508-ibb-recipe-dodaj-tagi-m2m-tag-servings-diffi/) |
+| 260602-i1r | Nowy app content/ + weekly research pipeline (model WeeklyResearch, management command, Anthropic SDK) | 2026-06-02 | 2d547a5 | — | [260602-i1r-nowy-app-content-z-weekly-research-pipel](.planning/quick/260602-i1r-nowy-app-content-z-weekly-research-pipel/) |
 
 ## Session Continuity
 
