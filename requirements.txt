@@ -10,3 +10,4 @@ Pillow
 whitenoise>=6.12,<7
 psycopg2-binary>=2.9
 anthropic>=0.40,<1.0
+markdown>=3.5,<4

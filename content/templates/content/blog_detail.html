@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ post.title }} — Kuchenna Komitywa{% endblock %}
+
+{% block content %}
+<section class="kk-section" aria-label="Wpis blogowy">
+    <div class="wrap-narrow">
+        <div class="hero-eyebrow">blog</div>
+        <h1>{{ post.title }}</h1>
+
+        <div class="d-flex flex-wrap gap-2 mb-4" style="align-items: center; margin-bottom: 24px;">
+            {% if post.published_at %}
+            <span style="font-family: var(--font-body); font-style: italic; color: var(--ink-faded); font-size: 15px;">
+                {{ post.published_at|date:"j E Y" }}
+            </span>
+            {% endif %}
+            {% with tag_items=post.tags_list %}
+            {% if tag_items %}
+            <span style="color: var(--ink-faded);">·</span>
+            <div class="tag-row" style="margin-bottom: 0; display: inline-flex;">
+                {% for t in tag_items %}<span class="tag">#{{ t }}</span>{% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+
+        {% if post.excerpt %}
+        <p class="lead" style="font-style: italic;">{{ post.excerpt }}</p>
+        {% endif %}
+
+        <article class="kk-blog-body">
+            {% autoescape off %}{{ post.body_html }}{% endautoescape %}
+        </article>
+
+        <p style="margin-top: 32px; padding-top: 16px; border-top: 1px dashed var(--ink-soft);">
+            <a href="{% url 'content:blog_list' %}" class="kk-link-arrow">← wróć do bloga</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

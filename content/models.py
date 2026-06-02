@@ -1,4 +1,9 @@
+import markdown as md
 from django.db import models
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.safestring import mark_safe
+from django.utils.text import slugify
 
 
 class WeeklyResearch(models.Model):
@@ -35,3 +40,96 @@ class WeeklyResearch(models.Model):
 
     def __str__(self):
         return f"{self.week_label} ({self.status})"
+
+
+class BlogPostManager(models.Manager):
+    def published(self):
+        return self.filter(
+            status="published",
+            published_at__lte=timezone.now(),
+        )
+
+
+class BlogPost(models.Model):
+    STATUS_CHOICES = [
+        ("draft", "draft"),
+        ("published", "published"),
+    ]
+
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=220, unique=True, blank=True)
+    excerpt = models.TextField(
+        blank=True,
+        default="",
+        help_text="Krótki lead 1-2 zdania (max 300 znaków).",
+    )
+    body = models.TextField(
+        help_text="Markdown. Wspierane rozszerzenia: extra, smarty.",
+    )
+    tags = models.CharField(
+        max_length=300,
+        blank=True,
+        default="",
+        help_text="Tagi rozdzielone przecinkami, np. 'wegan, brownie, sezon'.",
+    )
+    status = models.CharField(
+        max_length=12,
+        choices=STATUS_CHOICES,
+        default="draft",
+        db_index=True,
+    )
+    published_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    source_research = models.ForeignKey(
+        WeeklyResearch,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="blog_posts",
+        help_text="Źródłowy WeeklyResearch, jeśli post powstał z 'Promuj do BlogPost'.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = BlogPostManager()
+
+    class Meta:
+        verbose_name = "Blog post"
+        verbose_name_plural = "Blog posts"
+        ordering = ["-published_at", "-created_at"]
+        indexes = [
+            models.Index(fields=["status", "-published_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.title} ({self.status})"
+
+    def save(self, *args, **kwargs):
+        # Auto-slug TYLKO jeśli pusty (user może sam wpisać własny w admin)
+        if not self.slug and self.title:
+            base = slugify(self.title)[:200] or "post"
+            slug = base
+            i = 2
+            qs = BlogPost.objects.filter(slug=slug).exclude(pk=self.pk)
+            while qs.exists():
+                slug = f"{base}-{i}"
+                i += 1
+                qs = BlogPost.objects.filter(slug=slug).exclude(pk=self.pk)
+            self.slug = slug
+        # Auto-published_at TYLKO jeśli status='published' i published_at jest None
+        # (nigdy nie nadpisuje historii — gdy user cofa do draft a potem publikuje
+        #  ponownie, zachowujemy pierwotną datę publikacji.)
+        if self.status == "published" and self.published_at is None:
+            self.published_at = timezone.now()
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("content:blog_detail", args=[self.slug])
+
+    @property
+    def tags_list(self):
+        return [t.strip() for t in (self.tags or "").split(",") if t.strip()]
+
+    @property
+    def body_html(self):
+        html = md.markdown(self.body or "", extensions=["extra", "smarty"])
+        return mark_safe(html)

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Blog — Kuchenna Komitywa{% endblock %}
+
+{% block content %}
+<section class="kk-section" aria-label="Blog">
+    <div class="wrap">
+        <div class="section-head">
+            <div>
+                <div class="section-number">· blog</div>
+                <h2 class="section-title">Z notatnika kuchni<span class="section-annotation">— co się dzieje w roślinnej piekarni</span></h2>
+            </div>
+            <div class="section-meta">
+                {{ page_obj.paginator.count }} wpis{{ page_obj.paginator.count|pluralize:"y,ów" }}
+            </div>
+        </div>
+
+        {% if posts %}
+        <div class="recipe-grid" aria-label="Lista wpisów">
+            {% for post in posts %}
+            <a class="recipe-card" href="{{ post.get_absolute_url }}" aria-label="Otwórz wpis: {{ post.title }}">
+                <div class="recipe-img">
+                    <div class="num-stamp">{{ forloop.counter|stringformat:"02d" }}</div>
+                    {% if post.published_at %}
+                    <div class="time-stamp">{{ post.published_at|date:"j.m.Y" }}</div>
+                    {% endif %}
+                </div>
+                <div class="recipe-body">
+                    <div class="recipe-kicker">wpis</div>
+                    <div class="recipe-name">{{ post.title }}</div>
+                    {% if post.excerpt %}
+                    <p class="recipe-meta" style="display:block; font-style: italic;">{{ post.excerpt|truncatechars:160 }}</p>
+                    {% endif %}
+                    {% with tag_items=post.tags_list %}
+                    {% if tag_items %}
+                    <div class="recipe-meta" aria-label="Tagi">
+                        {% for t in tag_items %}<span>#{{ t }}</span>{% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Paginacja bloga">
+            <ul class="kk-pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Poprzednia strona">«</a>
+                </li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Następna strona">»</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="kk-empty-state">
+            <h2>Jeszcze nic nie ma</h2>
+            <p>Pierwszy wpis już wkrótce. W międzyczasie zajrzyj do <a href="{% url 'recipes:list' %}">przepiśnika</a>.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
