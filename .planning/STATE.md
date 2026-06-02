@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 11 — HTTPS & Bezpieczeństwo
 Plan: —
 Status: Not started (roadmap defined, awaiting plan)
-Last activity: 2026-06-02 — Completed quick task 260602-p98: hardening run_weekly_research (sleep 60s, JSON strictness, auto-retry, --retry-format)
+Last activity: 2026-06-02 — Completed quick task 260602-prf: admin preview WeeklyResearch (tabbed UI + Copy to clipboard + brand styling)
 
 ## Milestone Status
 
@@ -99,6 +99,7 @@ v1.1 key decisions:
 | 260508-ibb | Recipe: tagi (M2M Tag), servings, difficulty, notes + filtr tagów + frontend | 2026-05-08 | ffa99b0 | Verified | [260508-ibb-recipe-dodaj-tagi-m2m-tag-servings-diffi](.planning/quick/260508-ibb-recipe-dodaj-tagi-m2m-tag-servings-diffi/) |
 | 260602-i1r | Nowy app content/ + weekly research pipeline (model WeeklyResearch, management command, Anthropic SDK) | 2026-06-02 | 2d547a5 | — | [260602-i1r-nowy-app-content-z-weekly-research-pipel](.planning/quick/260602-i1r-nowy-app-content-z-weekly-research-pipel/) |
 | 260602-p98 | Hardening run_weekly_research: sleep 60s, JSON strictness addendum, auto-retry call 2, --retry-format flag | 2026-06-02 | 8e9a6df | — | [260602-p98-hardening-run-weekly-research-sleep-60s-](.planning/quick/260602-p98-hardening-run-weekly-research-sleep-60s-/) |
+| 260602-prf | Admin preview WeeklyResearch — tabbed UI (Blog/IG Posty/Stories) z Copy to clipboard, brand palette | 2026-06-02 | b6bed65 | — | [260602-prf-admin-preview-weeklyresearch-tabbed-ui-b](.planning/quick/260602-prf-admin-preview-weeklyresearch-tabbed-ui-b/) |
 
 ## Session Continuity
 
