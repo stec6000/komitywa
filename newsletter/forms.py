@@ -21,3 +21,22 @@ class NewsletterSignupForm(forms.Form):
             attrs={"class": "form-check-input"}
         ),
     )
+    # Honeypot — boty często wypełniają pola o nazwie "website".
+    # Human users go nie widzą (ukryte przez CSS .kk-honeypot).
+    website = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "kk-honeypot",
+                "autocomplete": "off",
+                "tabindex": "-1",
+                "aria-hidden": "true",
+            }
+        ),
+    )
+
+    def clean_website(self):
+        value = self.cleaned_data.get("website", "")
+        if value:
+            raise forms.ValidationError("bot-detected")
+        return value

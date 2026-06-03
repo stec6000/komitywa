@@ -1,10 +1,16 @@
+import logging
+
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from .captcha import get_client_ip, verify_turnstile
 from .emails import send_confirmation_email
 from .forms import NewsletterSignupForm
 from .models import Subscriber
+
+
+log = logging.getLogger("newsletter.security")
 
 
 def subscribe(request):
@@ -13,6 +19,23 @@ def subscribe(request):
 
     form = NewsletterSignupForm(request.POST)
     if not form.is_valid():
+        # Honeypot triggers form error on `website`; silent reject.
+        if "website" in form.errors:
+            log.info(
+                "Newsletter signup rejected: honeypot ip=%s",
+                get_client_ip(request),
+            )
+        return redirect("home")
+
+    # Cloudflare Turnstile verification (graceful skip when not configured).
+    turnstile_token = request.POST.get("cf-turnstile-response", "")
+    ok, reason = verify_turnstile(turnstile_token, get_client_ip(request))
+    if not ok:
+        log.info(
+            "Newsletter signup rejected: turnstile=%s ip=%s",
+            reason,
+            get_client_ip(request),
+        )
         return redirect("home")
 
     email = form.cleaned_data["email"]

@@ -5,6 +5,7 @@
         <p>Przepisy, historie. Bez spamu, bez reklam, bez linków afiliacyjnych. Tylko my, stół i zeszyt.</p>
         <form method="POST" action="{% url 'newsletter:subscribe' %}">
             {% csrf_token %}
+            <input type="text" name="website" class="kk-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
             <input type="email" name="email" placeholder="twój e-mail" required aria-label="Adres email">
             <button type="submit" class="btn btn-accent">zapisz mnie</button>
             <div class="form-check">
@@ -14,6 +15,10 @@
                     <a href="{% url 'privacy-policy' %}" target="_blank" rel="noopener">Polityka prywatności</a>
                 </label>
             </div>
+            {% if TURNSTILE_SITE_KEY %}
+            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+            <div class="cf-turnstile kk-turnstile" data-sitekey="{{ TURNSTILE_SITE_KEY }}" data-theme="light"></div>
+            {% endif %}
         </form>
     </div>
 </section>

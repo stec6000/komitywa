@@ -105,6 +105,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "shop.context_processors.cart_count",
+                "backend.context_processors.turnstile",
             ],
         },
     },
@@ -236,6 +237,10 @@ DEFAULT_FROM_EMAIL = env(
 
 # Anthropic (weekly research pipeline — content app)
 ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
+
+# Cloudflare Turnstile (anti-bot — newsletter signup). Brak kluczy = graceful skip.
+TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY", default="")
+TURNSTILE_SECRET_KEY = env("TURNSTILE_SECRET_KEY", default="")
 
 # Logging
 os.makedirs(BASE_DIR / "logs", exist_ok=True)
