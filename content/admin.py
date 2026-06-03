@@ -1,4 +1,11 @@
+from pathlib import Path
+
+from django.conf import settings
 from django.contrib import admin, messages
+from django.urls import reverse
+
+from content.services.ai_prompts import AI_IMAGE_BRAND_SUFFIX
+from content.services.story_renderer import StoryRenderer
 
 from .models import BlogPost, WeeklyResearch
 
@@ -53,6 +60,57 @@ def promote_to_blogpost(modeladmin, request, queryset):
         )
 
 
+@admin.action(description="Generuj grafiki stories (PNG 1080x1920)")
+def generate_story_images_action(modeladmin, request, queryset):
+    renderer = StoryRenderer()
+    total_gen, total_skip, total_err = 0, 0, 0
+    for wr in queryset:
+        if not wr.formatted_json:
+            messages.warning(
+                request,
+                f"{wr.week_label}: brak formatted_json — pominieto",
+            )
+            continue
+        stories = wr.formatted_json.get("instagram_stories") or []
+        if not stories:
+            messages.warning(
+                request,
+                f"{wr.week_label}: brak instagram_stories — pominieto",
+            )
+            continue
+        out_dir = (
+            Path(settings.MEDIA_ROOT)
+            / "weekly_research"
+            / wr.week_label
+            / "stories"
+        )
+        for idx, slide in enumerate(stories):
+            slide_type = (
+                (slide.get("slide_type") or f"slide{idx + 1}")
+                .lower()
+                .replace(" ", "_")
+            )
+            filename = f"{idx + 1:02d}_{slide_type}.png"
+            path = out_dir / filename
+            if path.exists():
+                total_skip += 1
+                continue
+            try:
+                renderer.render_to_file(slide, path)
+                total_gen += 1
+            except Exception as exc:  # noqa: BLE001
+                total_err += 1
+                messages.warning(
+                    request,
+                    f"{wr.week_label} slajd {idx + 1}: {exc}",
+                )
+    messages.success(
+        request,
+        f"Wygenerowano {total_gen} grafik, pominieto {total_skip} istniejacych, "
+        f"bledow {total_err}",
+    )
+
+
 @admin.register(WeeklyResearch)
 class WeeklyResearchAdmin(admin.ModelAdmin):
     change_form_template = "admin/content/weeklyresearch/change_form.html"
@@ -61,7 +119,56 @@ class WeeklyResearchAdmin(admin.ModelAdmin):
     search_fields = ("week_label",)
     readonly_fields = ("raw_research", "formatted_json", "created_at", "updated_at")
     ordering = ("-date_to",)
-    actions = [promote_to_blogpost]
+    actions = [promote_to_blogpost, generate_story_images_action]
+
+    def get_stories_files(self, obj):
+        if obj is None or not obj.week_label:
+            return []
+        media_root = Path(settings.MEDIA_ROOT)
+        stories_dir = media_root / "weekly_research" / obj.week_label / "stories"
+        if not stories_dir.exists():
+            return []
+        files = []
+        for png in sorted(stories_dir.glob("*.png")):
+            stem = png.stem  # "01_hook"
+            try:
+                idx_str, slide_type = stem.split("_", 1)
+                idx = int(idx_str)
+            except ValueError:
+                idx = 9999
+                slide_type = stem
+            try:
+                rel = png.relative_to(media_root)
+                url = f"{settings.MEDIA_URL.rstrip('/')}/{rel.as_posix()}"
+            except ValueError:
+                url = ""
+            files.append({
+                "index": idx,
+                "slide_type": slide_type,
+                "url": url,
+                "filename": png.name,
+            })
+        files.sort(key=lambda f: f["index"])
+        return files
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        extra_context = extra_context or {}
+        try:
+            obj = self.get_object(request, object_id)
+        except Exception:
+            obj = None
+        extra_context["ai_image_brand_suffix"] = AI_IMAGE_BRAND_SUFFIX
+        if obj is not None:
+            stories_files = self.get_stories_files(obj)
+            extra_context["stories_files"] = stories_files
+            if stories_files:
+                extra_context["stories_zip_url"] = reverse(
+                    "content:weeklyresearch_stories_zip",
+                    kwargs={"pk": obj.pk},
+                )
+        return super().change_view(
+            request, object_id, form_url=form_url, extra_context=extra_context,
+        )
 
 
 @admin.action(description="Opublikuj zaznaczone posty")
