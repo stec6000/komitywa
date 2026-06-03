@@ -9,7 +9,7 @@
 {% block after_field_sets %}
   {{ block.super }}
   {% if original.formatted_json %}
-    {% include "admin/content/weeklyresearch/_preview.html" with data=original.formatted_json %}
+    {% include "admin/content/weeklyresearch/_preview.html" with data=original.formatted_json stories_files=stories_files stories_zip_url=stories_zip_url ai_image_brand_suffix=ai_image_brand_suffix %}
   {% endif %}
 {% endblock %}
 

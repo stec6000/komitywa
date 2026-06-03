@@ -129,7 +129,8 @@ Cron odpala się **na początku tygodnia** — wtedy `week_label` to dopiero co 
 
 1. **Strona admina z podglądem** — ładny preview JSON-a (blog/posty/stories) zamiast surowego JSONField, z przyciskiem "Copy to clipboard" dla każdego segmentu.
 2. **Eksport markdownu na blog** — drugi command albo akcja w adminie, która z `formatted_json["blog"]` robi gotowy plik `.md` lub wpis w jakimś modelu `BlogPost`.
-3. **Generowanie obrazków pod IG** — `visual_hint` z każdego posta → DALL-E / Midjourney / inny generator; dla stories `bg_color` + `text` → automatyczne grafiki w formacie 1080×1920.
+3. **✅ Generowanie grafik stories + AI prompty pod posty** — DONE (260603-aou).
+   Patrz sekcja "Generowanie grafik IG" ponizej.
 4. **Newsletter** — wysyłka co tydzień z najlepszymi fragmentami researchu (newsletter app już jest w projekcie).
 5. **Per-tydzień regeneracja konkretnego segmentu** — np. tylko stories albo tylko blog, jak coś jest słabe.
 
@@ -143,5 +144,70 @@ Daj znać, co Cię interesuje — każde z tych można zrobić jako osobny `/gsd
 | `admin.py` | rejestracja w panelu admina |
 | `management/commands/run_weekly_research.py` | komenda + prompty (RESEARCH_PROMPT, FORMAT_PROMPT) |
 | `migrations/0001_initial.py` | tabela `content_weeklyresearch` |
+| `services/colors.py` | Brand palette mapping (text_color_for_bg) |
+| `services/story_renderer.py` | PNG renderer dla IG Stories |
+| `services/ai_prompts.py` | Brand AI image prompt suffix |
+| `management/commands/generate_story_images.py` | CLI generator PNG-ow |
+| `fonts/NotoSans-*.ttf` | Bundled fonty (Pillow) |
+| `views.py` | + WeeklyResearchStoriesZipView (ZIP download) |
 
 Prompty są verbatim z brifu (paleta kolorów w stories podmieniona na realną z `static/css/main.css`). Modyfikacje promptów: edytuj `run_weekly_research.py`, zrób PR/commit, deploy.
+
+## Generowanie grafik IG
+
+### Stories (PNG 1080x1920)
+
+Pipeline produkuje gotowe pliki PNG na rozmiar IG Stories — generowane lokalnie przez
+Pillow z bundled fontow Noto Sans (w `content/fonts/`). Pliki ladawia w
+`MEDIA_ROOT/weekly_research/<week_label>/stories/01_hook.png` itd.
+
+**Z admina:**
+1. Wejdz na `/admin/content/weeklyresearch/`
+2. Zaznacz checkbox przy interesujacym researchu
+3. W menu "Action" wybierz **"Generuj grafiki stories (PNG 1080x1920)"** i klik Go
+4. Komunikat na gorze: "Wygenerowano N grafik, pominieto M istniejacych"
+5. Wejdz na change view tego researchu — tab "IG Stories" pokazuje miniatury
+   rzeczywistych PNG-ow z linkami download + przyciskiem **"Pobierz wszystkie jako ZIP"**
+
+**Z CLI** (lokalnie lub na serwerze):
+```bash
+# Najnowszy formatted research
+python manage.py generate_story_images --latest
+
+# Konkretny tydzien
+python manage.py generate_story_images --week 2026-W23
+
+# Nadpisz istniejace pliki
+python manage.py generate_story_images --latest --force
+```
+
+ZIP endpoint (staff-only): `/blog/admin/content/weeklyresearch/<pk>/stories_zip`
+(URL pattern: `/blog/admin/content/weeklyresearch/<pk>/stories.zip` — name: `content:weeklyresearch_stories_zip`)
+
+Jesli nie ma jeszcze NotoColorEmoji.ttf bundled (lub byl >12MiB) — emoji renderuja sie
+jako tekst w NotoSans Bold (czasem widoczne jako kolko/puste).
+
+### Posty — AI image prompts
+
+Pod kazdym postem w tabie "IG Posty" jest sekcja **"Prompt AI (z brand stylem)"** —
+`visual_hint` z formatted_json + brand styling suffix (Bialystok, rzemieslnicza
+fotografia, square 1080x1080, no text overlay).
+
+Klik **"Skopiuj prompt do AI (z brand stylem)"** → wklej w ChatGPT (DALL-E),
+Midjourney lub innym generatorze obrazow → dostaniesz spojny brand-wise obrazek
+pod posta.
+
+Brand suffix mieszka w `content/services/ai_prompts.py::AI_IMAGE_BRAND_SUFFIX` — to
+jedyne miejsce do edycji jezeli chcesz zmienic styling.
+
+### Architektura
+
+| Komponent | Lokalizacja | Co robi |
+|---|---|---|
+| `StoryRenderer` | `content/services/story_renderer.py` | Buduje PNG 1080x1920 z dict-a slajdu |
+| `text_color_for_bg` | `content/services/colors.py` | Brand palette mapping bg → text |
+| `AI_IMAGE_BRAND_SUFFIX` | `content/services/ai_prompts.py` | Stala brand styling do promptow AI |
+| `generate_story_images` | `content/management/commands/` | CLI command |
+| `generate_story_images_action` | `content/admin.py` | Admin action |
+| `WeeklyResearchStoriesZipView` | `content/views.py` | ZIP download endpoint |
+| Fonty | `content/fonts/NotoSans-{Regular,Bold}.ttf` | Bundled, w repo (~600KB-1MB total) |

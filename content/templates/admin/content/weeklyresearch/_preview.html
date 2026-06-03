@@ -61,6 +61,19 @@
             </button>
             <button type="button" class="kk-copy-btn" data-copy-text="{{ p.visual_hint }}">Skopiuj wizualkę</button>
           </div>
+          {% if ai_image_brand_suffix %}
+            {% with ai_prompt=p.visual_hint|stringformat:"s"|add:ai_image_brand_suffix %}
+              <div class="kk-post-ai-prompt">
+                <div class="kk-post-ai-prompt-header">Prompt AI (z brand stylem)</div>
+                <pre class="kk-ai-prompt-preview">{{ ai_prompt }}</pre>
+                <div class="kk-post-ai-actions">
+                  <button type="button" class="kk-copy-btn" data-copy-text="{{ ai_prompt }}">
+                    Skopiuj prompt do AI (z brand stylem)
+                  </button>
+                </div>
+              </div>
+            {% endwith %}
+          {% endif %}
         </article>
       {% endfor %}
       <div class="kk-bulk-actions">
@@ -73,20 +86,67 @@
 
     {# ===== STORIES ===== #}
     <div class="kk-panel kk-panel-stories">
-      <div class="kk-stories-grid">
-        {% for s in data.instagram_stories %}
-          <div class="kk-story-wrapper">
-            <div class="kk-story-card"
-                 style="background-color: {{ s.bg_color }}; color: {{ s.bg_color|text_color_for_bg }};">
-              <div class="kk-story-emoji">{{ s.emoji }}</div>
-              <div class="kk-story-text">{{ s.text }}</div>
-              <div class="kk-story-type">{{ s.slide_type }}</div>
-            </div>
-            <div class="kk-story-hex">{{ s.bg_color }}</div>
-            <button type="button" class="kk-copy-btn" data-copy-text="{{ s.text }}">Tekst</button>
+      {% if stories_files %}
+        <div class="kk-stories-generated">
+          <div class="kk-stories-actions">
+            {% if stories_zip_url %}
+              <a class="kk-stories-zip-link" href="{{ stories_zip_url }}" download>
+                Pobierz wszystkie jako ZIP ({{ stories_files|length }} plikow)
+              </a>
+            {% endif %}
           </div>
-        {% endfor %}
-      </div>
+          <div class="kk-stories-grid">
+            {% for sf in stories_files %}
+              <div class="kk-story-actual">
+                <a href="{{ sf.url }}" download="{{ sf.filename }}" target="_blank" rel="noopener">
+                  <img class="kk-story-actual-img" src="{{ sf.url }}" alt="{{ sf.filename }}" loading="lazy">
+                </a>
+                <div class="kk-story-actual-meta">
+                  <span class="kk-story-actual-label">{{ sf.slide_type }}</span>
+                  <a class="kk-story-actual-download" href="{{ sf.url }}" download="{{ sf.filename }}">PNG</a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        <details class="kk-stories-placeholder-toggle">
+          <summary>Pokaz podglad CSS (placeholder)</summary>
+          <div class="kk-stories-grid">
+            {% for s in data.instagram_stories %}
+              <div class="kk-story-wrapper">
+                <div class="kk-story-card"
+                     style="background-color: {{ s.bg_color }}; color: {{ s.bg_color|text_color_for_bg }};">
+                  <div class="kk-story-emoji">{{ s.emoji }}</div>
+                  <div class="kk-story-text">{{ s.text }}</div>
+                  <div class="kk-story-type">{{ s.slide_type }}</div>
+                </div>
+                <div class="kk-story-hex">{{ s.bg_color }}</div>
+                <button type="button" class="kk-copy-btn" data-copy-text="{{ s.text }}">Tekst</button>
+              </div>
+            {% endfor %}
+          </div>
+        </details>
+      {% else %}
+        <p class="kk-stories-info">
+          Brak wygenerowanych grafik. W list view zaznacz ten research, akcja
+          <b>"Generuj grafiki stories (PNG 1080x1920)"</b>, lub odpal:
+          <code>python manage.py generate_story_images --week {{ original.week_label|default:"&lt;label&gt;" }}</code>
+        </p>
+        <div class="kk-stories-grid">
+          {% for s in data.instagram_stories %}
+            <div class="kk-story-wrapper">
+              <div class="kk-story-card"
+                   style="background-color: {{ s.bg_color }}; color: {{ s.bg_color|text_color_for_bg }};">
+                <div class="kk-story-emoji">{{ s.emoji }}</div>
+                <div class="kk-story-text">{{ s.text }}</div>
+                <div class="kk-story-type">{{ s.slide_type }}</div>
+              </div>
+              <div class="kk-story-hex">{{ s.bg_color }}</div>
+              <button type="button" class="kk-copy-btn" data-copy-text="{{ s.text }}">Tekst</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
       <div class="kk-bulk-actions">
         <button type="button" class="kk-copy-btn kk-copy-btn-primary"
                 data-copy-text="{% for s in data.instagram_stories %}{{ forloop.counter }}. [{{ s.slide_type }}] {{ s.emoji }} {{ s.text }}&#10;{% endfor %}">
