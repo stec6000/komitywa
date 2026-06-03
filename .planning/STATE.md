@@ -7,7 +7,7 @@ current_plan: 0
 status: planning
 stopped_at: ~
 last_updated: "2026-04-16T00:00:00.000Z"
-last_activity: 2026-05-08 -- Completed quick task 260508-ibb: tagi + servings + difficulty + notes na Recipe
+last_activity: 2026-06-03 -- Completed quick task 260603-aou: IG Stories PNG generator + AI image prompty z brand suffix
 progress:
   total_phases: 2
   completed_phases: 0
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 11 — HTTPS & Bezpieczeństwo
 Plan: —
 Status: Not started (roadmap defined, awaiting plan)
-Last activity: 2026-06-02 — Completed quick task 260602-qcl: pełny blog na stronie (BlogPost model + admin draft/publish + akcja Promuj + frontend /blog/)
+Last activity: 2026-06-03 — Completed quick task 260603-aou: IG Stories PNG generator (Pillow 1080x1920) + AI image prompty z brand suffix do postow + admin action + CLI command + ZIP download
 
 ## Milestone Status
 
@@ -101,9 +101,10 @@ v1.1 key decisions:
 | 260602-p98 | Hardening run_weekly_research: sleep 60s, JSON strictness addendum, auto-retry call 2, --retry-format flag | 2026-06-02 | 8e9a6df | — | [260602-p98-hardening-run-weekly-research-sleep-60s-](.planning/quick/260602-p98-hardening-run-weekly-research-sleep-60s-/) |
 | 260602-prf | Admin preview WeeklyResearch — tabbed UI (Blog/IG Posty/Stories) z Copy to clipboard, brand palette | 2026-06-02 | b6bed65 | — | [260602-prf-admin-preview-weeklyresearch-tabbed-ui-b](.planning/quick/260602-prf-admin-preview-weeklyresearch-tabbed-ui-b/) |
 | 260602-qcl | Pełny blog na stronie: BlogPost model + admin draft/publish + akcja Promuj z WeeklyResearch + frontend /blog/ + /blog/<slug>/ | 2026-06-02 | 14e8054 | — | [260602-qcl-pe-ny-blog-na-stronie-model-blogpost-adm](.planning/quick/260602-qcl-pe-ny-blog-na-stronie-model-blogpost-adm/) |
+| 260603-aou | IG Stories PNG generator (1080x1920 przez Pillow) + AI image prompty z brand suffix do postow (services layer + admin action + CLI + ZIP download) | 2026-06-03 | f88706e | — | [260603-aou-grafiki-ig-stories-png-1080x1920-przez-p](.planning/quick/260603-aou-grafiki-ig-stories-png-1080x1920-przez-p/) |
 
 ## Session Continuity
 
-Last session: 2026-04-16T00:00:00.000Z
-Stopped at: v1.2 roadmap created — Phase 11 ready for planning
+Last session: 2026-06-03T08:05:00.000Z
+Stopped at: Completed quick task 260603-aou (IG Stories PNG generator + AI prompty)
 Resume file: None
