@@ -3,22 +3,69 @@
         <div class="newsletter-eyebrow">list w każdą niedzielę</div>
         <h3>Niedzielne listy z kuchni</h3>
         <p>Przepisy, historie. Bez spamu, bez reklam, bez linków afiliacyjnych. Tylko my, stół i zeszyt.</p>
-        <form method="POST" action="{% url 'newsletter:subscribe' %}">
+        <button type="button" class="btn btn-accent kk-newsletter-cta" data-newsletter-open aria-haspopup="dialog" aria-controls="kk-newsletter-modal">
+            zapisz się do listów
+        </button>
+    </div>
+</section>
+
+<div class="kk-modal-backdrop" id="kk-newsletter-modal" data-newsletter-modal role="dialog" aria-modal="true" aria-labelledby="kk-newsletter-modal-title" hidden>
+    <div class="kk-modal">
+        <button type="button" class="kk-modal-close" data-newsletter-close aria-label="Zamknij">&times;</button>
+        <div class="newsletter-eyebrow">niedzielne listy</div>
+        <h3 id="kk-newsletter-modal-title">Twoje listy w niedzielę</h3>
+        <p>Przepisy i historie z naszej kuchni. Bez spamu, bez reklam — tylko my, stół i zeszyt.</p>
+        <form method="POST" action="{% url 'newsletter:subscribe' %}" class="kk-modal-form">
             {% csrf_token %}
             <input type="text" name="website" class="kk-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
             <input type="email" name="email" placeholder="twój e-mail" required aria-label="Adres email">
-            <button type="submit" class="btn btn-accent">zapisz mnie</button>
             <div class="form-check">
-                <input type="checkbox" name="consent_newsletter" id="id_consent_newsletter" required>
-                <label for="id_consent_newsletter">
+                <input type="checkbox" name="consent_newsletter" id="id_consent_newsletter_modal" required>
+                <label for="id_consent_newsletter_modal">
                     Wyrażam zgodę na otrzymywanie newslettera.
                     <a href="{% url 'privacy-policy' %}" target="_blank" rel="noopener">Polityka prywatności</a>
                 </label>
             </div>
             {% if TURNSTILE_SITE_KEY %}
-            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
             <div class="cf-turnstile kk-turnstile" data-sitekey="{{ TURNSTILE_SITE_KEY }}" data-theme="light"></div>
             {% endif %}
+            <button type="submit" class="btn btn-accent">zapisz mnie</button>
         </form>
     </div>
-</section>
+</div>
+
+{% if TURNSTILE_SITE_KEY %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}
+<script>
+(function() {
+    var openBtns = document.querySelectorAll('[data-newsletter-open]');
+    var modal = document.querySelector('[data-newsletter-modal]');
+    var closeBtn = document.querySelector('[data-newsletter-close]');
+    if (!openBtns.length || !modal) return;
+
+    var lastOpener = null;
+
+    function openModal(ev) {
+        lastOpener = ev && ev.currentTarget ? ev.currentTarget : null;
+        modal.hidden = false;
+        document.body.classList.add('kk-modal-open');
+        var emailInput = modal.querySelector('input[type=email]');
+        if (emailInput) setTimeout(function() { emailInput.focus(); }, 50);
+    }
+    function closeModal() {
+        modal.hidden = true;
+        document.body.classList.remove('kk-modal-open');
+        if (lastOpener) lastOpener.focus();
+    }
+
+    openBtns.forEach(function(btn) { btn.addEventListener('click', openModal); });
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modal.hidden) closeModal();
+    });
+})();
+</script>
