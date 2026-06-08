@@ -133,3 +133,50 @@ class BlogPost(models.Model):
     def body_html(self):
         html = md.markdown(self.body or "", extensions=["extra", "smarty"])
         return mark_safe(html)
+
+
+class StorySlide(models.Model):
+    research = models.ForeignKey(
+        WeeklyResearch,
+        on_delete=models.CASCADE,
+        related_name="story_slides",
+    )
+    order = models.PositiveIntegerField(
+        help_text="Kolejnosc slajdu (1-based).",
+    )
+    slide_type = models.CharField(
+        max_length=20,
+        help_text="hook/fact/tip/cta",
+    )
+    headline = models.CharField(
+        max_length=90,
+        help_text="Twardy bezpiecznik DB; cel redakcyjny <=55 znakow.",
+    )
+    subtext = models.TextField(blank=True, default="")
+    bg_color = models.CharField(
+        max_length=9,
+        default="#f3ead7",
+        help_text="Hex, fallback gdy brak zdjecia.",
+    )
+    visual_hint = models.TextField(
+        blank=True,
+        default="",
+        help_text="Opis kadru -> zasila AI-prompt.",
+    )
+    background_image = models.ImageField(
+        upload_to="weekly_research/story_uploads/%Y/%m/",
+        blank=True,
+        null=True,
+        help_text="Wgrane zdjecie tla (layout A).",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Story slide"
+        verbose_name_plural = "Story slides"
+        ordering = ["research", "order"]
+        unique_together = ("research", "order")
+
+    def __str__(self):
+        return f"{self.research.week_label} #{self.order} ({self.slide_type})"
