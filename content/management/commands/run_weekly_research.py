@@ -181,7 +181,9 @@ class Command(BaseCommand):
         """
 
         def _do_call() -> str:
-            response = client.messages.create(
+            response = self._create_with_429_retry(
+                client,
+                "call 2 (format)",
                 model="claude-sonnet-4-6",
                 max_tokens=8000,
                 messages=[{"role": "user", "content": prompt}],
@@ -302,7 +304,9 @@ class Command(BaseCommand):
                 f"[1/2] Research dla {week_label} ({date_from} – {date_to})..."
             ))
             try:
-                research_response = client.messages.create(
+                research_response = self._create_with_429_retry(
+                    client,
+                    "call 1 (research)",
                     model="claude-sonnet-4-6",
                     max_tokens=8000,
                     # max_uses ogranicza liczbe rund web_search, by nie drenowac
