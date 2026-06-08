@@ -10,6 +10,36 @@ from content.services.story_renderer import StoryRenderer
 from .models import BlogPost, WeeklyResearch
 
 
+def _blog_body_from_json(blog):
+    """Skladaj Markdown body z intro + sections (schemat FORMAT_PROMPT).
+
+    Format zgodny z _preview.html: intro jako pierwszy akapit, kazda sekcja
+    jako "## {heading}\n\n{body}". Title i tagi NIE wchodza do body
+    (to osobne pola BlogPosta). Defensywnie pomija nie-dict sekcje.
+    """
+    parts = []
+    intro = (blog.get("intro") or "").strip()
+    if intro:
+        parts.append(intro)
+    for section in blog.get("sections") or []:
+        if not isinstance(section, dict):
+            continue
+        heading = (section.get("heading") or "").strip()
+        section_body = (section.get("body") or "").strip()
+        chunk = []
+        if heading:
+            chunk.append(f"## {heading}")
+        if section_body:
+            chunk.append(section_body)
+        if chunk:
+            parts.append("\n\n".join(chunk))
+    body = "\n\n".join(parts).strip()
+    if not body:
+        # Fallback kompatybilnosci: gdyby kiedys pojawil sie plaski schemat
+        body = (blog.get("body") or "").strip()
+    return body
+
+
 @admin.action(description="Promuj zaznaczone researche do BlogPost (draft)")
 def promote_to_blogpost(modeladmin, request, queryset):
     created = 0
@@ -23,8 +53,10 @@ def promote_to_blogpost(modeladmin, request, queryset):
         data = research.formatted_json or {}
         blog = data.get("blog") or {}
         title = (blog.get("title") or "").strip()
-        body = (blog.get("body") or "").strip()
-        excerpt = (blog.get("excerpt") or "").strip()
+        body = _blog_body_from_json(blog)
+        excerpt = (
+            blog.get("meta_description") or blog.get("excerpt") or ""
+        ).strip()
         # tagi mogą być w "tags" lub "hashtags" — bierzemy co jest
         raw_tags = blog.get("tags") or blog.get("hashtags") or []
         if isinstance(raw_tags, str):
