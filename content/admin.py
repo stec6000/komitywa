@@ -3,11 +3,16 @@ from pathlib import Path
 from django.conf import settings
 from django.contrib import admin, messages
 from django.urls import reverse
+from django.utils.html import format_html
 
-from content.services.ai_prompts import AI_IMAGE_BRAND_SUFFIX
+from content.services.ai_prompts import (
+    AI_IMAGE_BRAND_SUFFIX,
+    AI_STORY_BRAND_SUFFIX,
+    build_story_image_prompt,
+)
 from content.services.story_renderer import StoryRenderer
 
-from .models import BlogPost, WeeklyResearch
+from .models import BlogPost, StorySlide, WeeklyResearch
 
 
 def _blog_body_from_json(blog):
@@ -143,6 +148,107 @@ def generate_story_images_action(modeladmin, request, queryset):
     )
 
 
+@admin.action(description="Promuj stories do StorySlide")
+def promote_to_story_slides(modeladmin, request, queryset):
+    created = 0
+    skipped = 0
+    failed = 0
+    no_data = 0
+    for research in queryset:
+        # Idempotencja: jesli juz sa wiersze StorySlide, skip.
+        if research.story_slides.exists():
+            skipped += 1
+            continue
+        stories = (research.formatted_json or {}).get("instagram_stories") or []
+        if not stories:
+            no_data += 1
+            continue
+        for idx, slide in enumerate(stories, start=1):
+            if not isinstance(slide, dict):
+                failed += 1
+                continue
+            # Fallback stary schemat: 'text' -> headline.
+            headline = (
+                slide.get("headline") or slide.get("text") or ""
+            ).strip()[:90]
+            if not headline:
+                failed += 1
+                continue
+            subtext = (slide.get("subtext") or "").strip()
+            bg_color = (slide.get("bg_color") or "#f3ead7").strip()
+            visual_hint = (slide.get("visual_hint") or "").strip()
+            slide_type = (slide.get("slide_type") or "").strip()[:20]
+            StorySlide.objects.create(
+                research=research,
+                order=idx,
+                slide_type=slide_type,
+                headline=headline,
+                subtext=subtext,
+                bg_color=bg_color[:9],
+                visual_hint=visual_hint,
+            )
+            created += 1
+    if created:
+        messages.success(request, f"Utworzono {created} StorySlide.")
+    if skipped:
+        messages.info(
+            request,
+            f"Pominieto {skipped} — StorySlide juz istnieja dla tego researchu.",
+        )
+    if no_data:
+        messages.warning(
+            request,
+            f"Pominieto {no_data} — brak instagram_stories w formatted_json.",
+        )
+    if failed:
+        messages.warning(
+            request,
+            f"Pominieto {failed} slajdow — brak headline / niepoprawny format.",
+        )
+
+
+@admin.action(description="Generuj PNG (1080x1920)")
+def generate_story_slide_pngs(modeladmin, request, queryset):
+    renderer = StoryRenderer()
+    generated, errors = 0, 0
+    for slide in queryset:
+        slide_type = (
+            (slide.slide_type or "slide").lower().replace(" ", "_")
+        )
+        path = (
+            Path(settings.MEDIA_ROOT)
+            / "weekly_research"
+            / slide.research.week_label
+            / "stories"
+            / f"{slide.order:02d}_{slide_type}.png"
+        )
+        try:
+            renderer.render_to_file(slide, path)
+            generated += 1
+        except Exception as exc:  # noqa: BLE001
+            errors += 1
+            messages.warning(
+                request,
+                f"{slide.research.week_label} #{slide.order}: {exc}",
+            )
+    if generated:
+        messages.success(request, f"Wygenerowano {generated} PNG.")
+    if errors:
+        messages.warning(request, f"Bledow renderu: {errors}.")
+
+
+class StorySlideInline(admin.TabularInline):
+    model = StorySlide
+    extra = 0
+    fields = ("order", "slide_type", "headline", "bg_color", "background_image")
+    readonly_fields = fields
+    can_delete = False
+    show_change_link = True
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(WeeklyResearch)
 class WeeklyResearchAdmin(admin.ModelAdmin):
     change_form_template = "admin/content/weeklyresearch/change_form.html"
@@ -151,7 +257,12 @@ class WeeklyResearchAdmin(admin.ModelAdmin):
     search_fields = ("week_label",)
     readonly_fields = ("raw_research", "formatted_json", "created_at", "updated_at")
     ordering = ("-date_to",)
-    actions = [promote_to_blogpost, generate_story_images_action]
+    inlines = [StorySlideInline]
+    actions = [
+        promote_to_blogpost,
+        promote_to_story_slides,
+        generate_story_images_action,
+    ]
 
     def get_stories_files(self, obj):
         if obj is None or not obj.week_label:
@@ -190,6 +301,7 @@ class WeeklyResearchAdmin(admin.ModelAdmin):
         except Exception:
             obj = None
         extra_context["ai_image_brand_suffix"] = AI_IMAGE_BRAND_SUFFIX
+        extra_context["ai_story_brand_suffix"] = AI_STORY_BRAND_SUFFIX
         if obj is not None:
             stories_files = self.get_stories_files(obj)
             extra_context["stories_files"] = stories_files
@@ -255,3 +367,45 @@ class BlogPostAdmin(admin.ModelAdmin):
         if obj and obj.status == "published":
             ro.append("slug")
         return ro
+
+
+@admin.register(StorySlide)
+class StorySlideAdmin(admin.ModelAdmin):
+    list_display = ("research", "order", "slide_type", "headline", "has_image")
+    list_filter = ("research", "slide_type")
+    ordering = ("research", "order")
+    fields = (
+        "research",
+        "order",
+        "slide_type",
+        "headline",
+        "subtext",
+        "bg_color",
+        "visual_hint",
+        "background_image",
+        "ai_prompt_display",
+        "created_at",
+        "updated_at",
+    )
+    readonly_fields = ("ai_prompt_display", "created_at", "updated_at")
+    actions = [generate_story_slide_pngs]
+
+    @admin.display(boolean=True, description="Zdjecie")
+    def has_image(self, obj):
+        return bool(obj.background_image)
+
+    @admin.display(description="AI-prompt do zdjecia tla")
+    def ai_prompt_display(self, obj):
+        prompt = build_story_image_prompt(getattr(obj, "visual_hint", "") or "")
+        return format_html(
+            '<div>'
+            '<pre style="white-space:pre-wrap;max-width:700px;'
+            'padding:8px;background:#f6f6f6;border:1px solid #ddd;'
+            'border-radius:4px;">{}</pre>'
+            '<button type="button" '
+            'onclick="navigator.clipboard.writeText('
+            'this.previousElementSibling.textContent)">'
+            'Kopiuj prompt AI</button>'
+            '</div>',
+            prompt,
+        )
