@@ -101,6 +101,21 @@ JSON_STRICTNESS_ADDENDUM = (
 )
 
 
+# Twardy limit prob retry na 429 — zapobiega nieskonczonej petli (DoS guard).
+MAX_429_RETRIES = 3
+
+
+def _parse_retry_after(headers, default=60):
+    """Czyta naglowek retry-after (sekundy) z mapy naglowkow. Fallback = default."""
+    raw = headers.get("retry-after") if headers else None
+    if raw is None:
+        return default
+    try:
+        return max(1, int(round(float(raw))))
+    except (ValueError, TypeError):
+        return default
+
+
 def _strip_markdown_fences(raw_format: str) -> str:
     """Sciagamy ewentualne fence'y markdown z odpowiedzi modelu."""
     if raw_format.startswith("```"):
@@ -128,6 +143,32 @@ class Command(BaseCommand):
             action="store_true",
             help="Pomija call 1, uzywa istniejacego raw_research i robi tylko call 2 (format).",
         )
+
+    def _create_with_429_retry(self, client, call_label, **create_kwargs):
+        """client.messages.create(**create_kwargs) z retry na RateLimitError (429).
+
+        Czyta retry-after z exc.response.headers, spi tyle ile kaze serwer
+        (fallback 60s), ponawia do MAX_429_RETRIES razy. Po wyczerpaniu prob
+        rzuca CommandError z czytelnym komunikatem. Dotyczy WYLACZNIE 429 i
+        samego wywolania create — nie lapie json.JSONDecodeError ani innych
+        wyjatkow.
+        """
+        from anthropic import RateLimitError  # lazy, wzorzec jak Anthropic w handle()
+        for attempt in range(MAX_429_RETRIES):
+            try:
+                return client.messages.create(**create_kwargs)
+            except RateLimitError as exc:
+                if attempt == MAX_429_RETRIES - 1:
+                    raise CommandError(
+                        f"{call_label}: rate limit 429 po {MAX_429_RETRIES} probach: {exc}"
+                    ) from exc
+                response = getattr(exc, "response", None)
+                headers = getattr(response, "headers", None)
+                wait = _parse_retry_after(headers, default=60)
+                self.stderr.write(self.style.WARNING(
+                    f"[429] {call_label}: rate limit, retry {attempt + 1}/{MAX_429_RETRIES} za {wait}s..."
+                ))
+                time.sleep(wait)
 
     def _call_format(self, client, prompt: str) -> dict:
         """Wykonuje call 2 (format) z auto-retry na json.JSONDecodeError.
@@ -264,7 +305,9 @@ class Command(BaseCommand):
                 research_response = client.messages.create(
                     model="claude-sonnet-4-6",
                     max_tokens=8000,
-                    tools=[{"type": "web_search_20250305", "name": "web_search"}],
+                    # max_uses ogranicza liczbe rund web_search, by nie drenowac
+                    # minutowego bucketa ITPM (Tier 1 = 30K input tokens/min).
+                    tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 5}],
                     messages=[
                         {
                             "role": "user",
