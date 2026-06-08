@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 11 — HTTPS & Bezpieczeństwo
 Plan: —
 Status: Not started (roadmap defined, awaiting plan)
-Last activity: 2026-06-08 — Completed quick task 260608-e71: napraw promote_to_blogpost (skladaj body z intro+sections, excerpt z meta_description)
+Last activity: 2026-06-08 — Completed quick task 260608-kke: ulepszone IG stories (model StorySlide + upload zdjecia + renderer layout A + AI-prompt + bogatszy tekst)
 
 ## Milestone Status
 
@@ -105,6 +105,7 @@ v1.1 key decisions:
 | 260603-bzf | Newsletter anti-bot: Cloudflare Turnstile (graceful skip bez kluczy) + honeypot pole `website` + cleanup_junk_subscribers command | 2026-06-03 | e23c02e | — | [260603-bzf-newsletter-anti-bot-cloudflare-turnstile](.planning/quick/260603-bzf-newsletter-anti-bot-cloudflare-turnstile/) |
 | 260608-dau | Fix rate-limit 429 w run_weekly_research: max_uses na web_search + obsluga RateLimitError z retry-after w call 1 i call 2 | 2026-06-08 | 9177dfc | — | [260608-dau-fix-rate-limit-429-w-run-weekly-research](.planning/quick/260608-dau-fix-rate-limit-429-w-run-weekly-research/) |
 | 260608-e71 | Napraw promote_to_blogpost: skladaj body z intro+sections, excerpt z meta_description (akcja zawsze failowala — czytala nieistniejace klucze) | 2026-06-08 | de51a9b | — | [260608-e71-napraw-promote-to-blogpost-skladaj-body-](.planning/quick/260608-e71-napraw-promote-to-blogpost-skladaj-body-/) |
+| 260608-kke | Ulepszone IG stories (kierunek A): model StorySlide + upload zdjecia + renderer layout A (zdjecie + gradient scrim) + AI-prompt + bogatszy tekst (headline+subtext, bez emoji) | 2026-06-08 | d98a9f2 | Verified (PNG potwierdzone wizualnie; clipboard do klikniecia) | [260608-kke-ulepszone-ig-stories-model-storyslide-up](.planning/quick/260608-kke-ulepszone-ig-stories-model-storyslide-up/) |
 
 ## Session Continuity
 
