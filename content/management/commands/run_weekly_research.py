@@ -65,7 +65,7 @@ o dokładnie takiej strukturze:
     {{"caption": "...", "hashtags": ["..."], "visual_hint": "..."}}
   ],
   "instagram_stories": [
-    {{"slide_type": "hook|fact|tip|cta", "text": "...", "bg_color": "#hex", "emoji": "..."}}
+    {{"slide_type": "hook|fact|tip|cta", "headline": "...", "subtext": "...", "bg_color": "#hex", "visual_hint": "..."}}
   ]
 }}
 
@@ -79,10 +79,13 @@ Wytyczne:
   piekarnicze/deserowe, lokalne (#bialystok #podlasie) oraz #kuchennakomitywa. 
   visual_hint: konkretny opis kadru — co na zdjęciu, światło, stylizacja, nastrój 
   (przyda się przy robieniu zdjęcia lub grafiki).
-- INSTAGRAM STORIES: 6–7 slajdów tworzących łuk: 1 × hook → 3–4 × fact/tip → 1 × cta. 
-  Każdy slajd max ~120 znaków (czytelny na ekranie telefonu). bg_color wybierz 
-  z palety marki: #f3ead7 (papier), #6b7a3a (oliwka), #b6562e (terakota), 
-  #c89a3a (musztarda), #2a2420 (atrament). Dobierz pasujący emoji do każdego slajdu.
+- INSTAGRAM STORIES: 6–7 slajdów tworzących łuk: 1 × hook → 3–4 × fact/tip → 1 × cta.
+  Każdy slajd ma „headline" (mocny nagłówek, max ~55 znaków — czytelny na ekranie
+  telefonu) oraz „subtext" (rozwinięcie 1–2 zdania, max ~150 znaków). „visual_hint":
+  konkretny opis kadru — co na zdjęciu, światło, stylizacja, nastrój (zasila prompt
+  do zdjęcia tła, tak jak przy postach). bg_color wybierz z palety marki:
+  #f3ead7 (papier), #6b7a3a (oliwka), #b6562e (terakota), #c89a3a (musztarda),
+  #2a2420 (atrament) — służy jako kolor tła, gdy nie ma zdjęcia.
 
 Cały tekst po polsku.
 
