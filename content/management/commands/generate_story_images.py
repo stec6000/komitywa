@@ -57,15 +57,11 @@ class Command(BaseCommand):
                     "Brak WeeklyResearch ze statusem 'formatted'"
                 )
 
-        if not wr.formatted_json:
+        slides = list(wr.story_slides.all())
+        if not slides:
             raise CommandError(
-                f"WR {wr.week_label}: brak formatted_json"
-            )
-
-        stories = wr.formatted_json.get("instagram_stories") or []
-        if not stories:
-            raise CommandError(
-                f"WR {wr.week_label}: brak instagram_stories w formatted_json"
+                f"WR {wr.week_label}: brak StorySlide — najpierw "
+                f"'Promuj stories do StorySlide' w adminie"
             )
 
         out_dir = (
@@ -77,13 +73,13 @@ class Command(BaseCommand):
         renderer = StoryRenderer()
 
         generated, skipped = 0, 0
-        for idx, slide in enumerate(stories):
+        for slide in slides:
             slide_type = (
-                (slide.get("slide_type") or f"slide{idx + 1}")
+                (slide.slide_type or f"slide{slide.order}")
                 .lower()
                 .replace(" ", "_")
             )
-            filename = f"{idx + 1:02d}_{slide_type}.png"
+            filename = f"{slide.order:02d}_{slide_type}.png"
             path = out_dir / filename
 
             if path.exists() and not force:
@@ -98,6 +94,6 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 f"Done {wr.week_label}: generated={generated}, "
-                f"skipped={skipped}, total={len(stories)}"
+                f"skipped={skipped}, total={len(slides)}"
             )
         )

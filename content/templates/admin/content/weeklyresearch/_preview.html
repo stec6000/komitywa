@@ -110,18 +110,31 @@
           </div>
         </div>
         <details class="kk-stories-placeholder-toggle">
-          <summary>Pokaz podglad CSS (placeholder)</summary>
+          <summary>Pokaz teksty i prompty AI</summary>
+          {% if original.pk %}
+            <p class="kk-stories-edit-link">
+              <a href="{% url 'admin:content_storyslide_changelist' %}?research__id__exact={{ original.pk }}">
+                Edytuj slajdy / wgraj zdjecia
+              </a>
+            </p>
+          {% endif %}
           <div class="kk-stories-grid">
             {% for s in data.instagram_stories %}
               <div class="kk-story-wrapper">
                 <div class="kk-story-card"
                      style="background-color: {{ s.bg_color }}; color: {{ s.bg_color|text_color_for_bg }};">
-                  <div class="kk-story-emoji">{{ s.emoji }}</div>
-                  <div class="kk-story-text">{{ s.text }}</div>
+                  <div class="kk-story-headline">{{ s.headline|default:s.text }}</div>
+                  <div class="kk-story-subtext">{{ s.subtext }}</div>
                   <div class="kk-story-type">{{ s.slide_type }}</div>
                 </div>
                 <div class="kk-story-hex">{{ s.bg_color }}</div>
-                <button type="button" class="kk-copy-btn" data-copy-text="{{ s.text }}">Tekst</button>
+                <button type="button" class="kk-copy-btn" data-copy-text="{{ s.headline|default:s.text }} — {{ s.subtext }}">Tekst</button>
+                {% if ai_story_brand_suffix %}
+                  {% with sp=s.visual_hint|stringformat:"s"|add:ai_story_brand_suffix %}
+                    <pre class="kk-ai-prompt-preview">{{ sp }}</pre>
+                    <button type="button" class="kk-copy-btn" data-copy-text="{{ sp }}">Skopiuj prompt AI</button>
+                  {% endwith %}
+                {% endif %}
               </div>
             {% endfor %}
           </div>
@@ -132,24 +145,37 @@
           <b>"Generuj grafiki stories (PNG 1080x1920)"</b>, lub odpal:
           <code>python manage.py generate_story_images --week {{ original.week_label|default:"&lt;label&gt;" }}</code>
         </p>
+        {% if original.pk %}
+          <p class="kk-stories-edit-link">
+            <a href="{% url 'admin:content_storyslide_changelist' %}?research__id__exact={{ original.pk }}">
+              Edytuj slajdy / wgraj zdjecia
+            </a>
+          </p>
+        {% endif %}
         <div class="kk-stories-grid">
           {% for s in data.instagram_stories %}
             <div class="kk-story-wrapper">
               <div class="kk-story-card"
                    style="background-color: {{ s.bg_color }}; color: {{ s.bg_color|text_color_for_bg }};">
-                <div class="kk-story-emoji">{{ s.emoji }}</div>
-                <div class="kk-story-text">{{ s.text }}</div>
+                <div class="kk-story-headline">{{ s.headline|default:s.text }}</div>
+                <div class="kk-story-subtext">{{ s.subtext }}</div>
                 <div class="kk-story-type">{{ s.slide_type }}</div>
               </div>
               <div class="kk-story-hex">{{ s.bg_color }}</div>
-              <button type="button" class="kk-copy-btn" data-copy-text="{{ s.text }}">Tekst</button>
+              <button type="button" class="kk-copy-btn" data-copy-text="{{ s.headline|default:s.text }} — {{ s.subtext }}">Tekst</button>
+              {% if ai_story_brand_suffix %}
+                {% with sp=s.visual_hint|stringformat:"s"|add:ai_story_brand_suffix %}
+                  <pre class="kk-ai-prompt-preview">{{ sp }}</pre>
+                  <button type="button" class="kk-copy-btn" data-copy-text="{{ sp }}">Skopiuj prompt AI</button>
+                {% endwith %}
+              {% endif %}
             </div>
           {% endfor %}
         </div>
       {% endif %}
       <div class="kk-bulk-actions">
         <button type="button" class="kk-copy-btn kk-copy-btn-primary"
-                data-copy-text="{% for s in data.instagram_stories %}{{ forloop.counter }}. [{{ s.slide_type }}] {{ s.emoji }} {{ s.text }}&#10;{% endfor %}">
+                data-copy-text="{% for s in data.instagram_stories %}{{ forloop.counter }}. [{{ s.slide_type }}] {{ s.headline|default:s.text }} — {{ s.subtext }}&#10;{% endfor %}">
           Skopiuj wszystkie teksty stories
         </button>
       </div>
