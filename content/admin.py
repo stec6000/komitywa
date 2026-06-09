@@ -211,7 +211,8 @@ def promote_to_story_slides(modeladmin, request, queryset):
 def generate_story_slide_pngs(modeladmin, request, queryset):
     renderer = StoryRenderer()
     generated, errors = 0, 0
-    for slide in queryset:
+    total = queryset.count()
+    for i, slide in enumerate(queryset, start=1):
         slide_type = (
             (slide.slide_type or "slide").lower().replace(" ", "_")
         )
@@ -223,7 +224,7 @@ def generate_story_slide_pngs(modeladmin, request, queryset):
             / f"{slide.order:02d}_{slide_type}.png"
         )
         try:
-            renderer.render_to_file(slide, path)
+            renderer.render_to_file(slide, path, index=i, total=total)
             generated += 1
         except Exception as exc:  # noqa: BLE001
             errors += 1

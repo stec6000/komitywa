@@ -73,7 +73,8 @@ class Command(BaseCommand):
         renderer = StoryRenderer()
 
         generated, skipped = 0, 0
-        for slide in slides:
+        total = len(slides)
+        for i, slide in enumerate(slides, start=1):
             slide_type = (
                 (slide.slide_type or f"slide{slide.order}")
                 .lower()
@@ -87,7 +88,7 @@ class Command(BaseCommand):
                 skipped += 1
                 continue
 
-            renderer.render_to_file(slide, path)
+            renderer.render_to_file(slide, path, index=i, total=total)
             self.stdout.write(self.style.SUCCESS(f"wrote: {path}"))
             generated += 1
 
