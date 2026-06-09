@@ -46,6 +46,16 @@ class StoryRenderer:
     SCRIM_HEIGHT_RATIO = 0.45
     SCRIM_MAX_ALPHA = 217
 
+    WORDMARK_TEXT = "KUCHENNA KOMITYWA"
+    WORDMARK_SIZE = 26
+    WORDMARK_Y = 1830
+    WORDMARK_BLEND = 0.55
+    DOTS_Y = 64
+    DOT_RADIUS = 7
+    DOT_GAP = 16
+    DOT_DIM_ALPHA = 0.4
+    LAYOUT_A_BOTTOM_MARGIN = 240
+
     def __init__(self) -> None:
         if not self.FONT_PATH_REGULAR.exists() or not self.FONT_PATH_BOLD.exists():
             raise RuntimeError(
@@ -60,6 +70,9 @@ class StoryRenderer:
         )
         self._font_subtext = ImageFont.truetype(
             str(self.FONT_PATH_REGULAR), self.SUBTEXT_SIZE
+        )
+        self._font_wordmark = ImageFont.truetype(
+            str(self.FONT_PATH_REGULAR), self.WORDMARK_SIZE
         )
 
     @staticmethod
@@ -159,6 +172,8 @@ class StoryRenderer:
         subtext_lines,
         eyebrow_color,
         text_color,
+        vertical_center: bool = False,
+        bottom_margin=None,
     ) -> None:
         canvas_w, canvas_h = self.CANVAS_SIZE
 
@@ -181,7 +196,15 @@ class StoryRenderer:
                 + self.SUBTEXT_LINE_GAP * (len(subtext_lines) - 1)
             )
 
-        y = canvas_h - self.BOTTOM_MARGIN - total_h
+        if vertical_center:
+            y = (canvas_h - total_h) // 2
+        else:
+            bm = (
+                bottom_margin
+                if bottom_margin is not None
+                else self.BOTTOM_MARGIN
+            )
+            y = canvas_h - bm - total_h
 
         if eyebrow:
             spaced = " ".join(list(eyebrow))
@@ -223,7 +246,45 @@ class StoryRenderer:
                 if i < len(subtext_lines) - 1:
                     y += self.SUBTEXT_LINE_GAP
 
-    def render(self, slide) -> bytes:
+    def _blend(self, fg_rgb, bg_rgb, weight) -> tuple:
+        return tuple(
+            int(fg_rgb[i] * weight + bg_rgb[i] * (1 - weight))
+            for i in range(3)
+        )
+
+    def _draw_wordmark(self, draw, color_rgb, bg_rgb) -> None:
+        canvas_w, canvas_h = self.CANVAS_SIZE
+        spaced = " ".join(list(self.WORDMARK_TEXT))
+        blended = self._blend(color_rgb, bg_rgb, self.WORDMARK_BLEND)
+        bbox = draw.textbbox((0, 0), spaced, font=self._font_wordmark)
+        lw = bbox[2] - bbox[0]
+        x = (canvas_w - lw) // 2
+        y = self.WORDMARK_Y
+        draw.text((x, y), spaced, font=self._font_wordmark, fill=blended)
+
+    def _draw_progress_dots(
+        self, draw, index, total, active_rgb, bg_rgb
+    ) -> None:
+        if (
+            total is None
+            or index is None
+            or total < 1
+            or not (1 <= index <= total)
+        ):
+            return
+        canvas_w, canvas_h = self.CANVAS_SIZE
+        dim_rgb = self._blend(active_rgb, bg_rgb, self.DOT_DIM_ALPHA)
+        r = self.DOT_RADIUS
+        gap = self.DOT_GAP
+        row_w = total * (2 * r) + (total - 1) * gap
+        x0 = (canvas_w - row_w) // 2
+        cy = self.DOTS_Y
+        for i in range(total):
+            cx = x0 + i * (2 * r + gap) + r
+            fill = active_rgb if (i == index - 1) else dim_rgb
+            draw.ellipse((cx - r, cy - r, cx + r, cy + r), fill=fill)
+
+    def render(self, slide, index=None, total=None) -> bytes:
         data = self._normalize(slide)
         headline = (data["headline"] or "").strip()
         subtext = (data["subtext"] or "").strip()
@@ -255,6 +316,12 @@ class StoryRenderer:
                 subtext_lines,
                 eyebrow_color=(230, 230, 230),
                 text_color=(255, 255, 255),
+                vertical_center=False,
+                bottom_margin=self.LAYOUT_A_BOTTOM_MARGIN,
+            )
+            self._draw_wordmark(draw, (255, 255, 255), (20, 16, 12))
+            self._draw_progress_dots(
+                draw, index, total, (255, 255, 255), (0, 0, 0)
             )
         else:
             # ---- Fallback: solid bg_color + readable text ----
@@ -277,14 +344,17 @@ class StoryRenderer:
                 subtext_lines,
                 eyebrow_color=eyebrow_rgb,
                 text_color=text_rgb,
+                vertical_center=True,
             )
+            self._draw_wordmark(draw, text_rgb, bg_rgb)
+            self._draw_progress_dots(draw, index, total, text_rgb, bg_rgb)
 
         buf = BytesIO()
         img.save(buf, format="PNG", optimize=True)
         return buf.getvalue()
 
-    def render_to_file(self, slide, path) -> Path:
+    def render_to_file(self, slide, path, index=None, total=None) -> Path:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(self.render(slide))
+        path.write_bytes(self.render(slide, index=index, total=total))
         return path
