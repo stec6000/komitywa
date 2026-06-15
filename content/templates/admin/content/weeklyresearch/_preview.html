@@ -123,12 +123,12 @@
               <div class="kk-story-wrapper">
                 <div class="kk-story-card"
                      style="background-color: {{ s.bg_color }}; color: {{ s.bg_color|text_color_for_bg }};">
-                  <div class="kk-story-headline">{{ s.headline|default:s.text }}</div>
+                  <div class="kk-story-headline">{{ s|slide_headline }}</div>
                   <div class="kk-story-subtext">{{ s.subtext }}</div>
                   <div class="kk-story-type">{{ s.slide_type }}</div>
                 </div>
                 <div class="kk-story-hex">{{ s.bg_color }}</div>
-                <button type="button" class="kk-copy-btn" data-copy-text="{{ s.headline|default:s.text }} — {{ s.subtext }}">Tekst</button>
+                <button type="button" class="kk-copy-btn" data-copy-text="{{ s|slide_headline }} — {{ s.subtext }}">Tekst</button>
                 {% if ai_story_brand_suffix %}
                   {% with sp=s.visual_hint|stringformat:"s"|add:ai_story_brand_suffix %}
                     <pre class="kk-ai-prompt-preview">{{ sp }}</pre>
@@ -157,12 +157,12 @@
             <div class="kk-story-wrapper">
               <div class="kk-story-card"
                    style="background-color: {{ s.bg_color }}; color: {{ s.bg_color|text_color_for_bg }};">
-                <div class="kk-story-headline">{{ s.headline|default:s.text }}</div>
+                <div class="kk-story-headline">{{ s|slide_headline }}</div>
                 <div class="kk-story-subtext">{{ s.subtext }}</div>
                 <div class="kk-story-type">{{ s.slide_type }}</div>
               </div>
               <div class="kk-story-hex">{{ s.bg_color }}</div>
-              <button type="button" class="kk-copy-btn" data-copy-text="{{ s.headline|default:s.text }} — {{ s.subtext }}">Tekst</button>
+              <button type="button" class="kk-copy-btn" data-copy-text="{{ s|slide_headline }} — {{ s.subtext }}">Tekst</button>
               {% if ai_story_brand_suffix %}
                 {% with sp=s.visual_hint|stringformat:"s"|add:ai_story_brand_suffix %}
                   <pre class="kk-ai-prompt-preview">{{ sp }}</pre>
@@ -175,7 +175,7 @@
       {% endif %}
       <div class="kk-bulk-actions">
         <button type="button" class="kk-copy-btn kk-copy-btn-primary"
-                data-copy-text="{% for s in data.instagram_stories %}{{ forloop.counter }}. [{{ s.slide_type }}] {{ s.headline|default:s.text }} — {{ s.subtext }}&#10;{% endfor %}">
+                data-copy-text="{% for s in data.instagram_stories %}{{ forloop.counter }}. [{{ s.slide_type }}] {{ s|slide_headline }} — {{ s.subtext }}&#10;{% endfor %}">
           Skopiuj wszystkie teksty stories
         </button>
       </div>
