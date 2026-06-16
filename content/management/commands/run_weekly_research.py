@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from content.models import WeeklyResearch
+from content.services.humanize import humanize_json
 
 
 RESEARCH_PROMPT = """
@@ -101,6 +102,21 @@ JSON_STRICTNESS_ADDENDUM = (
     "\n\nKRYTYCZNE: zwroc WYLACZNIE prawidlowy, parsowalny JSON. "
     "Kazdy cudzyslow wewnatrz stringa MUSI byc escapowany jako \\\". "
     "Zadnych komentarzy, zadnego tekstu poza JSON-em."
+)
+
+
+# Nudge stylistyczny — pisz jak czlowiek, nie jak AI. Czesc rzeczy (mysliki,
+# wielokropek) i tak czysci deterministyczny sanitizer (humanize_json), ale
+# FRAZY-KLISZE da sie usunac tylko na poziomie promptu — sanitizer ich NIE rusza.
+HUMANIZE_ADDENDUM = (
+    "\n\nSTYL: pisz naturalnie, jak czlowiek, NIE jak AI. "
+    "Nie uzywaj dlugiego myslika (—) ani polpauzy (–) jako lacznika w zdaniu; "
+    "zamiast tego uzyj przecinka albo kropki. "
+    "Unikaj typowych fraz-wypelniaczy i klisz AI. Konkretnie NIE pisz: "
+    "\"warto pamietac\", \"nie tylko... ale rowniez\", \"nie tylko... ale takze\", "
+    "\"w dzisiejszych czasach\", \"w dzisiejszym swiecie\", \"w dobie\", "
+    "\"podsumowujac\". "
+    "Te frazy eliminujesz TY na poziomie tekstu — automatyczny sanitizer ich nie usuwa."
 )
 
 
@@ -353,7 +369,7 @@ class Command(BaseCommand):
 
         # Wspolny blok call 2 (oba galezie laduja tu z raw_research zdefiniowanym).
         self.stdout.write(self.style.NOTICE(f"[2/2] Formatowanie JSON dla {week_label}..."))
-        prompt = FORMAT_PROMPT.replace("{raw_research}", raw_research) + JSON_STRICTNESS_ADDENDUM
+        prompt = FORMAT_PROMPT.replace("{raw_research}", raw_research) + JSON_STRICTNESS_ADDENDUM + HUMANIZE_ADDENDUM
         try:
             parsed = self._call_format(client, prompt)
         except CommandError as exc:
@@ -368,6 +384,10 @@ class Command(BaseCommand):
             row.save(update_fields=["status", "error_message", "updated_at"])
             self.stderr.write(self.style.ERROR(f"[2/2] FAIL: {exc}"))
             raise
+
+        # Deterministyczne czyszczenie typografii (mysliki, wielokropek, cudzyslowy)
+        # PRZED zapisem — pojedynczy, czysty punkt (nie czyscimy dwa razy).
+        parsed = humanize_json(parsed)
 
         row.formatted_json = parsed
         row.status = "formatted"
