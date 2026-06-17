@@ -109,6 +109,7 @@ v1.1 key decisions:
 | 260609-ikz | Podrasowanie wizualne stories: balans fallbacku (tekst wysrodkowany) + wordmark marki + progress dots (renderer + admin akcja + CLI) | 2026-06-09 | 6681fd5 | Verified (PNG potwierdzone wizualnie) | [260609-ikz-podrasowanie-wizualne-stories-balans-fal](.planning/quick/260609-ikz-podrasowanie-wizualne-stories-balans-fal/) |
 | 260615-k1g | Fix 500 w admin WeeklyResearch change view: filtr slide_headline zamiast `s.headline\|default:s.text` (argument filtra rzucal VariableDoesNotExist na slajdach bez klucza `text`) | 2026-06-15 | 6519892 | Verified (render OK, stary expr potwierdzony jako rzucajacy, legacy `text` kompatybilny) | fast (bez katalogu quick) |
 | 260616-fzx | Usun slady AI z generowanego contentu: sanitizer content/services/humanize.py (em dash->przecinek, zakresy 10-15 zachowane, wielokropek, konserwatywne cudzyslowy) + HUMANIZE_ADDENDUM w prompcie + backfill command humanize_content --dry-run | 2026-06-16 | 751722b | Verified (14 testow OK + smoke na realnych stringach) | [260616-fzx-usun-slady-ai-z-generowanego-contentu-sa](.planning/quick/260616-fzx-usun-slady-ai-z-generowanego-contentu-sa/) |
+| 260617-hero | Czystszy hero na home: nowa symetryczna galazka SVG (.hero-sprig) zamiast krzywego listka + eyebrow 'roslinnie, sezonowo, powoli' (bez pory roku) + usunieta zbedna kreska .hero-eyebrow::before | 2026-06-17 | 69f4c9b | Verified (screenshot live hero przez headless chrome) | fast (bez katalogu quick) |
 
 ## Session Continuity
 
