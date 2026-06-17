@@ -140,6 +140,14 @@ section { padding: 70px 0; position: relative; z-index: 2; }
     line-height: 0.95;
     color: var(--ink);
 }
+.section-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+.section-title a:hover {
+    color: var(--accent);
+}
 .section-meta {
     font-family: var(--font-hand);
     font-size: 20px;
