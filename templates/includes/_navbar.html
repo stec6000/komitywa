@@ -15,7 +15,7 @@
             <a class="{% if request.resolver_match.app_name == 'recipes' %}active{% endif %}" href="{% url 'recipes:list' %}">przepiśnik</a>
             <a class="{% if request.resolver_match.app_name == 'shop' %}active{% endif %}" href="{% url 'shop:list' %}">sklep</a>
             <a class="{% if request.resolver_match.app_name == 'content' %}active{% endif %}" href="{% url 'content:blog_list' %}">blog</a>
-            <a class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">o nas</a>
+            <a class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">o mnie</a>
             <a class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'contact' %}">kontakt</a>
         </div>
 
