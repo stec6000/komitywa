@@ -1,40 +1,67 @@
 {% extends "base.html" %}
 {% load static %}
+{% load recipe_extras %}
 
 {% block title %}{{ recipe.title }} - Kuchenna Komitywa{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="Przepis">
     <div class="wrap">
-        <div class="row">
-            <div class="col-lg-8">
-                {% if recipe.image %}
-                <div class="kk-detail-hero">
-                    <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+        {% if recipe.image %}
+        <div class="kk-detail-hero">
+            <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+        </div>
+        {% endif %}
+
+        {% if recipe.category %}
+        <div class="hero-eyebrow">{{ recipe.category.name|lower }}</div>
+        {% endif %}
+
+        <h1>{{ recipe.title }}</h1>
+
+        <div class="kk-meta-bar">
+            <div class="kk-meta-item">
+                <span class="kk-meta-label">czas</span>
+                <span class="kk-meta-value">{{ recipe.prep_time }} min</span>
+            </div>
+            <div class="kk-meta-item">
+                <span class="kk-meta-label">porcje</span>
+                <span class="kk-meta-value">{{ recipe.servings }} porcj{% if recipe.servings == 1 %}a{% elif recipe.servings < 5 %}e{% else %}i{% endif %}</span>
+            </div>
+            <div class="kk-meta-item">
+                <span class="kk-meta-label">trudność</span>
+                <span class="kk-meta-value">{{ recipe.difficulty }}</span>
+            </div>
+            <div class="kk-meta-item">
+                <span class="kk-meta-label">dodano</span>
+                <span class="kk-meta-value">{{ recipe.created_at|date:"j E Y" }}</span>
+            </div>
+        </div>
+
+        <p class="lead">{{ recipe.description }}</p>
+
+        {% with recipe_tags=recipe.tags.all %}
+        {% if recipe_tags %}
+        <div class="tag-row">
+            {% for t in recipe_tags %}
+            <a href="{% url 'recipes:list' %}?tag={{ t.slug }}" class="tag">#{{ t.name }}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="kk-recipe-body">
+            <aside class="kk-recipe-ingredients-col">
+                <div class="kk-ingredients-sticky">
+                    <h2>Składniki</h2>
+                    <div class="kk-ingredients kk-ingredients--list">{{ recipe.ingredients_text|format_ingredients }}</div>
+                    <p class="kk-ingredients-back">
+                        <a href="{% url 'recipes:list' %}" class="kk-link-arrow">← wróć do przepiśnika</a>
+                    </p>
                 </div>
-                {% endif %}
+            </aside>
 
-                {% if recipe.category %}
-                <div class="hero-eyebrow">{{ recipe.category.name|lower }}</div>
-                {% endif %}
-
-                <h1>{{ recipe.title }}</h1>
-
-                <div class="d-flex flex-wrap gap-2 mb-4" style="align-items: center;">
-                    <span class="kk-prep-time">⏱ {{ recipe.prep_time }} min</span>
-                    <span class="kk-prep-time">🍽 {{ recipe.servings }} porcj{% if recipe.servings == 1 %}a{% elif recipe.servings < 5 %}e{% else %}i{% endif %}</span>
-                    <span class="kk-prep-time">★ {{ recipe.difficulty }}</span>
-                    {% if recipe.category %}
-                    <span class="kk-category-badge">{{ recipe.category.name|lower }}</span>
-                    {% endif %}
-                    <span style="font-family: var(--font-body); font-style: italic; color: var(--ink-faded); font-size: 15px;">{{ recipe.created_at|date:"j E Y" }}</span>
-                </div>
-
-                <p class="lead">{{ recipe.description }}</p>
-
-                <h2>Składniki</h2>
-                <div class="kk-ingredients">{{ recipe.ingredients_text|linebreaksbr }}</div>
-
+            <div class="kk-recipe-steps-col">
                 <h2>Sposób przygotowania</h2>
                 <div class="kk-steps">{{ recipe.steps_text|linebreaksbr }}</div>
 
@@ -42,45 +69,6 @@
                 <h2>Od autora</h2>
                 <div class="kk-notes">{{ recipe.notes|linebreaksbr }}</div>
                 {% endif %}
-            </div>
-
-            <div class="col-lg-4">
-                <aside class="kk-detail-sidebar">
-                    <div class="featured-label" style="position: static; display: inline-block; margin-bottom: 16px;">notatnik</div>
-                    <div class="mb-3">
-                        <div class="hero-eyebrow" style="font-size: 22px; margin-bottom: 4px;">czas</div>
-                        <div style="font-family: var(--font-display); font-size: 28px;">{{ recipe.prep_time }} min</div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="hero-eyebrow" style="font-size: 22px; margin-bottom: 4px;">porcje</div>
-                        <div style="font-family: var(--font-display); font-size: 28px;">{{ recipe.servings }}</div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="hero-eyebrow" style="font-size: 22px; margin-bottom: 4px;">poziom</div>
-                        <div style="font-family: var(--font-display); font-size: 22px;">{{ recipe.difficulty }}</div>
-                    </div>
-                    {% if recipe.category %}
-                    <div class="mb-3">
-                        <div class="hero-eyebrow" style="font-size: 22px; margin-bottom: 4px;">kategoria</div>
-                        <div style="font-family: var(--font-display); font-size: 22px;">{{ recipe.category.name }}</div>
-                    </div>
-                    {% endif %}
-                    {% with recipe_tags=recipe.tags.all %}
-                    {% if recipe_tags %}
-                    <div class="mb-3">
-                        <div class="hero-eyebrow" style="font-size: 22px; margin-bottom: 4px;">tagi</div>
-                        <div class="tag-row" style="margin-bottom: 0;">
-                            {% for t in recipe_tags %}
-                            <a href="{% url 'recipes:list' %}?tag={{ t.slug }}" class="tag">#{{ t.name }}</a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% endwith %}
-                    <p style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed var(--ink-soft);">
-                        <a href="{% url 'recipes:list' %}" class="kk-link-arrow">← wróć do przepiśnika</a>
-                    </p>
-                </aside>
             </div>
         </div>
     </div>
