@@ -1366,6 +1366,89 @@ section { padding: 70px 0; position: relative; z-index: 2; }
     top: 110px;
 }
 
+/* --------- Recipe meta-bar (under title) --------- */
+.kk-meta-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 14px;
+    margin: 0 0 32px;
+}
+.kk-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    box-shadow: 4px 5px 0 var(--paper-shadow);
+    padding: 8px 16px;
+    transform: rotate(-1deg);
+}
+.kk-meta-item:nth-child(even) {
+    transform: rotate(1deg);
+    background: var(--paper-2);
+}
+.kk-meta-label {
+    font-family: var(--font-hand);
+    font-size: 16px;
+    line-height: 1;
+    text-transform: lowercase;
+    color: var(--ink-faded);
+}
+.kk-meta-value {
+    font-family: var(--font-display);
+    font-size: 22px;
+    line-height: 1.1;
+    color: var(--ink);
+}
+
+/* --------- Recipe two-column body --------- */
+.kk-recipe-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    align-items: start;
+}
+.kk-ingredients-sticky {
+    position: sticky;
+    top: 100px;
+    max-height: calc(100vh - 130px);
+    overflow-y: auto;
+}
+.kk-ingredients-back {
+    margin-top: 16px;
+}
+.kk-ingredients--list {
+    padding: 20px 24px;
+}
+.kk-ingredients--list ul.kk-ingredient-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+.kk-ingredient-item {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 6px;
+    line-height: 1.55;
+}
+.kk-ingredient-item::before {
+    content: "–";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+}
+.kk-ingredient-group {
+    font-family: var(--font-hand);
+    font-size: 21px;
+    color: var(--accent-2);
+    margin-top: 20px;
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+.kk-ingredient-group:first-child {
+    margin-top: 0;
+}
+
 /* Detail body typography */
 .kk-section h1 {
     font-family: var(--font-display);
@@ -1614,6 +1697,11 @@ section { padding: 70px 0; position: relative; z-index: 2; }
     .col-lg-7 { grid-column: span 7; }
     .col-lg-8 { grid-column: span 8; }
     .row.justify-content-center > .col-lg-8 { grid-column: 3 / span 8; }
+    .kk-recipe-body {
+        grid-template-columns: minmax(0, 1fr) 340px;
+    }
+    .kk-recipe-steps-col { order: 1; }
+    .kk-recipe-ingredients-col { order: 2; }
 }
 
 /* --------- Responsive breakpoints --------- */
