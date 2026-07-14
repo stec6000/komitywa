@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 11 — HTTPS & Bezpieczeństwo
 Plan: —
 Status: Not started (roadmap defined, awaiting plan)
-Last activity: 2026-07-14 — Completed quick task 260714-h29: nowy przepis "Wegańskie ragù z tofu" (migracja seedująca 0007, zdjęcie penne-ragu, 4 porcje ~305 kcal)
+Last activity: 2026-07-14 — Completed quick task 260714-li1: redesign strony przepisu (meta-bar na górze, sticky składniki po prawej, usunięty dublujący sidebar)
 
 ## Milestone Status
 
@@ -111,6 +111,7 @@ v1.1 key decisions:
 | 260616-fzx | Usun slady AI z generowanego contentu: sanitizer content/services/humanize.py (em dash->przecinek, zakresy 10-15 zachowane, wielokropek, konserwatywne cudzyslowy) + HUMANIZE_ADDENDUM w prompcie + backfill command humanize_content --dry-run | 2026-06-16 | 751722b | Verified (14 testow OK + smoke na realnych stringach) | [260616-fzx-usun-slady-ai-z-generowanego-contentu-sa](.planning/quick/260616-fzx-usun-slady-ai-z-generowanego-contentu-sa/) |
 | 260617-hero | Czystszy hero na home: nowa symetryczna galazka SVG (.hero-sprig) zamiast krzywego listka + eyebrow 'roslinnie, sezonowo, powoli' (bez pory roku) + usunieta zbedna kreska .hero-eyebrow::before | 2026-06-17 | 69f4c9b | Verified (screenshot live hero przez headless chrome) | fast (bez katalogu quick) |
 | 260714-h29 | Nowy przepis "Wegańskie ragù z tofu" — migracja seedująca 0007 (kategoria obiady, tagi tofu+pieczone, 4 porcje ~305 kcal), zdjęcie penne-ragu skopiowane do seed_images | 2026-07-14 | e14a4ac | — | [260714-h29-dodaj-nowy-przepis-wega-skie-rag-tofu-mi](.planning/quick/260714-h29-dodaj-nowy-przepis-wega-skie-rag-tofu-mi/) |
+| 260714-li1 | Redesign strony przepisu pod UX: meta-bar (czas/porcje/trudność/data) w ramkach pod tytułem, sticky składniki po prawej z nagłówkami grup (filtr format_ingredients), kroki po lewej, usunięty dublujący sidebar "notatnik" (mobile: składniki przed krokami) | 2026-07-14 | c10f50d | Screenshoty desktop+mobile OK | [260714-li1-redesign-strony-szczeg-w-przepisu-pod-ux](.planning/quick/260714-li1-redesign-strony-szczeg-w-przepisu-pod-ux/) |
 
 ## Session Continuity
 
