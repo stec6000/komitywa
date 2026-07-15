@@ -160,6 +160,22 @@
                 <p class="featured-blurb">
                     {{ featured_recipe.description }}
                 </p>
+                <div class="featured-meta">
+                    <div class="featured-meta-item">
+                        <span class="featured-meta-label">porcje</span>
+                        <span class="featured-meta-value">{{ featured_recipe.servings }} porcj{% if featured_recipe.servings == 1 %}a{% elif featured_recipe.servings < 5 %}e{% else %}i{% endif %}</span>
+                    </div>
+                    <div class="featured-meta-item">
+                        <span class="featured-meta-label">trudność</span>
+                        <span class="featured-meta-value">{{ featured_recipe.difficulty }}</span>
+                    </div>
+                    {% if featured_recipe.category %}
+                    <div class="featured-meta-item">
+                        <span class="featured-meta-label">kategoria</span>
+                        <span class="featured-meta-value">{{ featured_recipe.category.name|lower }}</span>
+                    </div>
+                    {% endif %}
+                </div>
                 <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 24px;">
                     <a class="btn" href="{% url 'recipes:detail' slug=featured_recipe.slug %}">cały przepis →</a>
                     <span class="hand" style="font-size: 20px; color: var(--ink-soft);">{{ featured_recipe.prep_time }} min</span>
