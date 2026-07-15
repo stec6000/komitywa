@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 11 — HTTPS & Bezpieczeństwo
 Plan: —
 Status: Not started (roadmap defined, awaiting plan)
-Last activity: 2026-07-15 — Completed quick task 260715-exh: balans sekcji "przepis tygodnia" (mini-meta, zdjęcie 4/3 max 480px, wycentrowanie)
+Last activity: 2026-07-15 — Completed quick task 260715-hqv: ożywienie tła strony (tekstura kraft, ołówkowe szkice składników, scroll-drift)
 
 ## Milestone Status
 
@@ -114,6 +114,7 @@ v1.1 key decisions:
 | 260714-li1 | Redesign strony przepisu pod UX: meta-bar (czas/porcje/trudność/data) w ramkach pod tytułem, sticky składniki po prawej z nagłówkami grup (filtr format_ingredients), kroki po lewej, usunięty dublujący sidebar "notatnik" (mobile: składniki przed krokami) | 2026-07-14 | c10f50d | Screenshoty desktop+mobile OK | [260714-li1-redesign-strony-szczeg-w-przepisu-pod-ux](.planning/quick/260714-li1-redesign-strony-szczeg-w-przepisu-pod-ux/) |
 | 260715-eov | Tagi jako słowa kluczowe: usunięty prefiks "#" z tagów (detail + lista, 4 miejsca), recipeCategory + kategoria w keywords JSON-LD Recipe | 2026-07-15 | 02813b7 | — | [260715-eov-tagi-jako-s-owa-kluczowe-usu-z-wy-wietla](.planning/quick/260715-eov-tagi-jako-s-owa-kluczowe-usu-z-wy-wietla/) |
 | 260715-exh | Balans sekcji "przepis tygodnia" na home: mini-meta (porcje/trudność/kategoria) w lewej kolumnie, zdjęcie 4/3 max-height 480px, wycentrowanie pionowe (mobile: stretch) | 2026-07-15 | 251e680 | Screenshoty desktop+mobile OK | [260715-exh-balans-sekcji-przepis-tygodnia-wype-nij-](.planning/quick/260715-exh-balans-sekcji-przepis-tygodnia-wype-nij-/) |
+| 260715-hqv | Ożywienie tła: tekstura kraft (data-URI, wzmocnienie istniejących warstw body::before/after), 6 bladych ołówkowych szkiców składników w marginesach (warstwa .page-sketches w base.html, aria-hidden, pointer-events:none, ukryte <=900px), scroll-drift w @supports(animation-timeline)+prefers-reduced-motion; zero JS i plików graficznych | 2026-07-15 | ea45a16 | Screenshoty home+przepis OK | [260715-hqv-o-yw-t-o-strony-tekstura-papieru-kraft-o](.planning/quick/260715-hqv-o-yw-t-o-strony-tekstura-papieru-kraft-o/) |
 
 ## Session Continuity
 
