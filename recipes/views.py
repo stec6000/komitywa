@@ -80,8 +80,16 @@ def recipe_detail(request, slug):
         schema["image"] = request.build_absolute_uri(recipe.image.url)
 
     tag_names = list(recipe.tags.values_list("name", flat=True))
-    if tag_names:
-        schema["keywords"] = ", ".join(tag_names)
+
+    keyword_names = []
+    if recipe.category:
+        schema["recipeCategory"] = recipe.category.name
+        keyword_names.append(recipe.category.name)
+    for name in tag_names:
+        if name not in keyword_names:
+            keyword_names.append(name)
+    if keyword_names:
+        schema["keywords"] = ", ".join(keyword_names)
 
     schema_json = mark_safe(json.dumps(schema, ensure_ascii=False))
 
