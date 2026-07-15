@@ -42,13 +42,21 @@ body {
     background: var(--paper);
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    /* body jest containing-block dla warstw tekstury (::before/::after position:absolute);
+       min-height gwarantuje pokrycie teksturą także na krotkich stronach. */
+    min-height: 100vh;
 }
 img { max-width: 100%; height: auto; display: block; }
 
 /* --------- Paper texture (full-bleed background layers) --------- */
+/* PERF: warstwy tekstury sa position:absolute (nie fixed) i przewijaja sie RAZEM z trescia.
+   Fixed + mix-blend-mode:multiply wymuszal re-rasteryzacje CALEGO viewportu co klatke scrolla
+   (~12.7ms/klatke, software raster) -> jank/lag ("laguje, nie przesuwa sie plynnie",
+   debug: obrazki-dziwne-przy-scrollu). Absolute -> blend zapiekany w kafle scrolla raz,
+   re-raster tylko nowo-odslanianego paska. Wyglad przy scrollY=0 identyczny (absolute≡fixed). */
 body::before {
     content: "";
-    position: fixed; inset: 0;
+    position: absolute; inset: 0;
     pointer-events: none;
     z-index: 0;
     background:
@@ -60,7 +68,7 @@ body::before {
 }
 body::after {
     content: "";
-    position: fixed; inset: 0;
+    position: absolute; inset: 0;
     pointer-events: none;
     z-index: 1;
     /* Kraft: fine speckle grain + directional paper fibers (very low opacity — namacalnosc, nie szum) */
