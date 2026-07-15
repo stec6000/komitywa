@@ -48,12 +48,12 @@
                 <a href="{% url 'recipes:list' %}?{% if active_category %}kategoria={{ active_category }}&{% endif %}{% for at in active_tags %}{% if at != t.slug %}tag={{ at }}&{% endif %}{% endfor %}{% if query %}q={{ query }}{% endif %}"
                    class="tag active"
                    aria-current="page"
-                   aria-label="Wylacz tag {{ t.name }}">#{{ t.name }}</a>
+                   aria-label="Wylacz tag {{ t.name }}">{{ t.name }}</a>
             {% else %}
                 {# Inactive -> link adds this tag to the active set #}
                 <a href="{% url 'recipes:list' %}?{% if active_category %}kategoria={{ active_category }}&{% endif %}{% for at in active_tags %}tag={{ at }}&{% endfor %}tag={{ t.slug }}{% if query %}&q={{ query }}{% endif %}"
                    class="tag"
-                   aria-label="Dodaj tag {{ t.name }}">#{{ t.name }}</a>
+                   aria-label="Dodaj tag {{ t.name }}">{{ t.name }}</a>
             {% endif %}
             {% endfor %}
         </div>
@@ -77,7 +77,7 @@
                     {% with recipe_tags=recipe.tags.all %}
                     {% if recipe_tags %}
                     <div class="recipe-meta" aria-label="Tagi przepisu">
-                        {% for t in recipe_tags %}<span>#{{ t.name }}</span>{% endfor %}
+                        {% for t in recipe_tags %}<span>{{ t.name }}</span>{% endfor %}
                     </div>
                     {% endif %}
                     {% endwith %}
