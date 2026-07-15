@@ -94,7 +94,7 @@ body { position: relative; }
     background-position: center;
     background-size: contain;
     opacity: 0.08;
-    /* wobble baseline; scroll-drift (below) refines this where supported */
+    /* static wobble baseline (scroll-drift removed — see note below) */
     transform: rotate(-6deg);
 }
 
@@ -137,27 +137,10 @@ body { position: relative; }
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='%232a2420' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M50,90 C49,68 51,44 50,14'/><path d='M50,80 L40,74'/><path d='M50,80 L60,74'/><path d='M50,70 L39,65'/><path d='M50,70 L61,65'/><path d='M50,60 L40,55'/><path d='M50,60 L60,55'/><path d='M50,50 L41,45'/><path d='M50,50 L59,45'/><path d='M50,40 L42,36'/><path d='M50,40 L58,36'/><path d='M50,30 L43,27'/><path d='M50,30 L57,27'/></svg>");
 }
 
-/* Scroll-drift: only where supported AND motion not reduced.
-   Firefox / older Safari fall back to the static rotations above. */
-@media (prefers-reduced-motion: no-preference) {
-    @supports (animation-timeline: view()) {
-        .sk {
-            animation-name: sk-drift;
-            animation-timeline: view();
-            animation-range: entry 0% cover 60%;
-        }
-        @keyframes sk-drift {
-            from { transform: rotate(var(--sk-rot, -6deg)) translateY(14px); }
-            to   { transform: rotate(0deg) translateY(0); }
-        }
-        .sk-thyme  { --sk-rot: -9deg; }
-        .sk-onion  { --sk-rot: 7deg; }
-        .sk-carrot { --sk-rot: -5deg; }
-        .sk-bowl   { --sk-rot: 4deg; }
-        .sk-fork   { --sk-rot: -8deg; }
-        .sk-sprig  { --sk-rot: 6deg; }
-    }
-}
+/* NOTE: scroll-drift (animation-timeline: view()) usunięty — powodował, że
+   blade szkice-obrazki obracały się/przesuwały podczas przewijania w Chrome
+   ("obrazki dziwnie wyglądają przy scrollowaniu", debug: obrazki-dziwne-przy-scrollu).
+   Szkice pozostają STATYCZNE (rotacje z reguł .sk-* powyżej). */
 
 /* Mobile / narrow: remove sketches entirely — zero collision with content. */
 @media (max-width: 900px) {

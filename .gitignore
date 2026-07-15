@@ -60,3 +60,6 @@ node_modules/
 
 # Visual brainstorm companion
 .superpowers/
+
+# debug reference screenshots (not versioned)
+.planning/debug/screenshots/
