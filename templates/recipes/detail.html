@@ -44,7 +44,7 @@
         {% if recipe_tags %}
         <div class="tag-row">
             {% for t in recipe_tags %}
-            <a href="{% url 'recipes:list' %}?tag={{ t.slug }}" class="tag">#{{ t.name }}</a>
+            <a href="{% url 'recipes:list' %}?tag={{ t.slug }}" class="tag">{{ t.name }}</a>
             {% endfor %}
         </div>
         {% endif %}
