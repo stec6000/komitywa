@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 Phase: 11 — HTTPS & Bezpieczeństwo
 Plan: —
 Status: Not started (roadmap defined, awaiting plan)
-Last activity: 2026-07-15 — Completed quick task 260715-hqv: ożywienie tła strony (tekstura kraft, ołówkowe szkice składników, scroll-drift)
+Last activity: 2026-07-16 — Fast task: usunięte ołówkowe szkice tła (decyzja estetyczna użytkownika); tekstura kraft zostaje
 
 ## Milestone Status
 
@@ -115,6 +115,7 @@ v1.1 key decisions:
 | 260715-eov | Tagi jako słowa kluczowe: usunięty prefiks "#" z tagów (detail + lista, 4 miejsca), recipeCategory + kategoria w keywords JSON-LD Recipe | 2026-07-15 | 02813b7 | — | [260715-eov-tagi-jako-s-owa-kluczowe-usu-z-wy-wietla](.planning/quick/260715-eov-tagi-jako-s-owa-kluczowe-usu-z-wy-wietla/) |
 | 260715-exh | Balans sekcji "przepis tygodnia" na home: mini-meta (porcje/trudność/kategoria) w lewej kolumnie, zdjęcie 4/3 max-height 480px, wycentrowanie pionowe (mobile: stretch) | 2026-07-15 | 251e680 | Screenshoty desktop+mobile OK | [260715-exh-balans-sekcji-przepis-tygodnia-wype-nij-](.planning/quick/260715-exh-balans-sekcji-przepis-tygodnia-wype-nij-/) |
 | 260715-hqv | Ożywienie tła: tekstura kraft (data-URI, wzmocnienie istniejących warstw body::before/after), 6 bladych ołówkowych szkiców składników w marginesach (warstwa .page-sketches w base.html, aria-hidden, pointer-events:none, ukryte <=900px), scroll-drift w @supports(animation-timeline)+prefers-reduced-motion; zero JS i plików graficznych | 2026-07-15 | ea45a16 | Screenshoty home+przepis OK | [260715-hqv-o-yw-t-o-strony-tekstura-papieru-kraft-o](.planning/quick/260715-hqv-o-yw-t-o-strony-tekstura-papieru-kraft-o/) |
+| 260716-fast | Usunięte ołówkowe szkice tła (.page-sketches z base.html + całe CSS .sk-*) — decyzja estetyczna użytkownika po 3 cyklach debugowania; tekstura kraft body::before/after zostaje (body position:relative zachowane jako containing block) | 2026-07-16 | 9790c8f | — | fast (bez katalogu quick) |
 
 ## Session Continuity
 
