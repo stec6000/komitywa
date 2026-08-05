@@ -1,8 +1,11 @@
+from datetime import timedelta
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.utils import timezone
 
-from shop.models import Order, Product, ProductCategory
+from shop.models import Order, OrderEdition, Product, ProductCategory
 
 
 class TestProductCategory(TestCase):
@@ -17,6 +20,69 @@ class TestProductCategory(TestCase):
         ProductCategory.objects.create(name="Desery", slug="desery")
         cats = list(ProductCategory.objects.values_list("name", flat=True))
         self.assertEqual(cats, ["Desery", "Zupy"])
+
+
+class TestOrderEdition(TestCase):
+    def test_slug_is_generated_and_made_unique(self):
+        first = OrderEdition.objects.create(title="Świąteczna edycja")
+        second = OrderEdition.objects.create(title="Świąteczna edycja")
+
+        self.assertEqual(first.slug, "swiateczna-edycja")
+        self.assertEqual(second.slug, "swiateczna-edycja-2")
+
+    def test_current_returns_open_edition_inside_time_window(self):
+        now = timezone.now()
+        current = OrderEdition.objects.create(
+            title="Sierpniowe wypieki",
+            status=OrderEdition.Status.OPEN,
+            opens_at=now - timedelta(days=1),
+            closes_at=now + timedelta(days=1),
+        )
+        OrderEdition.objects.create(
+            title="Jesienne wypieki",
+            status=OrderEdition.Status.OPEN,
+            opens_at=now + timedelta(days=1),
+        )
+        OrderEdition.objects.create(
+            title="Poprzednia edycja",
+            status=OrderEdition.Status.OPEN,
+            closes_at=now,
+        )
+        OrderEdition.objects.create(
+            title="Szkic",
+            status=OrderEdition.Status.DRAFT,
+        )
+
+        self.assertEqual(OrderEdition.objects.current(at=now), current)
+
+    def test_current_accepts_open_edition_without_dates(self):
+        edition = OrderEdition.objects.create(
+            title="Edycja bez dat",
+            status=OrderEdition.Status.OPEN,
+        )
+
+        self.assertEqual(OrderEdition.objects.current(), edition)
+
+    def test_current_returns_none_when_orders_are_closed(self):
+        OrderEdition.objects.create(
+            title="Zamknięta edycja",
+            status=OrderEdition.Status.CLOSED,
+        )
+
+        self.assertIsNone(OrderEdition.objects.current())
+
+    def test_end_must_be_after_start(self):
+        now = timezone.now()
+        edition = OrderEdition(
+            title="Błędne okno zamówień",
+            opens_at=now,
+            closes_at=now - timedelta(minutes=1),
+        )
+
+        with self.assertRaises(ValidationError) as error:
+            edition.full_clean()
+
+        self.assertIn("closes_at", error.exception.message_dict)
 
 
 class TestProduct(TestCase):
@@ -69,6 +135,36 @@ class TestProduct(TestCase):
             ("physical", "Produkt fizyczny"),
             Product.TYPE_CHOICES,
         )
+
+    def test_edition_fields_are_optional_for_existing_shop_flow(self):
+        product = Product.objects.create(
+            title="Produkt bez edycji",
+            category=self.category,
+            type="physical",
+            description="Opis",
+            price=Decimal("15.00"),
+        )
+
+        self.assertIsNone(product.edition)
+        self.assertEqual(product.ingredients, "")
+        self.assertEqual(product.allergens, "")
+        self.assertEqual(product.sort_order, 0)
+
+    def test_product_can_be_assigned_to_edition(self):
+        edition = OrderEdition.objects.create(title="Letni stół")
+        product = Product.objects.create(
+            title="Drożdżówka",
+            edition=edition,
+            category=self.category,
+            type="physical",
+            description="Opis",
+            ingredients="mąka, śliwki",
+            allergens="gluten",
+            price=Decimal("16.00"),
+            sort_order=2,
+        )
+
+        self.assertEqual(list(edition.products.all()), [product])
 
 
 class TestOrder(TestCase):

@@ -1,15 +1,18 @@
 {% extends "base.html" %}
-{% load static %}
 
-{% block title %}Blog — Kuchenna Komitywa{% endblock %}
+{% block title %}Z kuchni — Kuchenna Komitywa{% endblock %}
+{% block meta_description %}Z kuchni Kuchennej Komitywy: kulisy produkcji, testy nowych wypieków, historie składników, sezonowe inspiracje i zapiski z roślinnej pracowni.{% endblock %}
+{% block og_title %}Z kuchni — Kuchenna Komitywa{% endblock %}
+{% block og_description %}Kulisy roślinnej pracowni, nowe wypieki, sezonowe inspiracje i notatki z Białegostoku.{% endblock %}
 
 {% block content %}
-<section class="kk-section" aria-label="Blog">
+<section class="kk-section" aria-labelledby="kitchen-title">
     <div class="wrap">
         <div class="section-head">
             <div>
-                <div class="section-number">· blog</div>
-                <h2 class="section-title">Z notatnika kuchni<span class="section-annotation">— co się dzieje w roślinnej piekarni</span></h2>
+                <div class="section-number">· dziennik pracowni</div>
+                <h1 id="kitchen-title" class="section-title">Z kuchni</h1>
+                <p class="section-annotation">Kulisy produkcji, nowe wypieki, składniki i sezonowe notatki.</p>
             </div>
             <div class="section-meta">
                 {{ page_obj.paginator.count }} wpis{{ page_obj.paginator.count|pluralize:"y,ów" }}
@@ -17,35 +20,38 @@
         </div>
 
         {% if posts %}
-        <div class="recipe-grid" aria-label="Lista wpisów">
+        <div class="recipe-grid kitchen-journal" aria-label="Lista wpisów z kuchni">
             {% for post in posts %}
-            <a class="recipe-card" href="{{ post.get_absolute_url }}" aria-label="Otwórz wpis: {{ post.title }}">
-                <div class="recipe-img">
-                    <div class="num-stamp">{{ forloop.counter|stringformat:"02d" }}</div>
-                    {% if post.published_at %}
-                    <div class="time-stamp">{{ post.published_at|date:"j.m.Y" }}</div>
-                    {% endif %}
-                </div>
-                <div class="recipe-body">
-                    <div class="recipe-kicker">wpis</div>
-                    <div class="recipe-name">{{ post.title }}</div>
-                    {% if post.excerpt %}
-                    <p class="recipe-meta" style="display:block; font-style: italic;">{{ post.excerpt|truncatechars:160 }}</p>
-                    {% endif %}
-                    {% with tag_items=post.tags_list %}
-                    {% if tag_items %}
-                    <div class="recipe-meta" aria-label="Tagi">
-                        {% for t in tag_items %}<span>#{{ t }}</span>{% endfor %}
+            <article class="recipe-card kitchen-entry">
+                <a href="{{ post.get_absolute_url }}" aria-label="Czytaj wpis: {{ post.title }}">
+                    <div class="recipe-img kitchen-entry__cover">
+                        <div class="num-stamp">{{ forloop.counter|stringformat:"02d" }}</div>
+                        {% if post.published_at %}
+                        <time class="time-stamp" datetime="{{ post.published_at|date:'c' }}">{{ post.published_at|date:"j.m.Y" }}</time>
+                        {% endif %}
+                        <span class="kitchen-entry__label">notatka z pracowni</span>
                     </div>
-                    {% endif %}
-                    {% endwith %}
-                </div>
-            </a>
+                    <div class="recipe-body">
+                        <div class="recipe-kicker">z kuchni</div>
+                        <h2 class="recipe-name">{{ post.title }}</h2>
+                        {% if post.excerpt %}
+                        <p class="recipe-description">{{ post.excerpt|truncatechars:180 }}</p>
+                        {% endif %}
+                        {% with tag_items=post.tags_list %}
+                        {% if tag_items %}
+                        <div class="recipe-meta" aria-label="Tematy wpisu">
+                            {% for t in tag_items %}<span>{{ t }}</span>{% endfor %}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                </a>
+            </article>
             {% endfor %}
         </div>
 
         {% if page_obj.has_other_pages %}
-        <nav aria-label="Paginacja bloga">
+        <nav aria-label="Paginacja wpisów z kuchni">
             <ul class="kk-pagination">
                 {% if page_obj.has_previous %}
                 <li class="page-item">
@@ -54,7 +60,7 @@
                 {% endif %}
                 {% for num in page_obj.paginator.page_range %}
                 <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    <a class="page-link" href="?page={{ num }}"{% if page_obj.number == num %} aria-current="page"{% endif %}>{{ num }}</a>
                 </li>
                 {% endfor %}
                 {% if page_obj.has_next %}
@@ -68,8 +74,9 @@
 
         {% else %}
         <div class="kk-empty-state">
-            <h2>Jeszcze nic nie ma</h2>
-            <p>Pierwszy wpis już wkrótce. W międzyczasie zajrzyj do <a href="{% url 'recipes:list' %}">przepiśnika</a>.</p>
+            <h2>Pierwsze notatki są jeszcze w kuchni</h2>
+            <p>Wkrótce pojawią się tu kulisy pracowni. W międzyczasie zajrzyj do przepiśnika.</p>
+            <a href="{% url 'recipes:list' %}" class="kk-link-arrow">Zobacz przepisy →</a>
         </div>
         {% endif %}
     </div>

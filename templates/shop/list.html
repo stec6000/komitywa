@@ -1,16 +1,20 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Sklep - Kuchenna Komitywa{% endblock %}
+{% block title %}Sklep i ebooki — Kuchenna Komitywa{% endblock %}
+{% block meta_description %}Sklep Kuchennej Komitywy: zachowane ebooki i aktywne produkty roślinnej pracowni. Limitowane wypieki znajdziesz w aktualnych edycjach zamówień.{% endblock %}
+{% block og_title %}Sklep i ebooki — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
-<section class="kk-section" aria-label="Sklep">
+<section class="kk-section" aria-labelledby="shop-title">
     <div class="wrap">
         <div class="section-head">
             <div>
-                <div class="section-number">III. · sklep</div>
-                <h2 class="section-title">Ebooki &amp; produkty<span class="section-annotation">- nasze ulubione</span></h2>
+                <div class="section-number">· sklep</div>
+                <h1 id="shop-title" class="section-title">Sklep i ebooki</h1>
+                <p class="section-annotation">Cyfrowe publikacje i produkty dostępne poza limitowanymi edycjami.</p>
             </div>
-            <div class="section-meta">PDF natychmiast na mail · produkty z odbiorem osobistym</div>
+            <div class="section-meta"><a href="{% url 'orders' %}">Szukasz świeżych wypieków? Sprawdź zamówienia →</a></div>
         </div>
 
         <div class="tag-row" role="navigation" aria-label="Filtr kategorii">
@@ -27,9 +31,9 @@
         {% if page_obj.object_list %}
         <div class="ebook-grid">
             {% for product in page_obj %}
-            {% cycle "#6b7a3a" "#b6562e" "#8a5a2a" "#2e4a3a" "#a4762a" "#4a6b3a" "#7a3a3a" "#3a4a6b" as cover_color silent %}
+            {% cycle "var(--accent)" "var(--accent-2)" "var(--ink-faded)" "var(--ink-soft)" as cover_color silent %}
             {% cycle "-1deg" "1deg" "-0.5deg" "0.5deg" "-1.5deg" "1.5deg" "0deg" "-0.8deg" as cover_tilt silent %}
-            <a class="ebook" href="{% url 'shop:detail' slug=product.slug %}" aria-label="{{ product.title }}">
+            <a class="ebook" href="{% url 'shop:detail' slug=product.slug %}" aria-label="Zobacz produkt: {{ product.title }}">
                 {% if product.type == "ebook" %}
                 <div class="ebook-cover" style="--cover: {{ cover_color }}; transform: rotate({{ cover_tilt }});">
                     <div class="ebook-cover-num">{{ forloop.counter|stringformat:"02d" }}</div>
@@ -43,15 +47,16 @@
                 </div>
                 {% else %}
                 <div class="product-cover{% if product.image %} product-cover--photo{% endif %}" style="--img-bg: {{ cover_color }}; transform: rotate({{ cover_tilt }});">
-                    {% if product.image %}<img src="{{ product.image.url }}" alt="">{% endif %}
+                    {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.title }} — produkt Kuchennej Komitywy" data-fallback="{% static 'img/serek-ziola.jpg' %}" loading="lazy" decoding="async">{% endif %}
                 </div>
                 {% endif %}
                 <div class="ebook-info">
                     <div>
-                        <div class="ebook-title">{{ product.title }}</div>
+                        <h2 class="ebook-title">{{ product.title }}</h2>
                         <div class="ebook-meta">
-                            {% if product.type == "ebook" %}PDF · cyfrowy{% else %}odbiór osobisty{% endif %}
+                            {% if product.type == "ebook" %}PDF · produkt cyfrowy{% elif product.edition %}{{ product.edition.title }}{% else %}produkt fizyczny{% endif %}
                         </div>
+                        {% if product.description %}<p class="ebook-description">{{ product.description|truncatechars:120 }}</p>{% endif %}
                     </div>
                     <div class="ebook-price">{{ product.price|floatformat:"0" }} zł</div>
                 </div>
@@ -65,17 +70,17 @@
             <ul class="kk-pagination">
                 {% if page_obj.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?{% if active_category %}kategoria={{ active_category }}&{% endif %}page={{ page_obj.previous_page_number }}">«</a>
+                    <a class="page-link" href="?{% if active_category %}kategoria={{ active_category }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Poprzednia strona">«</a>
                 </li>
                 {% endif %}
                 {% for num in page_obj.paginator.page_range %}
                 <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                    <a class="page-link" href="?{% if active_category %}kategoria={{ active_category }}&{% endif %}page={{ num }}">{{ num }}</a>
+                    <a class="page-link" href="?{% if active_category %}kategoria={{ active_category }}&amp;{% endif %}page={{ num }}"{% if page_obj.number == num %} aria-current="page"{% endif %}>{{ num }}</a>
                 </li>
                 {% endfor %}
                 {% if page_obj.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?{% if active_category %}kategoria={{ active_category }}&{% endif %}page={{ page_obj.next_page_number }}">»</a>
+                    <a class="page-link" href="?{% if active_category %}kategoria={{ active_category }}&amp;{% endif %}page={{ page_obj.next_page_number }}" aria-label="Następna strona">»</a>
                 </li>
                 {% endif %}
             </ul>
@@ -85,12 +90,16 @@
         {% else %}
         <div class="kk-empty-state">
             {% if active_category %}
-            <h2>Pusta kategoria</h2>
-            <p>Tu jeszcze nic nie ma.</p>
-            <a href="{% url 'shop:list' %}" class="kk-link-arrow">wszystkie produkty →</a>
+            <h2>W tej kategorii nie ma teraz produktów</h2>
+            <p>Sprawdź pozostałe pozycje lub zobacz aktualną edycję zamówień.</p>
+            <div class="kk-action-row">
+                <a href="{% url 'shop:list' %}" class="kk-link-arrow">Wszystkie produkty →</a>
+                <a href="{% url 'orders' %}" class="kk-link-arrow">Aktualne zamówienia →</a>
+            </div>
             {% else %}
-            <h2>Sklep w przygotowaniu</h2>
-            <p>Pracujemy nad ebookami i produktami. Zajrzyj wkrótce.</p>
+            <h2>Sklep jest teraz pusty</h2>
+            <p>Limitowane wypieki i zestawy publikujemy w osobnych edycjach zamówień.</p>
+            <a href="{% url 'orders' %}" class="btn btn-accent">Sprawdź zamówienia →</a>
             {% endif %}
         </div>
         {% endif %}

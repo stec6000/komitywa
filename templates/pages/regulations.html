@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Regulamin - Kuchenna Komitywa{% endblock %}
+{% block meta_description %}Regulamin sklepu internetowego Kuchennej Komitywy: zasady zamówień, płatności, dostawy, odbioru i reklamacji.{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="Regulamin">
@@ -17,7 +18,7 @@
         <ul>
             <li><strong>Sklep</strong> - sklep internetowy prowadzony pod adresem https://www.kuchennakomitywa.pl/</li>
             <li><strong>Klient</strong> - osoba fizyczna dokonująca zakupu w Sklepie</li>
-            <li><strong>Produkt</strong> - towar lub usługa dostępna w Sklepie (ebooki, dania w słoiku, ciasta)</li>
+            <li><strong>Produkt</strong> - produkt cyfrowy albo spożywczy dostępny w aktualnej ofercie Sklepu</li>
             <li><strong>Zamówienie</strong> - oświadczenie woli Klienta zmierzające do zawarcia umowy</li>
         </ul>
 
@@ -33,21 +34,21 @@
 
         <h2>5. Dostawa</h2>
         <p><strong>Ebooki (PDF)</strong> - dostarczane na adres e-mail podany przy zamówieniu, natychmiast po zaksięgowaniu płatności.</p>
-        <p><strong>Dania w słoiku i ciasta</strong> - wyłącznie odbiór osobisty pod adresem: ul. Bukowa 14, Białystok. Godziny odbioru ustalane indywidualnie po złożeniu zamówienia.</p>
+        <p><strong>Produkty spożywcze</strong> - sposób, miejsce i termin dostawy albo odbioru są każdorazowo wskazane przy produkcie lub aktualnej edycji zamówień przed zakupem.</p>
 
         <h2>6. Prawo odstąpienia od umowy</h2>
         <p>Klient będący konsumentem ma prawo odstąpić od umowy w terminie 14 dni od dnia zawarcia umowy (zamówienia), bez podania przyczyny, składając oświadczenie na adres e-mail: kontakt@kuchennakomitywa.pl.</p>
         <p>Prawo odstąpienia <strong>nie przysługuje</strong> w przypadku:</p>
         <ul>
             <li>produktów cyfrowych (ebooki w formacie PDF) dostarczonych drogą elektroniczną - po rozpoczęciu pobierania lub wyraźnej zgodzie Klienta na dostarczenie przed upływem terminu odstąpienia;</li>
-            <li>produktów spożywczych o krótkim terminie przydatności (dania w słoiku, ciasta).</li>
+            <li>produktów spożywczych o krótkim terminie przydatności.</li>
         </ul>
 
         <h2>7. Reklamacje</h2>
         <p>Reklamacje należy zgłaszać drogą elektroniczną na adres: kontakt@kuchennakomitywa.pl, podając numer zamówienia i opis problemu. Sprzedawca udzieli odpowiedzi na reklamację w terminie 14 dni kalendarzowych od dnia jej otrzymania.</p>
 
         <h2>8. Ochrona danych osobowych</h2>
-        <p>Administratorem danych osobowych Klientów jest TOMASZ STECKIEWICZ, ul. Bukowa 14, 15-796 Białystok, NIP: 5423485438. Dane przetwarzane są wyłącznie w celu realizacji zamówień. Szczegółowe informacje zawiera <a href="{% url 'privacy-policy' %}" class="kk-link-arrow" style="font-size: inherit; border-bottom: 1px dotted;">Polityka prywatności</a>.</p>
+        <p>Administratorem danych osobowych Klientów jest TOMASZ STECKIEWICZ, ul. Bukowa 14, 15-796 Białystok, NIP: 5423485438. Dane przetwarzane są wyłącznie w celu realizacji zamówień. Szczegółowe informacje zawiera <a href="{% url 'privacy-policy' %}" class="kk-link-inline">Polityka prywatności</a>.</p>
 
         <h2>9. Postanowienia końcowe</h2>
         <p>Regulamin wchodzi w życie z dniem publikacji na stronie internetowej Sklepu. Sprzedawca zastrzega sobie prawo do zmiany regulaminu z powiadomieniem Klientów z 14-dniowym wyprzedzeniem.</p>

@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib import messages
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -25,6 +26,12 @@ def subscribe(request):
                 "Newsletter signup rejected: honeypot ip=%s",
                 get_client_ip(request),
             )
+        else:
+            messages.error(
+                request,
+                "Nie udało się zapisać na Listy z Komitywy. "
+                "Sprawdź adres e-mail i zaznacz zgodę.",
+            )
         return redirect("home")
 
     # Cloudflare Turnstile verification (graceful skip when not configured).
@@ -35,6 +42,11 @@ def subscribe(request):
             "Newsletter signup rejected: turnstile=%s ip=%s",
             reason,
             get_client_ip(request),
+        )
+        messages.error(
+            request,
+            "Nie udało się potwierdzić, że formularz wysyła człowiek. "
+            "Spróbuj ponownie za chwilę.",
         )
         return redirect("home")
 
@@ -82,7 +94,11 @@ def subscribe(request):
 
 
 def check_email(request):
-    return render(request, "newsletter/check_email.html")
+    return render(
+        request,
+        "newsletter/check_email.html",
+        {"hide_newsletter": True},
+    )
 
 
 def confirm(request, token):
@@ -91,11 +107,19 @@ def confirm(request, token):
     )
 
     if subscriber.is_confirmation_expired():
-        return render(request, "newsletter/link_expired.html")
+        return render(
+            request,
+            "newsletter/link_expired.html",
+            {"hide_newsletter": True},
+        )
 
     subscriber.is_confirmed = True
     subscriber.save(update_fields=["is_confirmed"])
-    return render(request, "newsletter/confirmed.html")
+    return render(
+        request,
+        "newsletter/confirmed.html",
+        {"hide_newsletter": True},
+    )
 
 
 def unsubscribe(request, token):
@@ -107,9 +131,16 @@ def unsubscribe(request, token):
         return render(
             request,
             "newsletter/unsubscribed.html",
-            {"already_unsubscribed": True},
+            {
+                "already_unsubscribed": True,
+                "hide_newsletter": True,
+            },
         )
 
     subscriber.is_unsubscribed = True
     subscriber.save(update_fields=["is_unsubscribed"])
-    return render(request, "newsletter/unsubscribed.html")
+    return render(
+        request,
+        "newsletter/unsubscribed.html",
+        {"hide_newsletter": True},
+    )

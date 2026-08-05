@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Wspólne gotowanie — Kuchenna Komitywa{% endblock %}
+{% block meta_description %}Planowane kameralne warsztaty i spotkania Kuchennej Komitywy w Białymstoku: roślinne drożdżówki, lepienie, fermentacja, sezonowy stół i świąteczne gotowanie.{% endblock %}
+{% block og_title %}Wspólne gotowanie — Kuchenna Komitywa{% endblock %}
+
+{% block content %}
+<section class="kk-workshop-hero" aria-labelledby="workshops-title">
+    <div class="wrap kk-workshop-hero__grid">
+        <div>
+            <p class="kk-kicker">Wydarzenia w przygotowaniu</p>
+            <h1 id="workshops-title">Spotkajmy się przy wspólnym stole</h1>
+            <p class="kk-page-intro__lead">Planujemy kameralne spotkania, podczas których wspólnie przygotujemy jedzenie, nauczymy się nowych technik i usiądziemy razem do stołu.</p>
+            <a href="#zainteresowanie-warsztatami" class="btn btn-accent">Daj znać, co Cię interesuje</a>
+        </div>
+        <aside class="kk-planned-note">
+            <p class="kk-hand-note">ważne</p>
+            <h2>To zapowiedź, nie stały kalendarz.</h2>
+            <p>Nie prowadzimy jeszcze regularnych zapisów. Zbieramy zainteresowanie tematami i terminami, żeby przygotować pierwsze spotkania.</p>
+        </aside>
+    </div>
+</section>
+
+<section class="kk-workshop-topics" aria-labelledby="topics-title">
+    <div class="wrap">
+        <header class="kk-home-heading">
+            <div>
+                <p class="kk-kicker">Pomysły na pierwsze stoły</p>
+                <h2 id="topics-title">Czego możemy uczyć się razem</h2>
+            </div>
+            <p>Tematy są propozycją. Formularz poniżej pomoże zdecydować, od czego zacząć.</p>
+        </header>
+        <ol class="kk-topic-list">
+            <li><span>01</span><strong>Roślinne drożdżówki</strong><p>Ciasto, wyrastanie, nadzienia i spokojna praca z czasem.</p></li>
+            <li><span>02</span><strong>Wspólne lepienie</strong><p>Technika, powtarzalny rytm i stół, przy którym każdy ma zajęte ręce.</p></li>
+            <li><span>03</span><strong>Kiszenie i fermentacja</strong><p>Podstawy, bezpieczeństwo i cierpliwość potrzebna dobrym procesom.</p></li>
+            <li><span>04</span><strong>Sezonowy stół</strong><p>Menu inspirowane tym, co w danym momencie daje Podlasie.</p></li>
+            <li><span>05</span><strong>Świąteczne gotowanie</strong><p>Roślinne dania i wypieki, które można postawić pośrodku stołu.</p></li>
+        </ol>
+    </div>
+</section>
+
+<section class="kk-inquiry-section" id="zainteresowanie-warsztatami" aria-labelledby="interest-title">
+    <div class="wrap kk-inquiry-section__grid">
+        <div class="kk-inquiry-section__intro">
+            <p class="kk-kicker">Lista zainteresowanych</p>
+            <h2 id="interest-title">Pomóż nam zaplanować pierwsze spotkanie</h2>
+            <p>To nie jest zakup biletu. Zapiszemy Twój wybór i odezwiemy się, gdy pojawi się pasujący termin.</p>
+        </div>
+        <form method="post" class="kk-public-form" novalidate>
+            {% csrf_token %}
+            {{ form.website }}
+            {% if form.errors %}
+            <div class="kk-form-summary" role="alert" tabindex="-1" data-focus-on-load autofocus>
+                <p><strong>Sprawdź oznaczone pola.</strong> Formularz nie został jeszcze wysłany.</p>
+                {% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
+            </div>
+            {% endif %}
+            <div class="kk-form-grid">
+                <div class="kk-field">
+                    <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                    {{ form.name }}
+                    {% include "includes/_field_errors.html" with field=form.name error_id="id_name-error" %}
+                </div>
+                <div class="kk-field">
+                    <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    {% include "includes/_field_errors.html" with field=form.email error_id="id_email-error" %}
+                </div>
+                <div class="kk-field kk-field--full">
+                    <label for="{{ form.topic.id_for_label }}">{{ form.topic.label }}</label>
+                    {{ form.topic }}
+                    {% include "includes/_field_errors.html" with field=form.topic error_id="id_topic-error" %}
+                </div>
+                <div class="kk-field kk-field--full">
+                    <label for="{{ form.preferred_timing.id_for_label }}">{{ form.preferred_timing.label }}</label>
+                    {{ form.preferred_timing }}
+                    {% include "includes/_field_errors.html" with field=form.preferred_timing error_id="id_preferred_timing-error" %}
+                </div>
+                <div class="kk-consent kk-field--full">
+                    {{ form.consent_contact }}
+                    <label for="{{ form.consent_contact.id_for_label }}">{{ form.consent_contact.label }} <a href="{% url 'privacy-policy' %}" target="_blank" rel="noopener">Polityka prywatności</a></label>
+                    {% include "includes/_field_errors.html" with field=form.consent_contact error_id="id_consent_contact-error" %}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-accent">Zapisz moje zainteresowanie</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

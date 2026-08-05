@@ -13,7 +13,7 @@ class NewsletterSignupForm(forms.Form):
     )
     consent_newsletter = forms.BooleanField(
         label=(
-            "Wyrażam zgodę na otrzymywanie newslettera. "
+            "Wyrażam zgodę na otrzymywanie Listów z Komitywy. "
             '<a href="/polityka-prywatnosci/" target="_blank">'
             "Polityka prywatności</a>"
         ),

@@ -1,57 +1,65 @@
 {% extends "base.html" %}
 
-{% block title %}Kontakt - Kuchenna Komitywa{% endblock %}
+{% block title %}Kontakt — Kuchenna Komitywa, Białystok{% endblock %}
+{% block meta_description %}Skontaktuj się z Kuchenną Komitywą w Białymstoku w sprawie zamówień, roślinnych wypieków dla kawiarni i planowanych spotkań kulinarnych.{% endblock %}
+{% block og_title %}Kontakt — Kuchenna Komitywa{% endblock %}
 
 {% block content %}
-<section class="kk-section" aria-label="Kontakt">
+<section class="kk-section" aria-labelledby="contact-title">
     <div class="wrap">
         <div class="section-head">
             <div>
-                <div class="section-number">- napisz, zadzwoń</div>
-                <h2 class="section-title">Kontakt</h2>
+                <div class="section-number">· napisz lub zadzwoń</div>
+                <h1 id="contact-title" class="section-title">Kontakt</h1>
             </div>
-            <div class="section-meta">odpowiadamy w 1-2 dni</div>
+            <div class="section-meta">Białystok</div>
         </div>
 
         <div class="row">
             <div class="col-lg-7">
                 <p class="lead">
-                    Masz pytania? Chcesz złożyć zamówienie na ciasto lub dowiedzieć się więcej o naszej ofercie?
-                    Napisz lub zadzwoń.
+                    Masz pytanie o limitowane zamówienie, wypieki dla swojego lokalu
+                    albo planowane wspólne gotowanie? Daj znać.
                 </p>
 
-                <div style="display: grid; grid-template-columns: auto 1fr; gap: 14px 24px; margin-top: 24px;">
-                    <div class="kk-contact-label">firma</div>
-                    <div>Tomasz Steckiewicz Kuchenna Komitywa</div>
+                <dl class="kk-contact-list">
+                    <dt class="kk-contact-label">firma</dt>
+                    <dd>Tomasz Steckiewicz Kuchenna Komitywa</dd>
 
-                    <div class="kk-contact-label">NIP</div>
-                    <div class="mono">5423485438</div>
+                    <dt class="kk-contact-label">NIP</dt>
+                    <dd class="mono">5423485438</dd>
 
-                    <div class="kk-contact-label">adres</div>
-                    <div>ul. Bukowa 14<br>15-796 Białystok</div>
+                    <dt class="kk-contact-label">adres</dt>
+                    <dd>ul. Bukowa 14<br>15-796 Białystok</dd>
 
-                    <div class="kk-contact-label">telefon</div>
-                    <div><a href="tel:+48511562100" style="text-decoration: none; color: inherit;">511 562 100</a></div>
+                    <dt class="kk-contact-label">telefon</dt>
+                    <dd><a href="tel:+48511562100">511 562 100</a></dd>
 
-                    <div class="kk-contact-label">e-mail</div>
-                    <div><a href="mailto:kontakt@kuchennakomitywa.pl" style="text-decoration: none; color: inherit;">kontakt@kuchennakomitywa.pl</a></div>
-                </div>
+                    <dt class="kk-contact-label">e-mail</dt>
+                    <dd><a href="mailto:kontakt@kuchennakomitywa.pl">kontakt@kuchennakomitywa.pl</a></dd>
+                </dl>
             </div>
 
             <div class="col-lg-5">
-                <aside class="belief-card" style="margin-top: 0;">
-                    <div class="belief-card-label">odbiór osobisty</div>
+                <aside class="belief-card contact-note">
+                    <div class="belief-card-label">odbiór zamówień</div>
                     <p>
-                        Dania w słoiku i ciasta odbierasz pod adresem ul. Bukowa 14, Białystok.
-                        Termin ustalimy mailem zaraz po opłaceniu zamówienia.
+                        Miejsce i termin odbioru zależą od konkretnej edycji.
+                        Aktualne informacje zawsze znajdziesz przy otwartych zamówieniach.
                     </p>
+                    <a href="{% url 'orders' %}" class="kk-link-arrow">Sprawdź zamówienia →</a>
                 </aside>
 
-                <aside class="belief-card">
-                    <div class="belief-card-label">ebooki</div>
+                <aside class="belief-card contact-note">
+                    <div class="belief-card-label">współpraca i spotkania</div>
                     <p>
-                        PDF przyjdzie automatycznie na Twój e-mail w ciągu kilku minut od zaksięgowania płatności.
+                        Prowadzisz kawiarnię? Zajrzyj do oferty B2B. Jeśli interesują Cię
+                        planowane warsztaty, zostaw kontakt na stronie wspólnego gotowania.
                     </p>
+                    <div class="kk-action-row">
+                        <a href="{% url 'for_cafes' %}" class="kk-link-arrow">Dla kawiarni →</a>
+                        <a href="{% url 'workshops' %}" class="kk-link-arrow">Wspólne gotowanie →</a>
+                    </div>
                 </aside>
             </div>
         </div>

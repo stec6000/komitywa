@@ -1,17 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Sprawdź e-mail - Kuchenna Komitywa{% endblock %}
+{% block title %}Sprawdź e-mail — Listy z Komitywy{% endblock %}
+{% block meta_description %}Dokończ zapis na Listy z Komitywy, potwierdzając swój adres e-mail.{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
 
 {% block content %}
-<section class="kk-section" aria-label="Sprawdź email">
-    <div class="wrap-narrow" style="text-align: center; padding: 60px 0;">
-        <div class="hero-eyebrow" style="justify-content: center;">newsletter</div>
-        <h1>Sprawdź swoją skrzynkę</h1>
-        <p class="lead">Wysłałem link potwierdzający. Kliknij go, żeby dokończyć zapis do newslettera.</p>
-        <p style="font-family: var(--font-hand); font-size: 22px; color: var(--ink-faded);">Link jest ważny przez 24 godziny.</p>
-        <p style="margin-top: 32px;">
-            <a href="{% url 'home' %}" class="btn btn-accent">na stronę główną →</a>
-        </p>
+<section class="kk-status-page" aria-labelledby="newsletter-check-title">
+    <div class="wrap-narrow kk-status-page__inner">
+        <div class="hero-eyebrow kk-status-page__eyebrow">Listy z Komitywy</div>
+        <div class="kk-status-page__mark" aria-hidden="true">✉</div>
+        <h1 id="newsletter-check-title">Sprawdź swoją skrzynkę</h1>
+        <p class="lead">Wysłaliśmy link potwierdzający. Kliknij go, żeby dokończyć zapis na Listy z Komitywy.</p>
+        <p class="kk-status-page__note">Link jest ważny przez 24 godziny.</p>
+        <a href="{% url 'home' %}" class="btn btn-accent kk-status-page__action">Na stronę główną →</a>
     </div>
 </section>
 {% endblock %}

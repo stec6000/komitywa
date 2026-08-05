@@ -1,10 +1,10 @@
 {% load static %}
 <nav class="nav" aria-label="Główna nawigacja">
     <div class="nav-inner">
-        <a class="nav-brand" href="{% url 'home' %}">
+        <a class="nav-brand" href="{% url 'home' %}"{% if request.resolver_match.url_name == "home" %} aria-current="page"{% endif %}>
             <span class="dot" aria-hidden="true"></span>
             Kuchenna Komitywa
-            <span class="nav-brand-sub">- roślinna kuchnia</span>
+            <span class="nav-brand-sub">roślinna pracownia · Białystok</span>
         </a>
 
         <button class="nav-toggle" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="Menu">
@@ -12,15 +12,17 @@
         </button>
 
         <div class="nav-links" id="mainNav">
-            <a class="{% if request.resolver_match.app_name == 'recipes' %}active{% endif %}" href="{% url 'recipes:list' %}">przepiśnik</a>
-            <a class="{% if request.resolver_match.app_name == 'shop' %}active{% endif %}" href="{% url 'shop:list' %}">sklep</a>
-            <a class="{% if request.resolver_match.app_name == 'content' %}active{% endif %}" href="{% url 'content:blog_list' %}">blog</a>
-            <a class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}">o mnie</a>
-            <a class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'contact' %}">kontakt</a>
+            <a class="{% if request.resolver_match.url_name == 'orders' or request.resolver_match.app_name == 'shop' %}active{% endif %}" href="{% url 'orders' %}"{% if request.resolver_match.url_name == 'orders' or request.resolver_match.app_name == 'shop' %} aria-current="page"{% endif %}>Zamówienia</a>
+            <a class="{% if request.resolver_match.url_name == 'for_cafes' %}active{% endif %}" href="{% url 'for_cafes' %}"{% if request.resolver_match.url_name == 'for_cafes' %} aria-current="page"{% endif %}>Dla kawiarni</a>
+            <a class="{% if request.resolver_match.app_name == 'recipes' %}active{% endif %}" href="{% url 'recipes:list' %}"{% if request.resolver_match.app_name == 'recipes' %} aria-current="page"{% endif %}>Przepisy</a>
+            <a class="{% if request.resolver_match.app_name == 'content' %}active{% endif %}" href="{% url 'content:blog_list' %}"{% if request.resolver_match.app_name == 'content' %} aria-current="page"{% endif %}>Z kuchni</a>
+            <a class="{% if request.resolver_match.url_name == 'workshops' %}active{% endif %}" href="{% url 'workshops' %}"{% if request.resolver_match.url_name == 'workshops' %} aria-current="page"{% endif %}>Wspólne gotowanie</a>
+            <a class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}" href="{% url 'about' %}"{% if request.resolver_match.url_name == 'about' %} aria-current="page"{% endif %}>O Komitywie</a>
+            <a class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'contact' %}"{% if request.resolver_match.url_name == 'contact' %} aria-current="page"{% endif %}>Kontakt</a>
         </div>
 
-        <a class="nav-cart" href="{% url 'shop:cart' %}" aria-label="Koszyk">
-            <span class="nav-cart-label">koszyk</span>
+        <a class="nav-cart" href="{% url 'shop:cart' %}" aria-label="Koszyk, liczba produktów: {{ cart_count|default:'0' }}">
+            <span class="nav-cart-label">Koszyk</span>
             <span class="nav-cart-badge{% if not cart_count %} dim{% endif %}">{{ cart_count|default:"0" }}</span>
         </a>
     </div>

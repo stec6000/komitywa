@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
 {% block title %}Potwierdzenie - Kuchenna Komitywa{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="Potwierdzenie">
-    <div class="wrap-narrow" style="text-align: center; padding: 60px 0;">
+    <div class="wrap-narrow kk-payment-state">
         <p class="lead">Strona przeniesiona.</p>
         <a href="{% url 'home' %}" class="btn btn-accent">na stronę główną →</a>
     </div>

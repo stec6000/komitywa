@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Link wygasł - Kuchenna Komitywa{% endblock %}
+{% block title %}Link wygasł — Listy z Komitywy{% endblock %}
+{% block meta_description %}Link potwierdzający zapis na Listy z Komitywy stracił ważność.{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
 
 {% block content %}
-<section class="kk-section" aria-label="Link wygasł">
-    <div class="wrap-narrow" style="text-align: center; padding: 60px 0;">
-        <div style="font-size: 64px; color: var(--ink-faded); margin-bottom: 24px;" aria-hidden="true">⌛</div>
-        <h1>Link wygasł</h1>
-        <p class="lead">Niestety, link potwierdzający stracił ważność. Spróbuj zapisać się ponownie - wystarczy adres e-mail.</p>
-        <p style="margin-top: 32px;">
-            <a href="{% url 'home' %}" class="btn btn-accent">na stronę główną →</a>
-        </p>
+<section class="kk-status-page" aria-labelledby="newsletter-expired-title">
+    <div class="wrap-narrow kk-status-page__inner">
+        <div class="kk-status-page__mark kk-status-page__mark--muted" aria-hidden="true">⌛</div>
+        <h1 id="newsletter-expired-title">Link wygasł</h1>
+        <p class="lead">Link potwierdzający stracił ważność. Wróć na stronę główną i zapisz się ponownie na Listy z Komitywy.</p>
+        <a href="{% url 'home' %}#listy-z-komitywy" class="btn btn-accent kk-status-page__action">Zapisz się ponownie →</a>
     </div>
 </section>
 {% endblock %}

@@ -26,6 +26,11 @@ class SendConfirmationEmailTests(TestCase):
     def test_subject_contains_potwierdz_zapis(self):
         send_confirmation_email(self.subscriber, self.request)
         self.assertIn("Potwierdź zapis", mail.outbox[0].subject)
+        self.assertIn("Listy z Komitywy", mail.outbox[0].subject)
+
+    def test_body_uses_current_newsletter_name(self):
+        send_confirmation_email(self.subscriber, self.request)
+        self.assertIn("Listy z Komitywy", mail.outbox[0].body)
 
     def test_body_contains_confirmation_url(self):
         send_confirmation_email(self.subscriber, self.request)

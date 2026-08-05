@@ -1,5 +1,7 @@
 from datetime import timedelta
+from unittest.mock import patch
 
+from django.contrib.messages import get_messages
 from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
@@ -15,6 +17,14 @@ class SubscribeViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("home"))
 
+    def test_check_email_does_not_repeat_signup_section(self):
+        response = self.client.get(reverse("newsletter:check_email"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'id="listy-z-komitywy"')
+        self.assertNotContains(response, "data-newsletter-open")
+        self.assertContains(response, 'href="/#listy-z-komitywy"')
+
     def test_post_valid_creates_subscriber_and_redirects(self):
         response = self.client.post(
             reverse("newsletter:subscribe"),
@@ -28,6 +38,40 @@ class SubscribeViewTests(TestCase):
             Subscriber.objects.filter(email="new@example.com").exists()
         )
         self.assertEqual(len(mail.outbox), 1)
+
+    def test_invalid_submission_returns_visible_feedback(self):
+        response = self.client.post(
+            reverse("newsletter:subscribe"),
+            {"email": "niepoprawny", "consent_newsletter": "on"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("home"))
+        feedback = [
+            str(message)
+            for message in get_messages(response.wsgi_request)
+        ]
+        self.assertTrue(any("Listy z Komitywy" in text for text in feedback))
+        self.assertEqual(Subscriber.objects.count(), 0)
+
+    @patch(
+        "newsletter.views.verify_turnstile",
+        return_value=(False, "invalid-input-response"),
+    )
+    def test_turnstile_failure_returns_visible_feedback(self, verify):
+        response = self.client.post(
+            reverse("newsletter:subscribe"),
+            {"email": "new@example.com", "consent_newsletter": "on"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        feedback = [
+            str(message)
+            for message in get_messages(response.wsgi_request)
+        ]
+        self.assertTrue(any("Spróbuj ponownie" in text for text in feedback))
+        self.assertEqual(Subscriber.objects.count(), 0)
+        verify.assert_called_once()
 
     def test_post_confirmed_email_redirects_silently(self):
         Subscriber.objects.create(
@@ -90,6 +134,8 @@ class ConfirmViewTests(TestCase):
             reverse("newsletter:confirm", args=["valid-token-123"])
         )
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Listy z Komitywy")
+        self.assertNotContains(response, "Do niedzieli")
         sub.refresh_from_db()
         self.assertTrue(sub.is_confirmed)
 

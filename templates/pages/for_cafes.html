@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Wypieki dla kawiarni — Kuchenna Komitywa{% endblock %}
+{% block meta_description %}Roślinne wypieki dla kawiarni i lokali w Białymstoku: shokupan, drożdżówki, ciastka, sezonowe wypieki i produkty przygotowane dla lokalu.{% endblock %}
+{% block og_title %}Wypieki dla kawiarni — Kuchenna Komitywa{% endblock %}
+
+{% block content %}
+<section class="kk-page-intro kk-page-intro--cafe" aria-labelledby="cafe-title">
+    <div class="wrap kk-page-intro__grid">
+        <div>
+            <p class="kk-kicker">Współpraca B2B · Białystok i okolice</p>
+            <h1 id="cafe-title">Wypieki, które dobrze czują się w kawiarni</h1>
+        </div>
+        <div>
+            <p class="kk-page-intro__lead">Pieczemy roślinnie, w niewielkich partiach. Możemy dostarczać regularnie, przygotować pojedynczą serię albo wspólnie opracować wypiek dla Waszego lokalu.</p>
+            <a href="#zapytanie-dla-kawiarni" class="btn btn-accent">Napisz w sprawie współpracy</a>
+        </div>
+    </div>
+</section>
+
+<section class="kk-b2b-products" aria-labelledby="b2b-products-title">
+    <div class="wrap">
+        <header class="kk-home-heading">
+            <div>
+                <p class="kk-kicker">Co możemy piec</p>
+                <h2 id="b2b-products-title">Stała baza i sezonowe pomysły</h2>
+            </div>
+            <p>Nie publikujemy cen hurtowych. Zakres, liczbę sztuk i warunki ustalamy po poznaniu potrzeb lokalu.</p>
+        </header>
+        <div class="kk-b2b-list">
+            <article><span>01</span><h3>Shokupan</h3><p>Miękki chleb o sprężystym miękiszu — do tostów, kanapek i serwowania przy kawie.</p></article>
+            <article><span>02</span><h3>Drożdżówki</h3><p>Klasyczne i sezonowe nadzienia, niewielkie serie i format dopasowany do witryny.</p></article>
+            <article><span>03</span><h3>Ciastka</h3><p>Roślinne ciastka do regularnej sprzedaży albo pojedynczej akcji w lokalu.</p></article>
+            <article><span>04</span><h3>Wypieki sezonowe</h3><p>Smaki wynikające z pory roku, świąt i tego, co aktualnie trafia do pracowni.</p></article>
+        </div>
+        <aside class="kk-custom-bake">
+            <p class="kk-hand-note">coś tylko dla Was?</p>
+            <div>
+                <h3>Możemy przygotować produkt specjalnie dla lokalu.</h3>
+                <p>Porozmawiamy o charakterze miejsca, formacie sprzedaży i smaku, który ma zostać z gośćmi na dłużej.</p>
+            </div>
+        </aside>
+    </div>
+</section>
+
+<section class="kk-b2b-process" aria-labelledby="process-title">
+    <div class="wrap kk-b2b-process__grid">
+        <div>
+            <p class="kk-kicker">Jak zaczynamy</p>
+            <h2 id="process-title">Najpierw krótka rozmowa i próba</h2>
+        </div>
+        <ol>
+            <li><strong>Napisz, czego potrzebuje lokal.</strong><span>Produkty, przybliżona liczba i częstotliwość.</span></li>
+            <li><strong>Ustalimy próbę i warunki.</strong><span>Zakres współpracy, termin oraz sposób dostawy lub odbioru.</span></li>
+            <li><strong>Sprawdzimy, co działa.</strong><span>Możemy zostać przy pojedynczym zamówieniu albo zaplanować regularne wypieki.</span></li>
+        </ol>
+    </div>
+</section>
+
+<section class="kk-inquiry-section" id="zapytanie-dla-kawiarni" aria-labelledby="inquiry-title">
+    <div class="wrap kk-inquiry-section__grid">
+        <div class="kk-inquiry-section__intro">
+            <p class="kk-kicker">Zapytanie</p>
+            <h2 id="inquiry-title">Chcesz przetestować nasze wypieki w swoim lokalu? Napisz do nas.</h2>
+            <p>Formularz nie jest zamówieniem i do niczego nie zobowiązuje. Odpowiemy na podany adres e-mail.</p>
+        </div>
+        <form method="post" class="kk-public-form" novalidate>
+            {% csrf_token %}
+            {{ form.website }}
+            {% if form.errors %}
+            <div class="kk-form-summary" role="alert" tabindex="-1" data-focus-on-load autofocus>
+                <p><strong>Sprawdź oznaczone pola.</strong> Formularz nie został jeszcze wysłany.</p>
+                {% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
+            </div>
+            {% endif %}
+
+            <div class="kk-form-grid">
+                <div class="kk-field kk-field--full">
+                    <label for="{{ form.venue_name.id_for_label }}">{{ form.venue_name.label }}</label>
+                    {{ form.venue_name }}
+                    {% include "includes/_field_errors.html" with field=form.venue_name error_id="id_venue_name-error" %}
+                </div>
+                <div class="kk-field">
+                    <label for="{{ form.contact_name.id_for_label }}">{{ form.contact_name.label }}</label>
+                    {{ form.contact_name }}
+                    {% include "includes/_field_errors.html" with field=form.contact_name error_id="id_contact_name-error" %}
+                </div>
+                <div class="kk-field">
+                    <label for="{{ form.city.id_for_label }}">{{ form.city.label }}</label>
+                    {{ form.city }}
+                    {% include "includes/_field_errors.html" with field=form.city error_id="id_city-error" %}
+                </div>
+                <div class="kk-field">
+                    <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    {% include "includes/_field_errors.html" with field=form.email error_id="id_email-error" %}
+                </div>
+                <div class="kk-field">
+                    <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }} <span>(opcjonalnie)</span></label>
+                    {{ form.phone }}
+                    {% include "includes/_field_errors.html" with field=form.phone error_id="id_phone-error" %}
+                </div>
+                <fieldset class="kk-field kk-field--full kk-checkbox-group">
+                    <legend>{{ form.interested_products.label }}</legend>
+                    {{ form.interested_products }}
+                    {% include "includes/_field_errors.html" with field=form.interested_products error_id="id_interested_products-error" %}
+                </fieldset>
+                <div class="kk-field kk-field--full">
+                    <label for="{{ form.frequency.id_for_label }}">{{ form.frequency.label }}</label>
+                    {{ form.frequency }}
+                    {% include "includes/_field_errors.html" with field=form.frequency error_id="id_frequency-error" %}
+                </div>
+                <div class="kk-field kk-field--full">
+                    <label for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>
+                    {{ form.message }}
+                    {% include "includes/_field_errors.html" with field=form.message error_id="id_message-error" %}
+                </div>
+                <div class="kk-consent kk-field--full">
+                    {{ form.privacy_consent }}
+                    <label for="{{ form.privacy_consent.id_for_label }}">{{ form.privacy_consent.label }} <a href="{% url 'privacy-policy' %}" target="_blank" rel="noopener">Polityka prywatności</a></label>
+                    {% include "includes/_field_errors.html" with field=form.privacy_consent error_id="id_privacy_consent-error" %}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-accent">Wyślij zapytanie</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

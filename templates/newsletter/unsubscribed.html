@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 
-{% block title %}Wypisano z newslettera - Kuchenna Komitywa{% endblock %}
+{% block title %}Wypisano z Listów z Komitywy{% endblock %}
+{% block meta_description %}Adres został wypisany z Listów z Komitywy.{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
 
 {% block content %}
-<section class="kk-section" aria-label="Wypisano z newslettera">
-    <div class="wrap-narrow" style="text-align: center; padding: 60px 0;">
+<section class="kk-status-page" aria-labelledby="newsletter-unsubscribed-title">
+    <div class="wrap-narrow kk-status-page__inner">
         {% if already_unsubscribed %}
-        <div class="hero-eyebrow" style="justify-content: center;">już bez listów</div>
-        <h1>Już wypisany/a</h1>
-        <p class="lead">Ten adres został już wcześniej wypisany z newslettera.</p>
+        <div class="hero-eyebrow kk-status-page__eyebrow">już bez listów</div>
+        <h1 id="newsletter-unsubscribed-title">Ten adres jest już wypisany</h1>
+        <p class="lead">Nie będziemy wysyłać na niego Listów z Komitywy.</p>
         {% else %}
-        <div class="hero-eyebrow" style="justify-content: center;">do zobaczenia</div>
-        <h1>Wypisano z newslettera</h1>
-        <p class="lead">Zostałeś/aś wypisany/a z newslettera Kuchennej Komitywy. Szkoda, że odchodzisz!</p>
+        <div class="hero-eyebrow kk-status-page__eyebrow">do zobaczenia</div>
+        <h1 id="newsletter-unsubscribed-title">Adres został wypisany</h1>
+        <p class="lead">Nie będziemy już wysyłać na niego Listów z Komitywy. Dziękujemy za dotychczasową obecność.</p>
         {% endif %}
-        <p style="margin-top: 32px;">
-            <a href="{% url 'home' %}" class="btn btn-accent">na stronę główną →</a>
-        </p>
+        <a href="{% url 'home' %}" class="btn btn-accent kk-status-page__action">Na stronę główną →</a>
     </div>
 </section>
 {% endblock %}

@@ -1,10 +1,10 @@
-<section class="kk-newsletter-section" aria-label="Newsletter">
+<section class="kk-newsletter-section" id="listy-z-komitywy" aria-labelledby="newsletter-title">
     <div class="container">
-        <div class="newsletter-eyebrow">list w każdą niedzielę</div>
-        <h3>Niedzielne listy z kuchni</h3>
-        <p>Przepisy, historie. Bez spamu, bez reklam, bez linków afiliacyjnych. Tylko my, stół i zeszyt.</p>
+        <div class="newsletter-eyebrow">prosto z pracowni</div>
+        <h2 id="newsletter-title">Listy z Komitywy</h2>
+        <p>Napiszemy, co właśnie wyrasta, piecze się i szykuje do wspólnego stołu. Subskrybenci jako pierwsi poznają terminy zamówień i spotkań.</p>
         <button type="button" class="btn btn-accent kk-newsletter-cta" data-newsletter-open aria-haspopup="dialog" aria-controls="kk-newsletter-modal">
-            zapisz się do listów
+            Zapisz się na Listy z Komitywy
         </button>
     </div>
 </section>
@@ -12,24 +12,25 @@
 <div class="kk-modal-backdrop" id="kk-newsletter-modal" data-newsletter-modal role="dialog" aria-modal="true" aria-labelledby="kk-newsletter-modal-title" hidden>
     <div class="kk-modal">
         <button type="button" class="kk-modal-close" data-newsletter-close aria-label="Zamknij">&times;</button>
-        <div class="newsletter-eyebrow">niedzielne listy</div>
-        <h3 id="kk-newsletter-modal-title">Twoje listy w niedzielę</h3>
-        <p>Przepisy i historie z naszej kuchni. Bez spamu, bez reklam — tylko my, stół i zeszyt.</p>
+        <div class="newsletter-eyebrow">prosto z pracowni</div>
+        <h3 id="kk-newsletter-modal-title">Listy z Komitywy</h3>
+        <p>Terminy zamówień, spotkań oraz najnowsze zapiski z kuchni. Piszemy tylko wtedy, gdy mamy coś dobrego do przekazania.</p>
         <form method="POST" action="{% url 'newsletter:subscribe' %}" class="kk-modal-form">
             {% csrf_token %}
             <input type="text" name="website" class="kk-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
-            <input type="email" name="email" placeholder="twój e-mail" required aria-label="Adres email">
+            <label class="visually-hidden" for="newsletter-email-modal">Adres e-mail</label>
+            <input type="email" id="newsletter-email-modal" name="email" placeholder="twój e-mail" autocomplete="email" required>
             <div class="form-check">
                 <input type="checkbox" name="consent_newsletter" id="id_consent_newsletter_modal" required>
                 <label for="id_consent_newsletter_modal">
-                    Wyrażam zgodę na otrzymywanie newslettera.
+                    Wyrażam zgodę na otrzymywanie Listów z Komitywy.
                     <a href="{% url 'privacy-policy' %}" target="_blank" rel="noopener">Polityka prywatności</a>
                 </label>
             </div>
             {% if TURNSTILE_SITE_KEY %}
             <div class="cf-turnstile kk-turnstile" data-sitekey="{{ TURNSTILE_SITE_KEY }}" data-theme="light"></div>
             {% endif %}
-            <button type="submit" class="btn btn-accent">zapisz mnie</button>
+            <button type="submit" class="btn btn-accent">Zapisz mnie</button>
         </form>
     </div>
 </div>
@@ -45,16 +46,44 @@
     if (!openBtns.length || !modal) return;
 
     var lastOpener = null;
+    var newlyInert = [];
+    var focusableSelector = [
+        'a[href]',
+        'button:not([disabled])',
+        'input:not([disabled]):not([type="hidden"])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])'
+    ].join(',');
+
+    function setPageInert(inert) {
+        if (inert) {
+            newlyInert = [];
+            Array.prototype.forEach.call(document.body.children, function(element) {
+                if (element === modal || element.tagName === 'SCRIPT' || element.inert) return;
+                element.inert = true;
+                newlyInert.push(element);
+            });
+            return;
+        }
+
+        newlyInert.forEach(function(element) {
+            element.inert = false;
+        });
+        newlyInert = [];
+    }
 
     function openModal(ev) {
         lastOpener = ev && ev.currentTarget ? ev.currentTarget : null;
         modal.hidden = false;
+        setPageInert(true);
         document.body.classList.add('kk-modal-open');
         var emailInput = modal.querySelector('input[type=email]');
         if (emailInput) setTimeout(function() { emailInput.focus(); }, 50);
     }
     function closeModal() {
         modal.hidden = true;
+        setPageInert(false);
         document.body.classList.remove('kk-modal-open');
         if (lastOpener) lastOpener.focus();
     }
@@ -65,7 +94,33 @@
         if (e.target === modal) closeModal();
     });
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && !modal.hidden) closeModal();
+        if (modal.hidden) return;
+
+        if (e.key === 'Escape') {
+            closeModal();
+            return;
+        }
+
+        if (e.key !== 'Tab') return;
+
+        var focusable = Array.prototype.filter.call(
+            modal.querySelectorAll(focusableSelector),
+            function(element) { return element.offsetParent !== null; }
+        );
+        if (!focusable.length) {
+            e.preventDefault();
+            return;
+        }
+
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
     });
 })();
 </script>

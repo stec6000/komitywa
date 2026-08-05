@@ -1,25 +1,26 @@
 {% extends "base.html" %}
 
 {% block title %}Potwierdzenie zamówienia - Kuchenna Komitywa{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="Potwierdzenie zamówienia">
-    <div class="wrap-narrow" style="text-align: center; padding: 60px 0;">
+    <div class="wrap-narrow kk-payment-state">
         {% if order_not_found %}
-        <div style="font-size: 64px; color: var(--ink-faded); margin-bottom: 24px;" aria-hidden="true">⚠</div>
+        <div class="kk-payment-state__mark kk-payment-state__mark--muted" aria-hidden="true">⚠</div>
         <h1>Nie znaleziono zamówienia</h1>
         <p class="lead">Nie mogliśmy znaleźć Twojego zamówienia. Jeśli dokonałeś płatności, potwierdzenie przyjdzie na e-mail. W razie problemów napisz do nas: kontakt@kuchennakomitywa.pl.</p>
         <a href="{% url 'home' %}" class="btn btn-accent">na stronę główną →</a>
         {% else %}
-        <div style="font-size: 64px; color: var(--accent); margin-bottom: 24px;" aria-hidden="true">✓</div>
+        <div class="kk-payment-state__mark kk-payment-state__mark--success" aria-hidden="true">✓</div>
         <h1>Dziękujemy za zamówienie!</h1>
         <p class="lead">Potwierdzenie zostanie wysłane na Twój e-mail. Jeśli nie otrzymasz wiadomości w ciągu kilku minut, sprawdź folder spam - czasem zakwas tam ląduje.</p>
         {% if order %}
-        <p style="font-family: var(--font-mono); font-size: 13px; color: var(--ink-faded); letter-spacing: 0.1em;">
+        <p class="kk-payment-state__number">
             zamówienie #{{ order.id }}
         </p>
         {% endif %}
-        <p style="margin-top: 32px;">
+        <p class="kk-payment-state__action">
             <a href="{% url 'home' %}" class="btn btn-accent">na stronę główną →</a>
         </p>
         {% endif %}

@@ -1,15 +1,22 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}{{ product.title }} - Kuchenna Komitywa{% endblock %}
+{% block title %}{{ product.title }} — Kuchenna Komitywa{% endblock %}
+{% block meta_description %}{{ product.description|striptags|truncatechars:155 }}{% endblock %}
+{% block og_type %}product{% endblock %}
+{% block og_title %}{{ product.title }} — Kuchenna Komitywa{% endblock %}
+{% block og_description %}{{ product.description|striptags|truncatechars:180 }}{% endblock %}
+{% block og_image %}{% if product.image %}{{ request.scheme }}://{{ request.get_host }}{{ product.image.url }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block og_image_alt %}{% if product.image %}{{ product.title }} — produkt Kuchennej Komitywy{% else %}{{ block.super }}{% endif %}{% endblock %}
 
 {% block content %}
-<section class="kk-section" aria-label="Produkt">
+<section class="kk-section" aria-labelledby="product-title">
     <div class="wrap">
         <div class="row">
             <div class="col-lg-8">
                 {% if product.type == "ebook" %}
-                <div style="max-width: 380px; margin: 0 auto 32px;">
-                    <div class="ebook-cover" style="--cover: #6b7a3a; aspect-ratio: 3/4;">
+                <div class="product-detail-cover">
+                    <div class="ebook-cover ebook-cover--detail">
                         <div class="ebook-cover-num">01</div>
                         <div>
                             {% if product.category %}
@@ -22,7 +29,7 @@
                 </div>
                 {% elif product.image %}
                 <div class="kk-detail-hero">
-                    <img src="{{ product.image.url }}" alt="{{ product.title }}">
+                    <img src="{{ product.image.url }}" alt="{{ product.title }} — produkt Kuchennej Komitywy" data-fallback="{% static 'img/serek-ziola.jpg' %}" decoding="async" fetchpriority="high">
                 </div>
                 {% endif %}
 
@@ -30,18 +37,20 @@
                 <div class="hero-eyebrow">{{ product.category.name|lower }}</div>
                 {% endif %}
 
-                <h1>{{ product.title }}</h1>
+                <h1 id="product-title">{{ product.title }}</h1>
 
-                <div class="d-flex flex-wrap gap-2 mb-4" style="align-items: center;">
+                <div class="product-detail-meta">
                     {% if product.type == "ebook" %}
                     <span class="kk-badge-digital">cyfrowy · PDF</span>
+                    {% elif product.edition %}
+                    <span class="kk-category-badge">{{ product.edition.title }}</span>
                     {% else %}
-                    <span class="kk-category-badge">odbiór osobisty</span>
+                    <span class="kk-category-badge">produkt fizyczny</span>
                     {% endif %}
-                    <span style="font-family: var(--font-hand); font-size: 28px; color: var(--accent-2);">{{ product.price|floatformat:"0" }} zł</span>
+                    <strong class="product-detail-price">{{ product.price|floatformat:"0" }} zł</strong>
                 </div>
 
-                <div style="margin: 24px 0;">
+                <div class="product-description">
                     {% if product.full_description %}
                     {{ product.full_description|linebreaks }}
                     {% else %}
@@ -49,43 +58,65 @@
                     {% endif %}
                 </div>
 
+                {% if product.ingredients or product.allergens %}
+                <dl class="product-composition">
+                    {% if product.ingredients %}
+                    <div>
+                        <dt>Składniki</dt>
+                        <dd>{{ product.ingredients|linebreaksbr }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if product.allergens %}
+                    <div>
+                        <dt>Alergeny</dt>
+                        <dd>{{ product.allergens|linebreaksbr }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+                {% endif %}
+
                 <div class="belief-card">
                     <div class="belief-card-label">jak to działa</div>
-                    <p>
-                        {% if product.type == "ebook" %}
-                        Po zakupie ebook przyjdzie automatycznie na Twój e-mail w ciągu kilku minut.
-                        {% else %}
-                        Odbiór osobisty pod adresem ul. Bukowa 14, Białystok. Termin ustalimy mailem po opłaceniu zamówienia.
-                        {% endif %}
-                    </p>
+                    {% if product.type == "ebook" %}
+                    <p>Po opłaceniu zamówienia ebook zostanie wysłany automatycznie na podany adres e-mail.</p>
+                    {% elif product.edition %}
+                    <p><strong>{{ product.edition.title }}</strong></p>
+                    {% if product.edition.pickup_details %}
+                    <p><strong>Odbiór:</strong><br>{{ product.edition.pickup_details|linebreaksbr }}</p>
+                    {% endif %}
+                    {% if product.edition.payment_details %}
+                    <p><strong>Płatność:</strong><br>{{ product.edition.payment_details|linebreaksbr }}</p>
+                    {% endif %}
+                    {% else %}
+                    <p>Szczegóły odbioru produktów fizycznych podajemy przy aktualnej edycji zamówień.</p>
+                    <a href="{% url 'orders' %}" class="kk-link-arrow">Sprawdź zamówienia →</a>
+                    {% endif %}
                 </div>
 
-                <form method="post" action="{% url 'shop:cart_add' product_id=product.id %}" style="margin-top: 32px;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-accent">+ dodaj do koszyka</button>
-                </form>
             </div>
 
             <div class="col-lg-4">
                 <aside class="kk-detail-sidebar">
-                    <div class="featured-label" style="position: static; display: inline-block; margin-bottom: 16px;">koszyk</div>
-                    <div style="font-family: var(--font-hand); font-size: 36px; color: var(--accent-2); margin-bottom: 14px;">{{ product.price|floatformat:"0" }} zł</div>
+                    <div class="featured-label">koszyk</div>
+                    <div class="product-detail-price product-detail-price--large">{{ product.price|floatformat:"0" }} zł</div>
 
-                    <p style="font-size: 16px; color: var(--ink-soft);">
+                    <p class="product-delivery-note">
                         {% if product.type == "ebook" %}
-                        Po zakupie ebook zostanie wysłany na Twój e-mail.
+                        Produkt cyfrowy wysyłany e-mailem po potwierdzeniu płatności.
+                        {% elif product.edition %}
+                        Produkt z edycji „{{ product.edition.title }}”. Szczegóły odbioru znajdziesz obok.
                         {% else %}
-                        Odbiór osobisty w naszej kuchni - termin ustalimy po opłaceniu.
+                        Produkt fizyczny. Szczegóły odbioru zależą od aktualnej edycji.
                         {% endif %}
                     </p>
 
                     <form method="post" action="{% url 'shop:cart_add' product_id=product.id %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-accent w-100" style="margin-bottom: 16px;">dodaj do koszyka</button>
+                        <button type="submit" class="btn btn-accent w-100">Dodaj do koszyka</button>
                     </form>
 
-                    <p style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--ink-soft);">
-                        <a href="{% url 'shop:list' %}" class="kk-link-arrow">← wróć do sklepu</a>
+                    <p class="product-detail-back">
+                        <a href="{% url 'shop:list' %}" class="kk-link-arrow">← Wróć do sklepu</a>
                     </p>
                 </aside>
             </div>

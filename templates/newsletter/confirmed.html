@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Zapis potwierdzony - Kuchenna Komitywa{% endblock %}
+{% block title %}Zapis potwierdzony — Listy z Komitywy{% endblock %}
+{% block meta_description %}Zapis na Listy z Komitywy został potwierdzony.{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
 
 {% block content %}
-<section class="kk-section" aria-label="Zapis potwierdzony">
-    <div class="wrap-narrow" style="text-align: center; padding: 60px 0;">
-        <div style="font-size: 64px; color: var(--accent); margin-bottom: 24px;" aria-hidden="true">✓</div>
-        <h1>jesteś w komitywie!</h1>
-        <p class="lead">Twój zapis do newslettera Kuchennej Komitywy został potwierdzony. Do niedzieli - pierwszy list już idzie.</p>
-        <p style="margin-top: 32px;">
-            <a href="{% url 'home' %}" class="btn btn-accent">na stronę główną →</a>
-        </p>
+<section class="kk-status-page" aria-labelledby="newsletter-confirmed-title">
+    <div class="wrap-narrow kk-status-page__inner">
+        <div class="kk-status-page__mark kk-status-page__mark--success" aria-hidden="true">✓</div>
+        <h1 id="newsletter-confirmed-title">Jesteś w komitywie!</h1>
+        <p class="lead">Twój zapis na Listy z Komitywy został potwierdzony. Napiszemy, gdy w pracowni pojawi się nowa edycja, spotkanie albo zapisek wart przesłania.</p>
+        <a href="{% url 'home' %}" class="btn btn-accent kk-status-page__action">Na stronę główną →</a>
     </div>
 </section>
 {% endblock %}

@@ -1,14 +1,18 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Przepiśnik - Kuchenna Komitywa{% endblock %}
+{% block title %}Roślinne przepisy — Kuchenna Komitywa{% endblock %}
+{% block meta_description %}Roślinne przepisy Kuchennej Komitywy: wyszukaj pomysł, wybierz kategorię i gotuj z dokładnym czasem przygotowania oraz liczbą porcji.{% endblock %}
+{% block og_title %}Roślinne przepisy — Kuchenna Komitywa{% endblock %}
+{% block og_description %}Przepisy z zeszytu roślinnej pracowni: do codziennego gotowania i wspólnego stołu.{% endblock %}
 
 {% block content %}
-<section class="kk-section" aria-label="Przepiśnik">
+<section class="kk-section" aria-labelledby="recipes-title">
     <div class="wrap">
         <div class="section-head">
             <div>
-                <div class="section-number">II. · przepiśnik</div>
-                <h2 class="section-title">Przepisy z zeszytu<span class="section-annotation">- klikaj żeby otworzyć</span></h2>
+                <div class="section-number">· przepiśnik</div>
+                <h1 id="recipes-title" class="section-title">Przepisy z zeszytu</h1>
+                <p class="section-annotation">Roślinne pomysły do codziennego gotowania i wspólnego stołu.</p>
             </div>
             <div class="section-meta">
                 {{ page_obj.paginator.count }} przepis{{ page_obj.paginator.count|pluralize:"y,ów" }}
@@ -41,7 +45,7 @@
             {% endfor %}
         </div>
 
-        <div class="tag-row" role="navigation" aria-label="Filtr tagow" style="margin-top:-10px;">
+        <div class="tag-row tag-row--secondary" role="navigation" aria-label="Filtr tagów">
             {% for t in tags %}
             {% if t.slug in active_tags %}
                 {# Active -> link toggles OFF this tag (keeps the rest) #}
@@ -66,7 +70,7 @@
                     <div class="num-stamp">{{ forloop.counter|stringformat:"02d" }}</div>
                     <div class="time-stamp">{{ recipe.prep_time }} min</div>
                     {% if recipe.image %}
-                    <img src="{{ recipe.image.url }}" alt="">
+                    <img src="{{ recipe.image.url }}" alt="{{ recipe.title }} — gotowe danie" data-fallback="{% static 'img/serek-ziola.jpg' %}" loading="lazy" decoding="async">
                     {% endif %}
                 </div>
                 <div class="recipe-body">
@@ -74,6 +78,9 @@
                     <div class="recipe-kicker">{{ recipe.category.name|lower }}</div>
                     {% endif %}
                     <div class="recipe-name">{{ recipe.title }}</div>
+                    {% if recipe.description %}
+                    <p class="recipe-description">{{ recipe.description|truncatechars:150 }}</p>
+                    {% endif %}
                     {% with recipe_tags=recipe.tags.all %}
                     {% if recipe_tags %}
                     <div class="recipe-meta" aria-label="Tagi przepisu">

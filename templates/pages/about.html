@@ -1,73 +1,80 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}O mnie - Kuchenna Komitywa{% endblock %}
+{% block title %}O Komitywie — roślinna pracownia z Białegostoku{% endblock %}
+{% block meta_description %}Poznaj Kuchenną Komitywę: niewielką roślinną pracownię z Białegostoku, w której Tomek Steckiewicz piecze dla kawiarni i przygotowuje limitowane zamówienia.{% endblock %}
+{% block og_title %}O Komitywie — Kuchenna Komitywa{% endblock %}
+{% block og_description %}Roślinna pracownia, sezonowe wypieki i jedzenie, które najlepiej smakuje przy wspólnym stole.{% endblock %}
 
 {% block content %}
-<section class="kk-section" aria-label="O mnie">
+<section class="kk-section" aria-labelledby="about-title">
     <div class="wrap">
         <div class="section-head">
             <div>
-                <div class="section-number">I. · kto gotuje</div>
-                <h2 class="section-title">O mnie</h2>
+                <div class="section-number">· skąd się wzięliśmy</div>
+                <h1 id="about-title" class="section-title">O Komitywie</h1>
             </div>
-            <div class="section-meta">Tomek · od 2013 roku</div>
+            <div class="section-meta">roślinna pracownia · Białystok</div>
         </div>
 
         <div class="about-grid">
-            <div class="about-photos">
+            <figure class="about-portrait">
                 <div class="polaroid">
                     <div class="polaroid-img polaroid-img--photo">
-                        <img src="{% static 'img/nasza-historia.jpg' %}" alt="Włochy 2025">
+                        <img
+                            src="{% static 'img/nasza-historia.jpg' %}"
+                            alt="Tomek Steckiewicz, osoba prowadząca Kuchenną Komitywę"
+                            width="1100"
+                            height="1210"
+                            decoding="async"
+                        >
                     </div>
-                    <div class="polaroid-caption">włochy 2025</div>
+                    <figcaption class="polaroid-caption">Tomek · Kuchenna Komitywa</figcaption>
                 </div>
-                <div class="polaroid">
-                    <div class="polaroid-img polaroid-img--photo">
-                        <img src="{% static 'img/kopenhaga-1.jpg' %}" alt="Kopenhaga 2026">
-                    </div>
-                    <div class="polaroid-caption">kopenhaga 2026</div>
-                </div>
-                <div class="about-annot">- to ja</div>
-            </div>
+            </figure>
 
-            <div>
-                <div class="about-greeting">cześć, tu Tomasz.</div>
+            <div class="about-story">
                 <p class="about-lead">
-                    Prowadzę <span class="scribble">Kuchenną Komitywę</span> - miejsce, gdzie miłość do roślin spotyka się z pasją do gotowania.
-                    Zaczęło się od prostego marzenia: udowodnić, że kuchnia roślinna może być smaczna, syta i pełna życia.
-                </p>
-
-                <h2 style="margin-top: 32px;">Nasza historia</h2>
-                <p class="about-body">
-                    Zaczęło się tak, jak chyba u większości - od gotowania dla siebie i dla bliskich. Żadnego planu, żadnego biznesplanu,
-                    po prostu kuchnia, garnek i ciekawość, czy da się zrobić coś dobrego bez mięsa. Wyszło, że tak. I że najwyraźniej nie tylko mnie to smakuje.
+                    Kuchenna Komitywa to niewielka roślinna pracownia z Białegostoku.
+                    Pieczemy chleby, drożdżówki i ciastka dla kawiarni, przygotowujemy
+                    limitowane zamówienia oraz świąteczne stoły. Interesuje nas sezonowość,
+                    lokalne składniki, rzemiosło i jedzenie, które najlepiej smakuje
+                    w dobrej komitywie.
                 </p>
                 <p class="about-body">
-                    Dziś Kuchenna Komitywa to moja kuchnia przeniesiona trochę dalej - w słoiki, w ciasta na zamówienie i w ebooki, które
-                    możesz ściągnąć i gotować u siebie. Wszystko robię ręcznie, z lokalnych produktów, bez kombinowania.
+                    Nie zamykamy się w jednej tradycji kulinarnej. Korzystamy z tego,
+                    co daje Podlasie, oraz z technik i smaków poznanych w różnych częściach świata.
+                    Komitywę prowadzi Tomek Steckiewicz.
                 </p>
 
                 <div class="belief-card">
-                    <div class="belief-card-label">w co wierzymy</div>
+                    <div class="belief-card-label">nasza kuchnia</div>
                     <p>
-                        Sezonowo, lokalnie, powoli. Bez produktów odzwierzęcych, bez ścinania dróg na skróty,
-                        bez śmiecenia. Gotowanie jako pretekst, żeby usiąść razem przy stole.
+                        Wszystko, co przygotowujemy, jest roślinne. Oferta zmienia się
+                        razem z porami roku i rytmem niewielkiej pracowni.
                     </p>
                 </div>
 
-                <h2 style="margin-top: 32px;">Co mnie wyróżnia</h2>
-                <ul class="about-body">
-                    <li><strong>100% roślinne składniki</strong> - bez kompromisów, bez produktów odzwierzęcych</li>
-                    <li><strong>Lokalne źródła</strong> - współpracujemy z okolicznymi rolnikami i dostawcami</li>
-                    <li><strong>Ręczna produkcja</strong> - każde danie przygotowuję z serca, nie na taśmie</li>
-                    <li><strong>Sezonowość</strong> - gotuję z tym, co natura daje w danym momencie</li>
-                </ul>
-
-                <p style="margin-top: 32px;">
-                    <a href="{% url 'recipes:list' %}" class="btn btn-accent">otwórz przepiśnik →</a>
-                </p>
+                <div class="kk-action-row">
+                    <a href="{% url 'orders' %}" class="btn btn-accent">Zobacz zamówienia →</a>
+                    <a href="{% url 'for_cafes' %}" class="kk-link-arrow">Oferta dla kawiarni →</a>
+                </div>
             </div>
+        </div>
+
+        <div class="about-notes" aria-label="Kadry i inspiracje z drogi">
+            <figure class="about-note-photo">
+                <img src="{% static 'img/kopenhaga-1.jpg' %}" alt="Tomek przy stoliku przed kawiarnią" width="600" height="800" loading="lazy" decoding="async">
+                <figcaption>przy stole</figcaption>
+            </figure>
+            <figure class="about-note-photo">
+                <img src="{% static 'img/kopenhaga-2.jpg' %}" alt="Kawa i wypiek na kawiarnianym stoliku" width="450" height="800" loading="lazy" decoding="async">
+                <figcaption>notatki ze świata</figcaption>
+            </figure>
+            <figure class="about-note-photo">
+                <img src="{% static 'img/kopenhaga-3.jpg' %}" alt="Tomek próbujący napoju przy kuchennym barze" width="600" height="800" loading="lazy" decoding="async">
+                <figcaption>smaki, które wracają z nami</figcaption>
+            </figure>
         </div>
     </div>
 </section>

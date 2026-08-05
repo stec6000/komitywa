@@ -376,10 +376,9 @@ class TestSchemaOrgExtras(TestCase):
         self.assertContains(response, '"keywords"')
         self.assertContains(response, "szybkie-extras")
 
-    def test_keywords_absent_when_no_tags(self):
+    def test_keywords_include_category_when_no_tags(self):
         response = self.client.get("/przepisy/bez-tagow-schema/")
-        self.assertNotContains(response, '"keywords"')
-        # recipeYield should still be present.
+        self.assertContains(response, '"keywords": "Desery-extras"')
         self.assertContains(response, '"recipeYield": "2"')
 
 

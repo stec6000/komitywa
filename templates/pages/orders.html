@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Zamówienia — Kuchenna Komitywa{% endblock %}
+{% block meta_description %}Aktualne limitowane zamówienia na roślinne wypieki i menu Kuchennej Komitywy w Białymstoku: produkty, ceny, skład, alergeny i szczegóły odbioru.{% endblock %}
+{% block og_title %}Zamówienia — Kuchenna Komitywa{% endblock %}
+
+{% block content %}
+<section class="kk-page-intro" aria-labelledby="orders-title">
+    <div class="wrap kk-page-intro__grid">
+        <div>
+            <p class="kk-kicker">Limitowane edycje · Białystok</p>
+            <h1 id="orders-title">Zamówienia z pracowni</h1>
+        </div>
+        <p class="kk-page-intro__lead">Pieczemy i gotujemy w małych seriach. Każda edycja ma osobne menu, termin zapisów oraz informacje o odbiorze.</p>
+    </div>
+</section>
+
+{% if current_edition and order_products %}
+<section class="kk-order-edition" aria-labelledby="edition-title">
+    <div class="wrap">
+        <div class="kk-order-edition__header">
+            {% if current_edition.image %}
+            <figure class="kk-order-edition__photo">
+                <img src="{{ current_edition.image.url }}" alt="{{ current_edition.image_alt|default:current_edition.title }}" data-fallback="{% static 'img/hero.jpg' %}" decoding="async">
+            </figure>
+            {% else %}
+            <figure class="kk-order-edition__photo kk-order-edition__photo--sample">
+                <img src="{% static 'img/hero.jpg' %}" alt="Przykładowe zdjęcie roślinnego stołu" decoding="async">
+                <figcaption>zdjęcie przykładowe</figcaption>
+            </figure>
+            {% endif %}
+            <div class="kk-order-edition__copy">
+                <p class="kk-hand-note">zamówienia są otwarte</p>
+                <h2 id="edition-title">{{ current_edition.title }}</h2>
+                <div class="kk-prose">{{ current_edition.description|linebreaks }}</div>
+            </div>
+        </div>
+
+        <dl class="kk-order-facts">
+            <div>
+                <dt>Koniec zamówień</dt>
+                <dd>{% if current_edition.closes_at %}{{ current_edition.closes_at|date:"l, j E Y · H:i" }}{% else %}Termin podany przy aktualizacji edycji{% endif %}</dd>
+            </div>
+            <div>
+                <dt>Odbiór</dt>
+                <dd>{{ current_edition.pickup_details|default:"Szczegóły odbioru podamy przed uruchomieniem zamówień."|linebreaksbr }}</dd>
+            </div>
+            <div>
+                <dt>Płatność</dt>
+                <dd>{{ current_edition.payment_details|default:"Płatność online przez Przelewy24."|linebreaksbr }}</dd>
+            </div>
+        </dl>
+
+        <div class="kk-order-products" aria-label="Menu aktualnej edycji">
+            {% for product in order_products %}
+            <article class="kk-order-product">
+                {% if product.image %}
+                <a href="{% url 'shop:detail' slug=product.slug %}" class="kk-order-product__image" aria-label="Zobacz szczegóły produktu {{ product.title }}">
+                    <img src="{{ product.image.url }}" alt="{{ product.title }}" data-fallback="{% static 'img/serek-ziola.jpg' %}" loading="lazy" decoding="async">
+                </a>
+                {% else %}
+                <a href="{% url 'shop:detail' slug=product.slug %}" class="kk-order-product__image kk-order-product__image--sample" aria-label="Zobacz szczegóły produktu {{ product.title }}">
+                    <img src="{% static 'img/serek-ziola.jpg' %}" alt="Przykładowe zdjęcie produktu {{ product.title }}" loading="lazy" decoding="async">
+                    <span>zdjęcie przykładowe</span>
+                </a>
+                {% endif %}
+                <div class="kk-order-product__body">
+                    <div class="kk-order-product__heading">
+                        <h3><a href="{% url 'shop:detail' slug=product.slug %}">{{ product.title }}</a></h3>
+                        <p class="kk-order-product__price">{{ product.price|floatformat:"2" }} zł</p>
+                    </div>
+                    <p>{{ product.description }}</p>
+                    <dl class="kk-product-details">
+                        <div>
+                            <dt>Skład</dt>
+                            <dd>{{ product.ingredients|default:"Informacja do uzupełnienia przy produkcie."|linebreaksbr }}</dd>
+                        </div>
+                        <div>
+                            <dt>Alergeny</dt>
+                            <dd>{{ product.allergens|default:"Informacja do uzupełnienia przy produkcie."|linebreaksbr }}</dd>
+                        </div>
+                    </dl>
+                    <form method="post" action="{% url 'shop:cart_add' product_id=product.id %}" class="kk-order-product__action">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-accent">Dodaj do koszyka</button>
+                        <a href="{% url 'shop:detail' slug=product.slug %}" class="kk-link-arrow">Pełny opis →</a>
+                    </form>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% else %}
+<section class="kk-orders-closed" aria-labelledby="closed-title">
+    <div class="wrap-narrow">
+        <p class="kk-orders-closed__mark" aria-hidden="true">···</p>
+        <h2 id="closed-title">W pracowni szykuje się kolejny rzut</h2>
+        <p>Obecnie nie prowadzimy zapisów na żaden rzut. Kolejne wypieki lub menu pojawią się tutaj wkrótce.</p>
+        <a class="btn btn-accent" href="#listy-z-komitywy">Powiadom mnie o kolejnej edycji</a>
+    </div>
+</section>
+{% endif %}
+
+<section class="kk-order-archive" aria-labelledby="archive-title">
+    <div class="wrap">
+        <header class="kk-home-heading kk-home-heading--compact">
+            <div>
+                <p class="kk-kicker">Archiwum</p>
+                <h2 id="archive-title">Poprzednie edycje</h2>
+            </div>
+        </header>
+        {% if archived_editions %}
+        <div class="kk-archive-list">
+            {% for edition in archived_editions %}
+            <article>
+                <p class="kk-archive-list__date">{% if edition.closes_at %}{{ edition.closes_at|date:"F Y" }}{% else %}z archiwum pracowni{% endif %}</p>
+                <h3>{{ edition.title }}</h3>
+                {% if edition.description %}<p>{{ edition.description|truncatechars:220 }}</p>{% endif %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="kk-empty-note">Zakończone edycje pojawią się tutaj, kiedy pracownia zamknie pierwszy rzut zapisany w nowym archiwum.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

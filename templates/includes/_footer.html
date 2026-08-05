@@ -3,35 +3,43 @@
     <div class="footer-grid">
         <div>
             <div class="footer-brand-title">Kuchenna Komitywa</div>
-            <div class="footer-brand-sub">roślinna kuchnia, wspólne stoły</div>
-            <p class="footer-brand-blurb">Mały projekt Tomka. Piszemy, gotujemy i jemy przy jednym stole w Białymstoku.</p>
+            <div class="footer-brand-sub">roślinna pracownia · Białystok</div>
+            <p class="footer-brand-blurb">Pieczemy dla kawiarni, przygotowujemy limitowane zamówienia i spotykamy się wokół wspólnego stołu.</p>
+            {% if hide_newsletter %}
+            <a class="footer-newsletter-link" href="{% url 'home' %}#listy-z-komitywy">Zapisz się na Listy z Komitywy →</a>
+            {% else %}
+            <button type="button" class="footer-newsletter-link" data-newsletter-open aria-haspopup="dialog" aria-controls="kk-newsletter-modal">Zapisz się na Listy z Komitywy →</button>
+            {% endif %}
             <p class="footer-nip mt-2">NIP: 5423485438</p>
         </div>
 
         <div class="footer-col">
-            <h5>strona</h5>
-            <a href="{% url 'recipes:list' %}">przepiśnik</a>
-            <a href="{% url 'shop:list' %}">sklep</a>
-            <a href="{% url 'about' %}">o mnie</a>
-            <a href="{% url 'contact' %}">kontakt</a>
+            <h2>Pracownia</h2>
+            <a href="{% url 'orders' %}">Zamówienia</a>
+            <a href="{% url 'for_cafes' %}">Dla kawiarni</a>
+            <a href="{% url 'workshops' %}">Wspólne gotowanie</a>
+            <a href="{% url 'about' %}">O Komitywie</a>
         </div>
 
         <div class="footer-col">
-            <h5>pomoc</h5>
-            <a href="{% url 'shop:cart' %}">koszyk</a>
-            <a href="{% url 'regulations' %}">regulamin</a>
-            <a href="{% url 'privacy-policy' %}">prywatność</a>
-            <a href="{% url 'contact' %}">kontakt</a>
+            <h2>Czytaj i zamawiaj</h2>
+            <a href="{% url 'recipes:list' %}">Przepisy</a>
+            <a href="{% url 'content:blog_list' %}">Z kuchni</a>
+            <a href="{% url 'shop:cart' %}">Koszyk</a>
+            <a href="{% url 'shop:list' %}">Sklep i ebooki</a>
         </div>
 
         <div class="footer-col">
-            <h5>znajdź nas</h5>
-            <a href="https://instagram.com/kuchennakomitywa" rel="noopener" target="_blank">instagram</a>
-            <a href="https://facebook.com/kuchennakomitywa" rel="noopener" target="_blank">facebook</a>
+            <h2>Kontakt i informacje</h2>
+            <a href="{% url 'contact' %}">Kontakt</a>
+            <a href="https://instagram.com/kuchennakomitywa" rel="noopener" target="_blank">Instagram</a>
             <a href="tel:+48511562100">511 562 100</a>
+            <a href="{% url 'regulations' %}">Regulamin</a>
+            <a href="{% url 'privacy-policy' %}">Polityka prywatności</a>
         </div>
     </div>
 
+    {% if request.resolver_match.app_name == "shop" %}
     <div class="footer-payments">
         <p class="footer-payments-label">Metody płatności</p>
         <div class="footer-payment-logos">
@@ -45,9 +53,10 @@
             <img src="{% static 'img/p24/logotypy-bankow/santander.png' %}" alt="Santander" class="footer-payment-logo">
         </div>
     </div>
+    {% endif %}
 
     <div class="footer-bottom">
         <div>© Kuchenna Komitywa {% now "Y" %} · Białystok</div>
-        <div>zrobione powoli, ręcznie</div>
+        <div>sezonowo, rzemieślniczo i do wspólnego stołu</div>
     </div>
 </footer>

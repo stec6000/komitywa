@@ -57,9 +57,3 @@ node_modules/
 
 *.pid
 *.sock
-
-# Visual brainstorm companion
-.superpowers/
-
-# debug reference screenshots (not versioned)
-.planning/debug/screenshots/

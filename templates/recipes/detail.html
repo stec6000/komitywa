@@ -2,14 +2,20 @@
 {% load static %}
 {% load recipe_extras %}
 
-{% block title %}{{ recipe.title }} - Kuchenna Komitywa{% endblock %}
+{% block title %}{{ recipe.title }} — roślinny przepis — Kuchenna Komitywa{% endblock %}
+{% block meta_description %}{{ recipe.description|striptags|truncatechars:155 }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ recipe.title }} — Kuchenna Komitywa{% endblock %}
+{% block og_description %}{{ recipe.description|striptags|truncatechars:180 }}{% endblock %}
+{% block og_image %}{% if recipe.image %}{{ request.scheme }}://{{ request.get_host }}{{ recipe.image.url }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block og_image_alt %}{% if recipe.image %}{{ recipe.title }} — gotowe danie{% else %}{{ block.super }}{% endif %}{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-label="Przepis">
     <div class="wrap">
         {% if recipe.image %}
         <div class="kk-detail-hero">
-            <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+            <img src="{{ recipe.image.url }}" alt="{{ recipe.title }} — gotowe danie" data-fallback="{% static 'img/serek-ziola.jpg' %}" fetchpriority="high" decoding="async">
         </div>
         {% endif %}
 

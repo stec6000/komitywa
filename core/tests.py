@@ -1,11 +1,18 @@
 from pathlib import Path
 from datetime import timedelta
+from decimal import Decimal
+from unittest.mock import patch
 
 from django.conf import settings
+from django.contrib.messages import get_messages
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
+from core.forms import CafeInquiryForm, WorkshopInterestForm
+from core.models import CafeInquiry, CafeLocation, WorkshopInterest
 from recipes.models import Category, Recipe
+from shop.models import OrderEdition, Product, ProductCategory
 
 
 class TestEnvironmentConfig(TestCase):
@@ -77,7 +84,7 @@ class TestHomeView(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_home_shows_latest_published_recipes(self):
-        """Home shows 1 featured + 3 grid (top 4 latest); older + unpublished hidden."""
+        """The mixed kitchen feed shows the three newest public recipes."""
         category, _ = Category.objects.get_or_create(
             name="Obiady",
             slug="obiady",
@@ -117,23 +124,18 @@ class TestHomeView(TestCase):
 
         response = self.client.get("/")
 
-        # Top 4 visible: newest as featured + next 3 in grid
+        # The new "Z kuchni" feed is deliberately limited to three entries.
         self.assertContains(response, "Najnowszy przepis")
         self.assertContains(response, "Srodkowy przepis")
         self.assertContains(response, "Trzeci przepis")
-        self.assertContains(response, "Czwarty przepis")
-        # Oldest + unpublished hidden
+        self.assertNotContains(response, "Czwarty przepis")
         self.assertNotContains(response, "Najstarszy przepis")
         self.assertNotContains(response, "Ukryty przepis")
-        # Featured contract
+        feed_titles = [item["title"] for item in response.context["kitchen_items"]]
         self.assertEqual(
-            response.context["featured_recipe"].title,
-            "Najnowszy przepis",
+            feed_titles,
+            ["Najnowszy przepis", "Srodkowy przepis", "Trzeci przepis"],
         )
-        feed_titles = [r.title for r in response.context["feed_recipes"]]
-        self.assertEqual(feed_titles, [
-            "Srodkowy przepis", "Trzeci przepis", "Czwarty przepis",
-        ])
 
     def test_home_recipe_cards_are_fully_clickable_without_read_more_text(self):
         category = Category.objects.create(name="Desery", slug="desery-home")
@@ -153,26 +155,129 @@ class TestHomeView(TestCase):
         self.assertNotContains(response, "Czytaj więcej")
 
 
+class TestOrdersView(TestCase):
+    def setUp(self):
+        self.category = ProductCategory.objects.create(
+            name="Wypieki",
+            slug="wypieki-zamowienia",
+        )
+
+    def test_empty_state_is_explicit_when_no_edition_is_open(self):
+        response = self.client.get(reverse("orders"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.context["current_edition"])
+        self.assertContains(response, "W pracowni szykuje się kolejny rzut")
+        self.assertContains(response, "Obecnie nie prowadzimy zapisów")
+
+    def test_open_edition_shows_only_active_physical_products(self):
+        now = timezone.now()
+        edition = OrderEdition.objects.create(
+            title="Sierpniowy stół",
+            description="Mała sierpniowa seria.",
+            status=OrderEdition.Status.OPEN,
+            opens_at=now - timedelta(hours=1),
+            closes_at=now + timedelta(days=2),
+            pickup_details="Odbiór w sobotę.",
+            payment_details="Płatność online.",
+        )
+        visible = Product.objects.create(
+            title="Drożdżówka ze śliwką",
+            slug="drozdzowka-ze-sliwka",
+            edition=edition,
+            category=self.category,
+            type="physical",
+            description="Miękka drożdżówka z owocami.",
+            ingredients="mąka, śliwki",
+            allergens="gluten",
+            price=Decimal("16.00"),
+            is_active=True,
+        )
+        Product.objects.create(
+            title="Nieaktywny chleb",
+            slug="nieaktywny-chleb",
+            edition=edition,
+            category=self.category,
+            type="physical",
+            description="Nie powinien być widoczny.",
+            price=Decimal("20.00"),
+            is_active=False,
+        )
+        Product.objects.create(
+            title="Ebook z tej edycji",
+            slug="ebook-z-tej-edycji",
+            edition=edition,
+            category=self.category,
+            type="ebook",
+            description="Produkt cyfrowy pozostaje w starym sklepie.",
+            price=Decimal("29.00"),
+            is_active=True,
+        )
+
+        response = self.client.get(reverse("orders"))
+
+        self.assertEqual(response.context["current_edition"], edition)
+        self.assertEqual(list(response.context["order_products"]), [visible])
+        self.assertContains(response, "Sierpniowy stół")
+        self.assertContains(response, "Drożdżówka ze śliwką")
+        self.assertContains(response, "mąka, śliwki")
+        self.assertContains(response, "gluten")
+        self.assertContains(response, "Odbiór w sobotę")
+        self.assertNotContains(response, "Nieaktywny chleb")
+        self.assertNotContains(response, "Ebook z tej edycji")
+
+    def test_archive_shows_only_closed_editions_marked_for_archive(self):
+        visible = OrderEdition.objects.create(
+            title="Wielkanocny stół",
+            status=OrderEdition.Status.CLOSED,
+            closes_at=timezone.now() - timedelta(days=10),
+            show_in_archive=True,
+        )
+        OrderEdition.objects.create(
+            title="Wewnętrzna próba",
+            status=OrderEdition.Status.CLOSED,
+            closes_at=timezone.now() - timedelta(days=5),
+            show_in_archive=False,
+        )
+
+        response = self.client.get(reverse("orders"))
+
+        self.assertEqual(list(response.context["archived_editions"]), [visible])
+        self.assertContains(response, "Wielkanocny stół")
+        self.assertNotContains(response, "Wewnętrzna próba")
+
+
 class TestBaseTemplate(TestCase):
     """FOUND-02: base.html renders with nav, footer."""
 
     def test_home_page_has_navbar(self):
         response = self.client.get("/")
-        # Sketchbook nav uses lowercase handwritten labels
-        self.assertContains(response, "przepiśnik")
-        self.assertContains(response, "sklep")
-        self.assertContains(response, "o nas")
-        self.assertContains(response, "kontakt")
+        expected_links = {
+            reverse("orders"): "Zamówienia",
+            reverse("for_cafes"): "Dla kawiarni",
+            reverse("recipes:list"): "Przepisy",
+            reverse("content:blog_list"): "Z kuchni",
+            reverse("workshops"): "Wspólne gotowanie",
+            reverse("about"): "O Komitywie",
+            reverse("contact"): "Kontakt",
+        }
+        for url, label in expected_links.items():
+            with self.subTest(label=label):
+                self.assertContains(response, f'href="{url}"')
+                self.assertContains(response, label)
 
     def test_home_page_has_cart_link(self):
         response = self.client.get("/")
-        self.assertContains(response, 'aria-label="Koszyk"')
+        self.assertContains(
+            response,
+            'aria-label="Koszyk, liczba produktów: 0"',
+        )
         self.assertContains(response, "nav-cart")
 
     def test_home_page_has_footer(self):
         response = self.client.get("/")
         self.assertContains(response, "Kuchenna Komitywa")
-        self.assertContains(response, "zrobione powoli, ręcznie")
+        self.assertContains(response, "sezonowo, rzemieślniczo")
 
     def test_home_page_has_skip_link(self):
         response = self.client.get("/")
@@ -233,39 +338,45 @@ class TestHeroSection(TestCase):
 
     def test_home_has_hero_section(self):
         response = self.client.get("/")
-        self.assertContains(response, 'class="hero"')
-        self.assertContains(response, "hero-grid")
+        self.assertContains(response, 'class="kk-home-hero"')
+        self.assertContains(response, "kk-home-hero__grid")
 
     def test_hero_has_headline(self):
         response = self.client.get("/")
-        # Sketchbook headline: "Wsp\u00f3lnie gotujemy z ro\u015blin"
-        self.assertContains(response, "Wsp\u00f3lnie")
-        self.assertContains(response, "gotujemy")
-        self.assertContains(response, "ro\u015blin")
+        self.assertContains(
+            response,
+            "Roślinna pracownia wypieków i dobrego jedzenia",
+        )
 
     def test_hero_has_cta_button(self):
         response = self.client.get("/")
-        self.assertContains(response, "otw\u00f3rz szkicownik")
+        self.assertContains(response, "Dowiedz się o kolejnym rzucie")
+        self.assertContains(response, "Współpraca dla kawiarni")
         self.assertContains(response, "btn-accent")
 
-    def test_hero_has_polaroid_stack(self):
+    def test_hero_has_real_photo_with_meaningful_alt(self):
         response = self.client.get("/")
-        self.assertContains(response, "hero-illus")
-        self.assertContains(response, "polaroid")
+        self.assertContains(response, "kk-home-hero__photo")
+        self.assertContains(
+            response,
+            'alt="Tomasz siedzący przy stoliku przed kawiarnią z wypiekiem"',
+        )
 
 
-class TestAboutTeaser(TestCase):
-    """LAND-01: Sketchbook about teaser replaces feature cards."""
+class TestHomeOfferSections(TestCase):
+    """LAND-01: Home explains the four real areas of the workshop."""
 
-    def test_about_teaser_present(self):
+    def test_four_offer_areas_are_present(self):
         response = self.client.get("/")
-        self.assertContains(response, "I. \u00b7 kto gotuje")
-        self.assertContains(response, "cze\u015b\u0107, tu Tomasz")
+        self.assertContains(response, "Wypieki dla kawiarni")
+        self.assertContains(response, "Limitowane zamówienia")
+        self.assertContains(response, "Cateringi świąteczne")
+        self.assertContains(response, "Wspólne gotowanie")
 
-    def test_belief_card_present(self):
+    def test_closed_orders_state_does_not_invent_an_offer(self):
         response = self.client.get("/")
-        self.assertContains(response, "w co wierzymy")
-        self.assertContains(response, "Sezonowo, lokalnie, powoli")
+        self.assertContains(response, "W kuchni właśnie szykuje się kolejna edycja")
+        self.assertContains(response, "Listy z Komitywy")
 
 
 class TestAboutPage(TestCase):
@@ -277,11 +388,16 @@ class TestAboutPage(TestCase):
 
     def test_about_page_has_heading(self):
         response = self.client.get("/o-nas/")
-        self.assertContains(response, "O nas")
+        html = response.content.decode()
+        self.assertRegex(html, r"<h1[^>]*>\s*O Komitywie\s*</h1>")
 
     def test_about_page_has_content(self):
         response = self.client.get("/o-nas/")
-        self.assertContains(response, "Kuchenna Komitywa")
+        self.assertContains(
+            response,
+            "Kuchenna Komitywa to niewielka roślinna pracownia",
+        )
+        self.assertContains(response, "Nie zamykamy się w jednej tradycji kulinarnej")
 
 
 class TestContactPage(TestCase):
@@ -362,3 +478,208 @@ class TestFooterLinks(TestCase):
     def test_footer_has_regulations_link(self):
         response = self.client.get("/")
         self.assertContains(response, 'href="/regulamin/"')
+
+
+class TestCafeLocation(TestCase):
+    def test_locations_are_ordered_for_display(self):
+        second = CafeLocation.objects.create(
+            name="Druga Kawiarnia",
+            address="Białystok",
+            products_note="Drożdżówki",
+            sort_order=20,
+        )
+        first = CafeLocation.objects.create(
+            name="Pierwsza Kawiarnia",
+            address="Białystok",
+            products_note="Shokupan",
+            sort_order=10,
+        )
+
+        self.assertEqual(list(CafeLocation.objects.all()), [first, second])
+
+    def test_home_context_contains_only_active_locations(self):
+        visible = CafeLocation.objects.create(
+            name="Widoczny lokal",
+            address="Białystok",
+            products_note="Ciastka",
+        )
+        CafeLocation.objects.create(
+            name="Ukryty lokal",
+            address="Białystok",
+            products_note="Ciastka",
+            is_active=False,
+        )
+
+        response = self.client.get(reverse("home"))
+
+        self.assertEqual(list(response.context["cafe_locations"]), [visible])
+        self.assertContains(response, "Gdzie zjeść Komitywę")
+        self.assertContains(response, "Widoczny lokal")
+        self.assertNotContains(response, "Ukryty lokal")
+
+    def test_home_hides_locations_section_until_real_data_exists(self):
+        response = self.client.get(reverse("home"))
+
+        self.assertEqual(list(response.context["cafe_locations"]), [])
+        self.assertNotContains(response, "Gdzie zjeść Komitywę")
+
+
+class TestCafeInquiryForm(TestCase):
+    def valid_data(self):
+        return {
+            "venue_name": "Kawiarnia Próba",
+            "contact_name": "Anna",
+            "email": "anna@example.com",
+            "phone": "",
+            "city": "Białystok",
+            "interested_products": ["shokupan", "cookies"],
+            "frequency": "weekly",
+            "message": "Chcemy przetestować wypieki.",
+            "privacy_consent": "on",
+            "website": "",
+        }
+
+    def test_selected_products_are_saved_as_readable_text(self):
+        form = CafeInquiryForm(data=self.valid_data())
+
+        self.assertTrue(form.is_valid(), form.errors)
+        inquiry = form.save()
+
+        self.assertEqual(inquiry.interested_products, "Shokupan, Ciastka")
+        self.assertEqual(inquiry.status, "new")
+        self.assertEqual(inquiry.phone, "")
+
+    def test_honeypot_rejects_submission(self):
+        data = self.valid_data()
+        data["website"] = "https://spam.example"
+
+        form = CafeInquiryForm(data=data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("website", form.errors)
+
+    def test_privacy_consent_is_required(self):
+        data = self.valid_data()
+        data.pop("privacy_consent")
+
+        form = CafeInquiryForm(data=data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("privacy_consent", form.errors)
+
+    def test_invalid_field_is_described_for_assistive_technology(self):
+        data = self.valid_data()
+        data["email"] = "niepoprawny"
+        form = CafeInquiryForm(data=data)
+
+        self.assertFalse(form.is_valid())
+        attrs = form.fields["email"].widget.attrs
+        self.assertEqual(attrs["aria-invalid"], "true")
+        self.assertIn("id_email-error", attrs["aria-describedby"])
+
+
+class TestWorkshopInterestForm(TestCase):
+    def valid_data(self):
+        return {
+            "name": "Ola",
+            "email": "ola@example.com",
+            "topic": "fermentation",
+            "preferred_timing": "weekend",
+            "consent_contact": "on",
+            "website": "",
+        }
+
+    def test_valid_interest_is_saved(self):
+        form = WorkshopInterestForm(data=self.valid_data())
+
+        self.assertTrue(form.is_valid(), form.errors)
+        interest = form.save()
+
+        self.assertEqual(interest.get_topic_display(), "Kiszenie i fermentacja")
+        self.assertEqual(interest.get_preferred_timing_display(), "Weekend")
+
+    def test_honeypot_rejects_submission(self):
+        data = self.valid_data()
+        data["website"] = "spam"
+
+        form = WorkshopInterestForm(data=data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("website", form.errors)
+
+
+class TestInquiryViews(TestCase):
+    cafe_data = {
+        "venue_name": "Kawiarnia Próba",
+        "contact_name": "Anna",
+        "email": "anna@example.com",
+        "phone": "123 456 789",
+        "city": "Białystok",
+        "interested_products": ["buns", "seasonal_bakes"],
+        "frequency": "occasionally",
+        "message": "Prosimy o kontakt.",
+        "privacy_consent": "on",
+        "website": "",
+    }
+    workshop_data = {
+        "name": "Ola",
+        "email": "ola@example.com",
+        "topic": "seasonal_table",
+        "preferred_timing": "weekday_evening",
+        "consent_contact": "on",
+        "website": "",
+    }
+
+    @patch("core.views.send_mail")
+    def test_cafe_inquiry_is_saved_and_notification_is_attempted(self, send_mail):
+        response = self.client.post(reverse("for_cafes"), self.cafe_data)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("for_cafes"))
+        self.assertEqual(CafeInquiry.objects.count(), 1)
+        send_mail.assert_called_once()
+        self.assertEqual(send_mail.call_args.args[3], [settings.CONTACT_EMAIL])
+        self.assertTrue(list(get_messages(response.wsgi_request)))
+
+    @patch("core.views.send_mail", side_effect=RuntimeError("SMTP unavailable"))
+    def test_email_failure_does_not_lose_cafe_inquiry(self, send_mail):
+        with self.assertLogs("core.views", level="ERROR"):
+            response = self.client.post(reverse("for_cafes"), self.cafe_data)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(CafeInquiry.objects.count(), 1)
+        send_mail.assert_called_once()
+
+    @patch("core.views.send_mail")
+    def test_workshop_interest_is_saved_and_notification_is_attempted(
+        self,
+        send_mail,
+    ):
+        response = self.client.post(reverse("workshops"), self.workshop_data)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("workshops"))
+        self.assertEqual(WorkshopInterest.objects.count(), 1)
+        send_mail.assert_called_once()
+        self.assertEqual(send_mail.call_args.args[3], [settings.CONTACT_EMAIL])
+        self.assertTrue(list(get_messages(response.wsgi_request)))
+
+    def test_bot_submission_is_not_saved(self):
+        data = {**self.workshop_data, "website": "https://spam.example"}
+
+        response = self.client.post(reverse("workshops"), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(WorkshopInterest.objects.count(), 0)
+        self.assertIn("website", response.context["form"].errors)
+
+    def test_invalid_workshop_form_links_error_to_field(self):
+        data = {**self.workshop_data, "email": "niepoprawny"}
+
+        response = self.client.post(reverse("workshops"), data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'aria-describedby="id_email-error"')
+        self.assertContains(response, 'aria-invalid="true"')
+        self.assertContains(response, 'id="id_email-error"')
+        self.assertContains(response, 'data-focus-on-load')
