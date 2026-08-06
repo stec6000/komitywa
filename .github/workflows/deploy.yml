@@ -85,4 +85,4 @@ jobs:
             -o StrictHostKeyChecking=yes \
             -p "$SSH_PORT" \
             "$DEPLOY_USER@$DEPLOY_HOST" \
-            "cd \"$DEPLOY_PATH\" && bash ./deploy.sh"
+            "cd \"$DEPLOY_PATH\" && git fetch origin main && git checkout origin/main -- deploy.sh && bash ./deploy.sh"
