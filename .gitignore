@@ -40,6 +40,10 @@ htmlcov/
 .vscode/
 .idea/
 
+# Local AI assistant artifacts
+.claude/
+.planning/
+
 # OS
 .DS_Store
 Thumbs.db
