@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Sprawdzamy płatność — Kuchenna Komitywa{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
+
+{% block content %}
+<section class="kk-section" aria-labelledby="payment-check-title">
+    <div class="wrap">
+        <div class="kk-empty-state">
+            <h1 id="payment-check-title">Sprawdzamy płatność</h1>
+            <p>Potwierdzenie z Przelewy24 może dotrzeć chwilę po Twoim powrocie. Nie składaj w tym czasie drugiej Rezerwacji.</p>
+            <a href="{% url 'orders' %}" class="btn btn-accent">wróć do Rzutu →</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

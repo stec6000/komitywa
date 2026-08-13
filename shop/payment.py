@@ -5,6 +5,8 @@ import logging
 import requests
 from django.conf import settings
 
+from .reservations import RESERVATION_TIME_LIMIT_MINUTES
+
 logger = logging.getLogger(__name__)
 
 P24_SANDBOX_URL = "https://sandbox.przelewy24.pl"
@@ -23,36 +25,69 @@ def calculate_sign(params):
 
 
 def register_transaction(order, url_return, url_status):
+    return _register_transaction(
+        session_id=order.p24_session_id,
+        total=order.total,
+        email=order.email,
+        description=f"Zamówienie #{order.id}",
+        url_return=url_return,
+        url_status=url_status,
+    )
+
+
+def register_rzut_transaction(reservation, url_return, url_status):
+    return _register_transaction(
+        session_id=reservation.p24_session_id,
+        total=reservation.total,
+        email=reservation.customer_email,
+        description=f"Rezerwacja Rzutu {reservation.rzut.title}",
+        url_return=url_return,
+        url_status=url_status,
+        time_limit=RESERVATION_TIME_LIMIT_MINUTES,
+    )
+
+
+def _register_transaction(
+    *,
+    session_id,
+    total,
+    email,
+    description,
+    url_return,
+    url_status,
+    time_limit=None,
+):
     sign = calculate_sign({
-        "sessionId": order.p24_session_id,
+        "sessionId": session_id,
         "merchantId": settings.P24_MERCHANT_ID,
-        "amount": int(order.total * 100),
+        "amount": int(total * 100),
         "currency": "PLN",
         "crc": settings.P24_CRC_KEY,
     })
     payload = {
         "merchantId": settings.P24_MERCHANT_ID,
         "posId": settings.P24_POS_ID,
-        "sessionId": order.p24_session_id,
-        "amount": int(order.total * 100),
+        "sessionId": session_id,
+        "amount": int(total * 100),
         "currency": "PLN",
-        "description": f"Zamówienie #{order.id}",
-        "email": order.email,
+        "description": description,
+        "email": email,
         "country": "PL",
         "language": "pl",
         "urlReturn": url_return,
         "urlStatus": url_status,
         "sign": sign,
     }
-    base_url = get_base_url()
+    if time_limit is not None:
+        payload["timeLimit"] = time_limit
     response = requests.post(
-        f"{base_url}/api/v1/transaction/register",
+        f"{get_base_url()}/api/v1/transaction/register",
         json=payload,
         auth=(str(settings.P24_POS_ID), settings.P24_API_KEY),
+        timeout=settings.P24_HTTP_TIMEOUT,
     )
     response.raise_for_status()
-    data = response.json()
-    return data["data"]["token"]
+    return response.json()["data"]["token"]
 
 
 def verify_transaction(session_id, order_id_p24, amount):
@@ -77,6 +112,7 @@ def verify_transaction(session_id, order_id_p24, amount):
         f"{base_url}/api/v1/transaction/verify",
         json=payload,
         auth=(str(settings.P24_POS_ID), settings.P24_API_KEY),
+        timeout=settings.P24_HTTP_TIMEOUT,
     )
     response.raise_for_status()
     data = response.json()

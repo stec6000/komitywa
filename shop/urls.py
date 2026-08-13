@@ -11,6 +11,21 @@ urlpatterns = [
     path("koszyk/", views.cart_view, name="cart"),
     path("zamowienia/koszyk/", views.rzut_cart_view, name="rzut_cart"),
     path(
+        "zamowienia/checkout/",
+        views.rzut_checkout,
+        name="rzut_checkout",
+    ),
+    path(
+        "zamowienia/powrot/",
+        views.rzut_p24_return,
+        name="rzut_p24_return",
+    ),
+    path(
+        "zamowienia/webhook/p24/",
+        views.rzut_p24_webhook,
+        name="rzut_p24_webhook",
+    ),
+    path(
         "zamowienia/koszyk/dodaj/<int:rzut_item_id>/",
         views.rzut_cart_add,
         name="rzut_cart_add",

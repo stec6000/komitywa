@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime, time as datetime_time, timedelta
 from decimal import Decimal
+import uuid
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
@@ -14,6 +15,10 @@ from django.utils.text import slugify
 class PickupSlot:
     starts_at: datetime_time
     ends_at: datetime_time
+
+
+def generate_rzut_p24_session_id():
+    return f"rzut-{uuid.uuid4().hex}"
 
 
 class ProductCategory(models.Model):
@@ -160,6 +165,11 @@ class OrderEdition(models.Model):
     show_upcoming_menu = models.BooleanField(
         default=True,
         verbose_name="Pokaż menu przed otwarciem sprzedaży",
+    )
+    allocation_revision = models.PositiveBigIntegerField(
+        default=0,
+        editable=False,
+        verbose_name="Wersja przydziału Puli",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -626,6 +636,138 @@ class RzutItem(models.Model):
         if 2 <= available <= 4:
             return f"Zostały {available} sztuki"
         return f"Zostało {available} sztuk"
+
+
+class Reservation(models.Model):
+    class Status(models.TextChoices):
+        ACTIVE = "active", "Aktywna"
+        CONFIRMED = "confirmed", "Potwierdzona"
+        EXPIRED = "expired", "Wygasła"
+        FAILED = "failed", "Nieudana"
+
+    rzut = models.ForeignKey(
+        OrderEdition,
+        on_delete=models.PROTECT,
+        related_name="reservations",
+        verbose_name="Rzut",
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+        verbose_name="Status Rezerwacji",
+    )
+    customer_name = models.CharField(
+        max_length=200,
+        verbose_name="Imię i nazwisko",
+    )
+    customer_email = models.EmailField(
+        verbose_name="E-mail Klienta",
+    )
+    customer_phone = models.CharField(
+        max_length=30,
+        blank=True,
+        default="",
+        verbose_name="Telefon",
+    )
+    customer_notes = models.CharField(
+        max_length=500,
+        blank=True,
+        default="",
+        verbose_name="Uwagi Klienta",
+    )
+    pickup_starts_at = models.TimeField(
+        verbose_name="Początek Przedziału Odbioru",
+    )
+    pickup_ends_at = models.TimeField(
+        verbose_name="Koniec Przedziału Odbioru",
+    )
+    total = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        verbose_name="Suma",
+    )
+    p24_session_id = models.CharField(
+        max_length=64,
+        unique=True,
+        default=generate_rzut_p24_session_id,
+        editable=False,
+        verbose_name="Identyfikator sesji P24",
+    )
+    data_processing_accepted_at = models.DateTimeField(
+        verbose_name="Akceptacja przetwarzania danych",
+    )
+    terms_accepted_at = models.DateTimeField(
+        verbose_name="Akceptacja regulaminu",
+    )
+    expires_at = models.DateTimeField(
+        verbose_name="Termin wygaśnięcia",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Rezerwacja"
+        verbose_name_plural = "Rezerwacje"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(
+                fields=["rzut", "customer_email", "status"],
+                name="reservation_customer_status",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.rzut}: {self.customer_email}"
+
+
+class ReservationItem(models.Model):
+    reservation = models.ForeignKey(
+        Reservation,
+        on_delete=models.CASCADE,
+        related_name="items",
+        verbose_name="Rezerwacja",
+    )
+    rzut_item = models.ForeignKey(
+        RzutItem,
+        on_delete=models.PROTECT,
+        related_name="reservation_items",
+        verbose_name="Pozycja Rzutu",
+    )
+    quantity = models.PositiveIntegerField(
+        validators=[MinValueValidator(1)],
+        verbose_name="Liczba sztuk",
+    )
+    unit_price = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        verbose_name="Cena jednostkowa",
+    )
+
+    class Meta:
+        verbose_name = "Wybrana Pozycja Rzutu"
+        verbose_name_plural = "Wybrane Pozycje Rzutu"
+        ordering = ["pk"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["reservation", "rzut_item"],
+                name="unique_item_per_reservation",
+            ),
+            models.CheckConstraint(
+                condition=Q(quantity__gte=1),
+                name="reservation_item_quantity_positive",
+            ),
+            models.CheckConstraint(
+                condition=Q(unit_price__gte=0),
+                name="reservation_item_price_nonnegative",
+            ),
+        ]
+
+    @property
+    def line_total(self):
+        return self.unit_price * self.quantity
 
 
 class Order(models.Model):

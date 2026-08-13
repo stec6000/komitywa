@@ -1,8 +1,10 @@
 import hashlib
 import json
 from decimal import Decimal
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+import requests
 from django.test import TestCase, override_settings
 
 from shop.models import Order, ProductCategory
@@ -90,7 +92,79 @@ class TestRegisterTransaction(TestCase):
         )
         self.assertEqual(call_args[1]["json"]["sessionId"], "order-1-abc")
         self.assertEqual(call_args[1]["json"]["amount"], 2999)
+        self.assertEqual(call_args[1]["timeout"], (3.05, 10))
         self.assertEqual(token, "test-token")
+
+
+@override_settings(
+    P24_MERCHANT_ID=12345,
+    P24_POS_ID=12345,
+    P24_CRC_KEY="testcrc",
+    P24_API_KEY="testapikey",
+    P24_SANDBOX=True,
+    P24_HTTP_TIMEOUT=(3.05, 10),
+)
+class TestRegisterRzutTransaction(TestCase):
+    def setUp(self):
+        self.reservation = SimpleNamespace(
+            p24_session_id="rzut-abc123",
+            total=Decimal("29.99"),
+            customer_email="jan@example.com",
+            rzut=SimpleNamespace(title="Rzut niedzielny"),
+        )
+
+    @patch("shop.payment.requests.post")
+    def test_sends_15_minute_rzut_payment_contract(self, mock_post):
+        from shop.payment import calculate_sign, register_rzut_transaction
+
+        response = MagicMock()
+        response.json.return_value = {"data": {"token": "rzut-token"}}
+        mock_post.return_value = response
+
+        token = register_rzut_transaction(
+            self.reservation,
+            "https://example.com/zamowienia/powrot/?session=rzut-abc123",
+            "https://example.com/zamowienia/webhook/p24/",
+        )
+
+        payload = mock_post.call_args.kwargs["json"]
+        self.assertEqual(token, "rzut-token")
+        self.assertEqual(payload["sessionId"], "rzut-abc123")
+        self.assertEqual(payload["amount"], 2999)
+        self.assertEqual(payload["timeLimit"], 15)
+        self.assertEqual(payload["email"], "jan@example.com")
+        self.assertEqual(
+            payload["urlReturn"],
+            "https://example.com/zamowienia/powrot/?session=rzut-abc123",
+        )
+        self.assertEqual(
+            payload["urlStatus"],
+            "https://example.com/zamowienia/webhook/p24/",
+        )
+        self.assertEqual(mock_post.call_args.kwargs["timeout"], (3.05, 10))
+        self.assertEqual(
+            payload["sign"],
+            calculate_sign({
+                "sessionId": "rzut-abc123",
+                "merchantId": 12345,
+                "amount": 2999,
+                "currency": "PLN",
+                "crc": "testcrc",
+            }),
+        )
+
+    @patch("shop.payment.requests.post", side_effect=requests.Timeout)
+    def test_timeout_is_not_retried_blindly(self, mock_post):
+        from shop.payment import register_rzut_transaction
+
+        with self.assertRaises(requests.Timeout):
+            register_rzut_transaction(
+                self.reservation,
+                "https://example.com/return/",
+                "https://example.com/status/",
+            )
+
+        mock_post.assert_called_once()
 
 
 @override_settings(
@@ -119,6 +193,7 @@ class TestVerifyTransaction(TestCase):
         self.assertIn(
             "/api/v1/transaction/verify", call_args[0][0]
         )
+        self.assertEqual(call_args[1]["timeout"], (3.05, 10))
         self.assertTrue(result)
 
 

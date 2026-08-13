@@ -153,6 +153,10 @@ class RzutCart:
         self.session[RZUT_CART_SESSION_KEY] = self.data
         self.session.modified = True
 
+    def clear(self):
+        self.session.pop(RZUT_CART_SESSION_KEY, None)
+        self.session.modified = True
+
     @staticmethod
     def _validate_quantity(quantity):
         if not isinstance(quantity, int) or isinstance(quantity, bool):

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Dane do Rezerwacji — Kuchenna Komitywa{% endblock %}
+{% block meta_description %}Dane do odbioru i płatności za Pozycje Rzutu.{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
+
+{% block content %}
+<section class="kk-section" aria-labelledby="rzut-checkout-title">
+    <div class="wrap">
+        <div class="section-head">
+            <div>
+                <div class="section-number">· dane odbioru i płatności</div>
+                <h1 id="rzut-checkout-title" class="section-title">Dane do Rezerwacji</h1>
+            </div>
+            <div class="section-meta">{{ rzut.title }}</div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <form method="post" class="kk-checkout-form">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                    <div class="kk-cart-warning" role="alert">{{ form.non_field_errors }}</div>
+                    {% endif %}
+                    {% for field in form %}
+                    <div class="{% if field.field.widget.input_type == 'checkbox' %}form-check{% else %}field{% endif %}">
+                        {% if field.field.widget.input_type == 'checkbox' %}
+                        {{ field }}
+                        <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }} *</label>
+                        {% else %}
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+                        {{ field }}
+                        {% endif %}
+                        {% if field.help_text %}<div class="form-text" id="{{ field.id_for_label }}_helptext">{{ field.help_text }}</div>{% endif %}
+                        {% for error in field.errors %}<div class="text-danger" role="alert">{{ error }}</div>{% endfor %}
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-accent w-100 kk-checkout-submit">zarezerwuj i przejdź do płatności →</button>
+                </form>
+            </div>
+
+            <div class="col-lg-4">
+                <aside class="kk-order-summary">
+                    <div class="featured-label kk-summary-label">Koszyk Rzutu</div>
+                    {% for line in lines %}
+                    <div class="summary-row">
+                        <span class="kk-summary-item-name">{{ line.item.product.title }} × {{ line.quantity }}</span>
+                        <span class="kk-summary-item-price">{{ line.line_total|floatformat:"2" }} zł</span>
+                    </div>
+                    {% endfor %}
+                    <hr>
+                    <div class="summary-row">
+                        <strong class="kk-summary-total-label">do zapłaty</strong>
+                        <span class="kk-price kk-summary-checkout-price">{{ total|floatformat:"2" }} zł</span>
+                    </div>
+                    <p class="kk-cart-notice"><strong>Pula zostanie zablokowana na 15 minut</strong> dopiero po poprawnym wysłaniu tego formularza.</p>
+                    <p><a href="{% url 'shop:rzut_cart' %}" class="kk-link-arrow">← wróć do Koszyka Rzutu</a></p>
+                </aside>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

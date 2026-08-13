@@ -2,27 +2,37 @@ import json
 import logging
 import uuid
 from decimal import Decimal
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .cart import Cart
 from .emails import send_ebook_delivery, send_order_confirmation
-from .forms import CheckoutForm
+from .forms import CheckoutForm, RzutCheckoutForm
 from .models import Order, Product, ProductCategory, RzutItem
 from .payment import (
     calculate_sign,
     get_payment_url,
+    register_rzut_transaction,
     register_transaction,
     verify_transaction,
 )
 from .rzut_cart import DifferentRzutError, InvalidQuantityError, RzutCart
+from .reservations import (
+    ReservationCheckoutData,
+    ReservationError,
+    ReservationLineRequest,
+    create_reservation,
+    fail_reservation,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +163,7 @@ def rzut_cart_add(request, rzut_item_id):
     except DifferentRzutError:
         messages.error(
             request,
-            "Koszyk Rzutu może zawierać Pozycje tylko jednego Rzutu.",
+            "Koszyk Rzutu może zawierać Pozycje Rzutu tylko jednego Rzutu.",
         )
     return redirect("shop:rzut_cart")
 
@@ -192,6 +202,110 @@ def rzut_cart_accept_prices(request):
             "Ceny ponownie się zmieniły. Sprawdź aktualną sumę.",
         )
     return redirect("shop:rzut_cart")
+
+
+def rzut_checkout(request):
+    cart = RzutCart(request)
+    snapshot = cart.snapshot()
+    if snapshot["removed_items"]:
+        messages.warning(
+            request,
+            "Koszyk Rzutu zmienił się. Sprawdź go przed podaniem danych.",
+        )
+        return redirect("shop:rzut_cart")
+    if not snapshot["lines"] or snapshot["rzut"] is None:
+        return redirect("shop:rzut_cart")
+    if snapshot["has_price_changes"]:
+        messages.error(
+            request,
+            "Cena co najmniej jednej Pozycji Rzutu zmieniła się. "
+            "Zaakceptuj aktualną sumę.",
+        )
+        return redirect("shop:rzut_cart")
+    if snapshot["has_availability_errors"]:
+        messages.error(
+            request,
+            "Wybrana liczba sztuk nie jest już dostępna. Popraw Koszyk Rzutu.",
+        )
+        return redirect("shop:rzut_cart")
+    form = RzutCheckoutForm(
+        snapshot["rzut"],
+        request.POST if request.method == "POST" else None,
+    )
+    if request.method == "POST" and form.is_valid():
+        slot = form.cleaned_data["pickup_slot"]
+        try:
+            reservation = create_reservation(
+                rzut_id=snapshot["rzut"].pk,
+                lines=[
+                    ReservationLineRequest(
+                        item_id=line["item"].pk,
+                        quantity=line["quantity"],
+                        expected_price=line["stored_price"],
+                    )
+                    for line in snapshot["lines"]
+                ],
+                checkout=ReservationCheckoutData(
+                    name=form.cleaned_data["name"],
+                    email=form.cleaned_data["email"],
+                    phone=form.cleaned_data["phone"],
+                    notes=form.cleaned_data["notes"],
+                    pickup_starts_at=slot.starts_at,
+                    pickup_ends_at=slot.ends_at,
+                ),
+            )
+        except ReservationError as exc:
+            messages.error(request, exc.user_message)
+            return redirect("shop:rzut_cart")
+
+        url_return = request.build_absolute_uri(
+            f"{reverse('shop:rzut_p24_return')}?"
+            + urlencode({"session": reservation.p24_session_id})
+        )
+        url_status = request.build_absolute_uri(
+            reverse("shop:rzut_p24_webhook")
+        )
+        try:
+            token = register_rzut_transaction(
+                reservation,
+                url_return,
+                url_status,
+            )
+        except Exception as exc:
+            logger.error(
+                "P24 registration failed for Reservation %d: %s",
+                reservation.pk,
+                exc,
+            )
+            fail_reservation(reservation)
+            messages.error(
+                request,
+                "Nie udało się rozpocząć płatności. Pula została "
+                "zwolniona, a Koszyk Rzutu zachowany. Spróbuj ponownie.",
+            )
+            return redirect("shop:rzut_cart")
+
+        cart.clear()
+        return redirect(get_payment_url(token))
+    return render(
+        request,
+        "shop/rzut_checkout.html",
+        {"form": form, **snapshot, "hide_newsletter": True},
+    )
+
+
+def rzut_p24_return(request):
+    return render(
+        request,
+        "shop/rzut_p24_return.html",
+        {"hide_newsletter": True},
+    )
+
+
+@csrf_exempt
+@require_POST
+def rzut_p24_webhook(request):
+    return JsonResponse({"error": "Not implemented"}, status=501)
 
 
 def checkout(request):

@@ -89,7 +89,7 @@ class TestRzutCartIsolation(RzutCartHttpTestCase):
 
         self.assertContains(
             response,
-            "Koszyk Rzutu może zawierać Pozycje tylko jednego Rzutu.",
+            "Koszyk Rzutu może zawierać Pozycje Rzutu tylko jednego Rzutu.",
         )
         cart = self.client.session["rzut_cart"]
         self.assertEqual(cart["rzut_id"], first_rzut.pk)

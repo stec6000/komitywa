@@ -220,6 +220,7 @@ P24_POS_ID = env.int("P24_POS_ID", default=0)
 P24_CRC_KEY = env("P24_CRC_KEY", default="")
 P24_API_KEY = env("P24_API_KEY", default="")
 P24_SANDBOX = env.bool("P24_SANDBOX", default=True)
+P24_HTTP_TIMEOUT = (3.05, 10)
 
 # Email
 EMAIL_BACKEND = env(

@@ -69,6 +69,9 @@
                 {% if has_availability_errors %}
                 <p class="kk-cart-warning">Popraw ilość, zanim przejdziesz dalej.</p>
                 {% endif %}
+                {% if not has_price_changes and not has_availability_errors %}
+                <a href="{% url 'shop:rzut_checkout' %}" class="btn btn-accent w-100">przejdź do danych i płatności →</a>
+                {% endif %}
                 <p class="kk-summary-back"><a href="{% url 'orders' %}" class="kk-link-arrow">← wróć do menu</a></p>
             </aside>
         </div>
