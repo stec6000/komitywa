@@ -63,8 +63,8 @@ class Cart:
 
     def __iter__(self):
         product_ids = self.cart.keys()
-        products = Product.objects.filter(
-            id__in=product_ids, is_active=True
+        products = Product.objects.available_in_shop().filter(
+            id__in=product_ids
         )
         products_map = {str(p.id): p for p in products}
 

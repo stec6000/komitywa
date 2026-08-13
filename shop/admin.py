@@ -1,7 +1,8 @@
+from django import forms
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Order, OrderEdition, Product, ProductCategory
+from .models import Order, OrderEdition, Product, ProductCategory, RzutItem
 
 
 @admin.register(ProductCategory)
@@ -11,19 +12,60 @@ class ProductCategoryAdmin(admin.ModelAdmin):
     search_fields = ["name"]
 
 
-class ProductInline(admin.TabularInline):
-    model = Product
+class RzutItemInlineForm(forms.ModelForm):
+    class Meta:
+        model = RzutItem
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["price"].required = False
+        self.fields["price"].help_text = (
+            "Pozostaw puste, aby użyć domyślnej ceny Produktu."
+        )
+        self.fields["portion"].required = False
+        self.fields["portion"].help_text = (
+            "Pozostaw puste, aby użyć domyślnej Porcji Produktu."
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("DELETE"):
+            return cleaned_data
+
+        product = cleaned_data.get("product")
+        if product is None:
+            return cleaned_data
+
+        if cleaned_data.get("price") is None:
+            cleaned_data["price"] = product.price
+        if not cleaned_data.get("portion"):
+            cleaned_data["portion"] = product.default_portion
+        if not cleaned_data["portion"]:
+            self.add_error(
+                "portion",
+                "Podaj Porcję albo uzupełnij domyślną Porcję Produktu.",
+            )
+
+        return cleaned_data
+
+
+class RzutItemInline(admin.TabularInline):
+    model = RzutItem
+    form = RzutItemInlineForm
     extra = 0
     fields = [
         "sort_order",
-        "title",
-        "category",
-        "type",
+        "product",
         "price",
+        "portion",
+        "pool",
+        "per_customer_limit",
         "is_active",
+        "production_note",
     ]
-    ordering = ["sort_order", "title"]
-    autocomplete_fields = ["category"]
+    ordering = ["sort_order", "product__title"]
+    autocomplete_fields = ["product"]
     show_change_link = True
 
 
@@ -35,14 +77,14 @@ class OrderEditionAdmin(admin.ModelAdmin):
         "opens_at",
         "closes_at",
         "show_in_archive",
-        "product_count",
+        "item_count",
         "updated_at",
     ]
     list_filter = ["status", "show_in_archive"]
     search_fields = ["title", "description", "pickup_details"]
     prepopulated_fields = {"slug": ("title",)}
     readonly_fields = ["image_preview", "created_at", "updated_at"]
-    inlines = [ProductInline]
+    inlines = [RzutItemInline]
     fieldsets = [
         (
             None,
@@ -93,27 +135,37 @@ class OrderEditionAdmin(admin.ModelAdmin):
             )
         return "---"
 
-    @admin.display(description="Produkty")
-    def product_count(self, obj):
-        return obj.products.count()
+    @admin.display(description="Pozycje Rzutu")
+    def item_count(self, obj):
+        return obj.items.count()
 
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = [
         "title",
-        "edition",
         "category",
         "type",
         "price",
+        "default_portion",
         "sort_order",
-        "is_active",
+        "is_available_in_shop",
+        "is_archived",
         "created_at",
         "image_preview",
     ]
-    list_filter = ["edition", "category", "type", "is_active"]
-    list_editable = ["sort_order", "is_active"]
-    list_select_related = ["edition", "category"]
+    list_filter = [
+        "category",
+        "type",
+        "is_available_in_shop",
+        "is_archived",
+    ]
+    list_editable = [
+        "sort_order",
+        "is_available_in_shop",
+        "is_archived",
+    ]
+    list_select_related = ["category"]
     search_fields = [
         "title",
         "description",
@@ -121,8 +173,47 @@ class ProductAdmin(admin.ModelAdmin):
         "allergens",
     ]
     prepopulated_fields = {"slug": ("title",)}
-    autocomplete_fields = ["edition", "category"]
+    autocomplete_fields = ["category"]
     readonly_fields = ["image_preview", "created_at", "updated_at"]
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": (
+                    "title",
+                    "slug",
+                    "category",
+                    "type",
+                    "description",
+                    "full_description",
+                )
+            },
+        ),
+        (
+            "Oferta domyślna",
+            {"fields": ("price", "default_portion")},
+        ),
+        (
+            "Informacje o produkcie",
+            {"fields": ("ingredients", "allergens", "image", "image_preview")},
+        ),
+        (
+            "Pliki cyfrowe",
+            {"fields": ("ebook_file",)},
+        ),
+        (
+            "Publikacja",
+            {
+                "fields": (
+                    "is_available_in_shop",
+                    "is_archived",
+                    "sort_order",
+                    "created_at",
+                    "updated_at",
+                )
+            },
+        ),
+    ]
 
     def image_preview(self, obj):
         if obj.image:

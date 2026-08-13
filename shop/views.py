@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 def product_list(request):
-    products = Product.objects.filter(is_active=True).select_related("category")
+    products = Product.objects.available_in_shop().select_related("category")
 
     active_category = request.GET.get("kategoria", "")
     if active_category:
@@ -45,7 +45,10 @@ def product_list(request):
 
 
 def product_detail(request, slug):
-    product = get_object_or_404(Product, slug=slug, is_active=True)
+    product = get_object_or_404(
+        Product.objects.available_in_shop(),
+        slug=slug,
+    )
     return render(request, "shop/detail.html", {
         "product": product,
     })
@@ -53,7 +56,10 @@ def product_detail(request, slug):
 
 @require_POST
 def cart_add(request, product_id):
-    product = get_object_or_404(Product, id=product_id, is_active=True)
+    product = get_object_or_404(
+        Product.objects.available_in_shop(),
+        id=product_id,
+    )
     cart = Cart(request)
     cart.add(product)
     return redirect("shop:cart")
@@ -64,7 +70,7 @@ def cart_view(request):
 
     # Fetch active products in cart
     product_ids = [int(k) for k in cart.cart.keys()]
-    products = Product.objects.filter(id__in=product_ids, is_active=True)
+    products = Product.objects.available_in_shop().filter(id__in=product_ids)
     products_map = {str(p.id): p for p in products}
 
     # Remove stale cart entries (Pitfall 6)
@@ -173,7 +179,7 @@ def checkout(request):
 
     # Build cart_items for order summary sidebar
     product_ids = [int(k) for k in cart.cart.keys()]
-    products = Product.objects.filter(id__in=product_ids, is_active=True)
+    products = Product.objects.available_in_shop().filter(id__in=product_ids)
     products_map = {str(p.id): p for p in products}
 
     cart_items = []

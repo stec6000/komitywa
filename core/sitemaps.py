@@ -66,7 +66,7 @@ class ProductSitemap(Sitemap):
     priority = 0.8
 
     def items(self):
-        return Product.objects.filter(is_active=True)
+        return Product.objects.available_in_shop()
 
     def location(self, item):
         return reverse("shop:detail", kwargs={"slug": item.slug})

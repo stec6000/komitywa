@@ -64,12 +64,12 @@ class SitemapFilteringTests(TestCase):
             price="25.00",
             is_active=True,
         )
-        self.inactive_product = Product.objects.create(
-            title="Nieaktywny produkt",
-            slug="nieaktywny-produkt",
+        self.unavailable_product = Product.objects.create(
+            title="Niedostępny produkt",
+            slug="niedostepny-produkt",
             description="Opis produktu",
             price="25.00",
-            is_active=False,
+            is_available_in_shop=False,
         )
 
     def test_recipe_sitemap_contains_only_published_recipes(self):
@@ -97,12 +97,12 @@ class SitemapFilteringTests(TestCase):
         )
         self.assertEqual(sitemap.lastmod(self.published_post), self.published_post.updated_at)
 
-    def test_product_sitemap_contains_only_active_products(self):
+    def test_product_sitemap_contains_only_shop_products(self):
         sitemap = ProductSitemap()
         items = list(sitemap.items())
 
         self.assertIn(self.active_product, items)
-        self.assertNotIn(self.inactive_product, items)
+        self.assertNotIn(self.unavailable_product, items)
         self.assertEqual(
             sitemap.location(self.active_product),
             reverse("shop:detail", kwargs={"slug": self.active_product.slug}),
