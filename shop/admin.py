@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib import admin
+from django.forms.models import BaseInlineFormSet
 from django.utils.html import format_html
 
 from .models import Order, OrderEdition, Product, ProductCategory, RzutItem
@@ -50,9 +51,40 @@ class RzutItemInlineForm(forms.ModelForm):
         return cleaned_data
 
 
+class RzutItemInlineFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        if any(self.errors):
+            return
+        if self.instance.status != OrderEdition.Status.PUBLISHED:
+            return
+
+        active_items = []
+        for form in self.forms:
+            cleaned_data = form.cleaned_data
+            if (
+                not cleaned_data
+                or cleaned_data.get("DELETE")
+                or not cleaned_data.get("is_active")
+            ):
+                continue
+            item = form.instance
+            if item.product.type == "physical":
+                active_items.append(item)
+
+        errors = []
+        if not active_items:
+            errors.append("Dodaj co najmniej jedną aktywną Pozycję Rzutu.")
+        for item in active_items:
+            errors.extend(item.publication_errors())
+        if errors:
+            raise forms.ValidationError(errors)
+
+
 class RzutItemInline(admin.TabularInline):
     model = RzutItem
     form = RzutItemInlineForm
+    formset = RzutItemInlineFormSet
     extra = 0
     fields = [
         "sort_order",
@@ -74,6 +106,7 @@ class OrderEditionAdmin(admin.ModelAdmin):
     list_display = [
         "title",
         "status",
+        "phase_display",
         "opens_at",
         "closes_at",
         "show_in_archive",
@@ -81,7 +114,13 @@ class OrderEditionAdmin(admin.ModelAdmin):
         "updated_at",
     ]
     list_filter = ["status", "show_in_archive"]
-    search_fields = ["title", "description", "pickup_details"]
+    search_fields = [
+        "title",
+        "description",
+        "pickup_place_name",
+        "pickup_address",
+        "pickup_instructions",
+    ]
     prepopulated_fields = {"slug": ("title",)}
     readonly_fields = ["image_preview", "created_at", "updated_at"]
     inlines = [RzutItemInline]
@@ -107,7 +146,12 @@ class OrderEditionAdmin(admin.ModelAdmin):
                 "fields": (
                     "opens_at",
                     "closes_at",
-                    "pickup_details",
+                    "pickup_date",
+                    "pickup_place_name",
+                    "pickup_address",
+                    "pickup_starts_at",
+                    "pickup_ends_at",
+                    "pickup_instructions",
                     "payment_details",
                 )
             },
@@ -116,6 +160,7 @@ class OrderEditionAdmin(admin.ModelAdmin):
             "Publikacja",
             {
                 "fields": (
+                    "show_upcoming_menu",
                     "show_in_archive",
                     "created_at",
                     "updated_at",
@@ -138,6 +183,11 @@ class OrderEditionAdmin(admin.ModelAdmin):
     @admin.display(description="Pozycje Rzutu")
     def item_count(self, obj):
         return obj.items.count()
+
+    @admin.display(description="Faza")
+    def phase_display(self, obj):
+        phase = obj.phase_at()
+        return OrderEdition.Phase(phase).label if phase else "—"
 
 
 @admin.register(Product)

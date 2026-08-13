@@ -3,12 +3,14 @@ import logging
 from django.conf import settings
 from django.contrib import messages
 from django.core.mail import send_mail
-from django.shortcuts import redirect, render
+from django.db.models import Prefetch
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from content.models import BlogPost
 from recipes.models import Recipe
-from shop.models import OrderEdition, Product
+from shop.models import OrderEdition, RzutItem
 
 from .forms import CafeInquiryForm, WorkshopInterestForm
 from .models import CafeLocation
@@ -103,43 +105,56 @@ def home(request):
     featured_recipe = latest_recipes[0] if latest_recipes else None
     feed_recipes = latest_recipes[1:4] if featured_recipe else latest_recipes[:3]
 
-    current_edition = OrderEdition.objects.current()
-    order_products = Product.objects.none()
-    if current_edition:
-        order_products = current_edition.products.filter(
-            is_active=True,
-            type="physical",
-        ).select_related("category").order_by("sort_order", "title")
+    current_rzut = OrderEdition.objects.current()
+    current_items = RzutItem.objects.none()
+    if current_rzut:
+        current_items = current_rzut.items.public_menu()
 
     return render(request, "pages/home.html", {
         "cafe_locations": CafeLocation.objects.filter(is_active=True),
-        "current_edition": current_edition,
+        "current_rzut": current_rzut,
+        "current_items": current_items,
         "feed_recipes": feed_recipes,
         "featured_recipe": featured_recipe,
         "kitchen_items": _kitchen_items(),
-        "order_products": order_products,
     })
 
 
 def orders(request):
-    current_edition = OrderEdition.objects.current()
-    order_products = Product.objects.none()
-    if current_edition:
-        order_products = current_edition.products.filter(
-            is_active=True,
-            type="physical",
-        ).select_related("category").order_by("sort_order", "title")
+    current_rzut = OrderEdition.objects.current()
+    upcoming_rzut = OrderEdition.objects.next_upcoming()
+    current_items = RzutItem.objects.none()
+    upcoming_items = RzutItem.objects.none()
+    if current_rzut:
+        current_items = current_rzut.items.public_menu()
+    if upcoming_rzut and upcoming_rzut.show_upcoming_menu:
+        upcoming_items = upcoming_rzut.items.public_menu()
 
-    archived_editions = OrderEdition.objects.filter(
-        status=OrderEdition.Status.CLOSED,
-        show_in_archive=True,
-    ).order_by("-closes_at", "-created_at")
+    public_items = RzutItem.objects.public_menu()
+    archived_rzuty = OrderEdition.objects.archived().prefetch_related(
+        Prefetch("items", queryset=public_items, to_attr="public_items")
+    )
 
     return render(request, "pages/orders.html", {
-        "archived_editions": archived_editions,
-        "current_edition": current_edition,
-        "order_products": order_products,
+        "archived_rzuty": archived_rzuty,
+        "current_rzut": current_rzut,
+        "current_items": current_items,
+        "upcoming_rzut": upcoming_rzut,
+        "upcoming_items": upcoming_items,
     })
+
+
+def rzut_item_detail(request, rzut_slug, product_slug):
+    item = get_object_or_404(
+        RzutItem.objects.select_related("rzut", "product"),
+        rzut__slug=rzut_slug,
+        product__slug=product_slug,
+        is_active=True,
+        product__type="physical",
+    )
+    if not item.rzut.is_public_at():
+        raise Http404
+    return render(request, "pages/rzut_item_detail.html", {"item": item})
 
 
 def for_cafes(request):

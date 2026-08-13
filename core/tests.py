@@ -12,7 +12,7 @@ from django.utils import timezone
 from core.forms import CafeInquiryForm, WorkshopInterestForm
 from core.models import CafeInquiry, CafeLocation, WorkshopInterest
 from recipes.models import Category, Recipe
-from shop.models import OrderEdition, Product, ProductCategory
+from shop.models import OrderEdition, Product, ProductCategory, RzutItem
 
 
 class TestEnvironmentConfig(TestCase):
@@ -162,69 +162,90 @@ class TestOrdersView(TestCase):
             slug="wypieki-zamowienia",
         )
 
-    def test_empty_state_is_explicit_when_no_edition_is_open(self):
+    def test_empty_state_is_explicit_when_no_rzut_is_open(self):
         response = self.client.get(reverse("orders"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertIsNone(response.context["current_edition"])
+        self.assertIsNone(response.context["current_rzut"])
         self.assertContains(response, "W pracowni szykuje się kolejny rzut")
         self.assertContains(response, "Obecnie nie prowadzimy zapisów")
 
-    def test_open_edition_shows_only_active_physical_products(self):
+    def test_open_rzut_shows_only_active_physical_items(self):
         now = timezone.now()
-        edition = OrderEdition.objects.create(
+        rzut = OrderEdition.objects.create(
             title="Sierpniowy stół",
             description="Mała sierpniowa seria.",
-            status=OrderEdition.Status.OPEN,
+            status=OrderEdition.Status.PUBLISHED,
             opens_at=now - timedelta(hours=1),
             closes_at=now + timedelta(days=2),
-            pickup_details="Odbiór w sobotę.",
+            pickup_date=timezone.localdate() + timedelta(days=3),
+            pickup_place_name="Kuchenna Komitywa",
+            pickup_address="ul. Bukowa 14, Białystok",
+            pickup_starts_at="10:00",
+            pickup_ends_at="13:00",
+            pickup_instructions="Odbiór w sobotę.",
             payment_details="Płatność online.",
         )
-        visible = Product.objects.create(
+        visible_product = Product.objects.create(
             title="Drożdżówka ze śliwką",
             slug="drozdzowka-ze-sliwka",
-            edition=edition,
             category=self.category,
             type="physical",
             description="Miękka drożdżówka z owocami.",
             ingredients="mąka, śliwki",
             allergens="gluten",
             price=Decimal("16.00"),
-            is_active=True,
         )
-        Product.objects.create(
+        visible = RzutItem.objects.create(
+            rzut=rzut,
+            product=visible_product,
+            price=Decimal("16.00"),
+            portion="1 sztuka",
+            pool=10,
+        )
+        inactive_product = Product.objects.create(
             title="Nieaktywny chleb",
             slug="nieaktywny-chleb",
-            edition=edition,
             category=self.category,
             type="physical",
             description="Nie powinien być widoczny.",
             price=Decimal("20.00"),
+        )
+        RzutItem.objects.create(
+            rzut=rzut,
+            product=inactive_product,
+            price=Decimal("20.00"),
+            portion="1 sztuka",
+            pool=10,
             is_active=False,
         )
-        Product.objects.create(
-            title="Ebook z tej edycji",
-            slug="ebook-z-tej-edycji",
-            edition=edition,
+        ebook = Product.objects.create(
+            title="Ebook z tego Rzutu",
+            slug="ebook-z-tego-rzutu",
             category=self.category,
             type="ebook",
             description="Produkt cyfrowy pozostaje w starym sklepie.",
             price=Decimal("29.00"),
-            is_active=True,
+        )
+        RzutItem.objects.create(
+            rzut=rzut,
+            product=ebook,
+            price=Decimal("29.00"),
+            portion="1 plik",
+            pool=10,
         )
 
         response = self.client.get(reverse("orders"))
 
-        self.assertEqual(response.context["current_edition"], edition)
-        self.assertEqual(list(response.context["order_products"]), [visible])
+        self.assertEqual(response.context["current_rzut"], rzut)
+        self.assertEqual(list(response.context["current_items"]), [visible])
         self.assertContains(response, "Sierpniowy stół")
         self.assertContains(response, "Drożdżówka ze śliwką")
         self.assertContains(response, "mąka, śliwki")
         self.assertContains(response, "gluten")
         self.assertContains(response, "Odbiór w sobotę")
         self.assertNotContains(response, "Nieaktywny chleb")
-        self.assertNotContains(response, "Ebook z tej edycji")
+        self.assertNotContains(response, "Ebook z tego Rzutu")
 
     def test_archive_shows_only_closed_editions_marked_for_archive(self):
         visible = OrderEdition.objects.create(
@@ -242,7 +263,7 @@ class TestOrdersView(TestCase):
 
         response = self.client.get(reverse("orders"))
 
-        self.assertEqual(list(response.context["archived_editions"]), [visible])
+        self.assertEqual(list(response.context["archived_rzuty"]), [visible])
         self.assertContains(response, "Wielkanocny stół")
         self.assertNotContains(response, "Wewnętrzna próba")
 
@@ -375,7 +396,7 @@ class TestHomeOfferSections(TestCase):
 
     def test_closed_orders_state_does_not_invent_an_offer(self):
         response = self.client.get("/")
-        self.assertContains(response, "W kuchni właśnie szykuje się kolejna edycja")
+        self.assertContains(response, "W kuchni właśnie szykuje się kolejny Rzut")
         self.assertContains(response, "Listy z Komitywy")
 
 

@@ -6,6 +6,11 @@ from . import views
 urlpatterns = [
     path("", views.home, name="home"),
     path("zamowienia/", views.orders, name="orders"),
+    path(
+        "zamowienia/<slug:rzut_slug>/<slug:product_slug>/",
+        views.rzut_item_detail,
+        name="rzut_item_detail",
+    ),
     path("dla-kawiarni/", views.for_cafes, name="for_cafes"),
     path("wspolne-gotowanie/", views.workshops, name="workshops"),
     path("o-nas/", views.about, name="about"),

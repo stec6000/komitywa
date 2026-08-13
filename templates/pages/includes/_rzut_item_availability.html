@@ -1,0 +1,7 @@
+{% if item.is_sold_out %}
+<p><strong>Wyprzedane</strong></p>
+{% elif item.show_exact_availability %}
+<p>{{ item.availability_message }}</p>
+{% else %}
+<p>Dostępny</p>
+{% endif %}

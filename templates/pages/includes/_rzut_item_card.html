@@ -1,0 +1,35 @@
+{% load static %}
+<article class="kk-order-product">
+    {% if item.product.image %}
+    <a href="{% url 'rzut_item_detail' rzut_slug=rzut.slug product_slug=item.product.slug %}" class="kk-order-product__image" aria-label="Zobacz szczegóły produktu {{ item.product.title }}">
+        <img src="{{ item.product.image.url }}" alt="{{ item.product.title }}" data-fallback="{% static 'img/serek-ziola.jpg' %}" loading="lazy" decoding="async">
+    </a>
+    {% else %}
+    <a href="{% url 'rzut_item_detail' rzut_slug=rzut.slug product_slug=item.product.slug %}" class="kk-order-product__image kk-order-product__image--sample" aria-label="Zobacz szczegóły produktu {{ item.product.title }}">
+        <img src="{% static 'img/serek-ziola.jpg' %}" alt="Przykładowe zdjęcie produktu {{ item.product.title }}" loading="lazy" decoding="async">
+        <span>zdjęcie przykładowe</span>
+    </a>
+    {% endif %}
+    <div class="kk-order-product__body">
+        <div class="kk-order-product__heading">
+            <h3><a href="{% url 'rzut_item_detail' rzut_slug=rzut.slug product_slug=item.product.slug %}">{{ item.product.title }}</a></h3>
+            <p class="kk-order-product__price">{{ item.price|floatformat:"2" }} zł</p>
+        </div>
+        <p>{{ item.product.description }}</p>
+        <p><strong>Porcja:</strong> {{ item.portion }}</p>
+        {% include "pages/includes/_rzut_item_availability.html" %}
+        <dl class="kk-product-details">
+            <div>
+                <dt>Skład</dt>
+                <dd>{{ item.product.ingredients|linebreaksbr }}</dd>
+            </div>
+            <div>
+                <dt>Alergeny</dt>
+                <dd>{{ item.product.allergens|linebreaksbr }}</dd>
+            </div>
+        </dl>
+        <div class="kk-order-product__action">
+            <a href="{% url 'rzut_item_detail' rzut_slug=rzut.slug product_slug=item.product.slug %}" class="kk-link-arrow">Pełny opis →</a>
+        </div>
+    </div>
+</article>

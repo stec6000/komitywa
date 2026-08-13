@@ -12,7 +12,7 @@
         </button>
 
         <div class="nav-links" id="mainNav">
-            <a class="{% if request.resolver_match.url_name == 'orders' or request.resolver_match.app_name == 'shop' %}active{% endif %}" href="{% url 'orders' %}"{% if request.resolver_match.url_name == 'orders' or request.resolver_match.app_name == 'shop' %} aria-current="page"{% endif %}>Zamówienia</a>
+            <a class="{% if request.resolver_match.url_name == 'orders' or request.resolver_match.url_name == 'rzut_item_detail' or request.resolver_match.app_name == 'shop' %}active{% endif %}" href="{% url 'orders' %}"{% if request.resolver_match.url_name == 'orders' or request.resolver_match.url_name == 'rzut_item_detail' or request.resolver_match.app_name == 'shop' %} aria-current="page"{% endif %}>Zamówienia</a>
             <a class="{% if request.resolver_match.url_name == 'for_cafes' %}active{% endif %}" href="{% url 'for_cafes' %}"{% if request.resolver_match.url_name == 'for_cafes' %} aria-current="page"{% endif %}>Dla kawiarni</a>
             <a class="{% if request.resolver_match.app_name == 'recipes' %}active{% endif %}" href="{% url 'recipes:list' %}"{% if request.resolver_match.app_name == 'recipes' %} aria-current="page"{% endif %}>Przepisy</a>
             <a class="{% if request.resolver_match.app_name == 'content' %}active{% endif %}" href="{% url 'content:blog_list' %}"{% if request.resolver_match.app_name == 'content' %} aria-current="page"{% endif %}>Z kuchni</a>

@@ -17,7 +17,7 @@
             </p>
             <p class="kk-hand-note">Sezonowo, rzemieślniczo i do wspólnego stołu.</p>
             <div class="kk-action-row">
-                {% if current_edition and order_products %}
+                {% if current_rzut and current_items %}
                 <a class="btn btn-accent" href="{% url 'orders' %}">Zobacz aktualne zamówienia</a>
                 {% else %}
                 <a class="btn btn-accent" href="#listy-z-komitywy">Dowiedz się o kolejnym rzucie — zapisz się na Listy z Komitywy</a>
@@ -54,7 +54,7 @@
             <article class="kk-service-ledger__item">
                 <p class="kk-service-ledger__note">dla Ciebie</p>
                 <h3>Limitowane zamówienia</h3>
-                <p>Krótkie edycje wypieków lub całego menu z odbiorem w konkretnym terminie.</p>
+                <p>Krótkie Rzuty wypieków lub całego menu z odbiorem w konkretnym terminie.</p>
                 <a href="{% url 'orders' %}" class="kk-link-arrow">Sprawdź zamówienia →</a>
             </article>
             <article class="kk-service-ledger__item">
@@ -82,11 +82,11 @@
             </div>
         </header>
 
-        {% if current_edition and order_products %}
+        {% if current_rzut and current_items %}
         <article class="kk-current-edition">
-            {% if current_edition.image %}
+            {% if current_rzut.image %}
             <div class="kk-current-edition__image">
-                <img src="{{ current_edition.image.url }}" alt="{{ current_edition.image_alt|default:current_edition.title }}" data-fallback="{% static 'img/hero.jpg' %}" loading="lazy" decoding="async">
+                <img src="{{ current_rzut.image.url }}" alt="{{ current_rzut.image_alt|default:current_rzut.title }}" data-fallback="{% static 'img/hero.jpg' %}" loading="lazy" decoding="async">
             </div>
             {% else %}
             <div class="kk-current-edition__image kk-current-edition__image--sample">
@@ -96,10 +96,10 @@
             {% endif %}
             <div class="kk-current-edition__copy">
                 <p class="kk-hand-note">zamówienia otwarte</p>
-                <h3>{{ current_edition.title }}</h3>
-                <p>{{ current_edition.description }}</p>
-                {% if current_edition.closes_at %}
-                <p class="kk-order-deadline">Zamówienia zbieramy do {{ current_edition.closes_at|date:"j E, H:i" }}.</p>
+                <h3>{{ current_rzut.title }}</h3>
+                <p>{{ current_rzut.description }}</p>
+                {% if current_rzut.closes_at %}
+                <p class="kk-order-deadline">Zamówienia zbieramy do {{ current_rzut.closes_at|date:"j E, H:i" }}.</p>
                 {% endif %}
                 <a class="btn btn-accent" href="{% url 'orders' %}">Zobacz menu i zamów</a>
             </div>
@@ -112,7 +112,7 @@
             </div>
             <div>
                 <h3>Obecnie nie prowadzimy zapisów na żaden rzut.</h3>
-                <p>W kuchni właśnie szykuje się kolejna edycja. Zapisz się na Listy z Komitywy, aby dowiedzieć się o niej jako pierwszy.</p>
+                <p>W kuchni właśnie szykuje się kolejny Rzut. Zapisz się na Listy z Komitywy, aby dowiedzieć się o nim jako pierwszy.</p>
             </div>
             <a class="btn btn-ghost" href="#listy-z-komitywy">Zapisz się na listy</a>
         </div>

@@ -30,22 +30,24 @@ class TestOrderEdition(TestCase):
         self.assertEqual(first.slug, "swiateczna-edycja")
         self.assertEqual(second.slug, "swiateczna-edycja-2")
 
-    def test_current_returns_open_edition_inside_time_window(self):
+    def test_current_returns_published_rzut_inside_time_window(self):
         now = timezone.now()
         current = OrderEdition.objects.create(
             title="Sierpniowe wypieki",
-            status=OrderEdition.Status.OPEN,
+            status=OrderEdition.Status.PUBLISHED,
             opens_at=now - timedelta(days=1),
             closes_at=now + timedelta(days=1),
         )
         OrderEdition.objects.create(
             title="Jesienne wypieki",
-            status=OrderEdition.Status.OPEN,
+            status=OrderEdition.Status.PUBLISHED,
             opens_at=now + timedelta(days=1),
+            closes_at=now + timedelta(days=2),
         )
         OrderEdition.objects.create(
             title="Poprzednia edycja",
-            status=OrderEdition.Status.OPEN,
+            status=OrderEdition.Status.PUBLISHED,
+            opens_at=now - timedelta(days=2),
             closes_at=now,
         )
         OrderEdition.objects.create(
@@ -55,13 +57,13 @@ class TestOrderEdition(TestCase):
 
         self.assertEqual(OrderEdition.objects.current(at=now), current)
 
-    def test_current_accepts_open_edition_without_dates(self):
-        edition = OrderEdition.objects.create(
-            title="Edycja bez dat",
-            status=OrderEdition.Status.OPEN,
+    def test_published_rzut_without_dates_is_not_current(self):
+        OrderEdition.objects.create(
+            title="Rzut bez dat",
+            status=OrderEdition.Status.PUBLISHED,
         )
 
-        self.assertEqual(OrderEdition.objects.current(), edition)
+        self.assertIsNone(OrderEdition.objects.current())
 
     def test_current_returns_none_when_orders_are_closed(self):
         OrderEdition.objects.create(
