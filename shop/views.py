@@ -4,22 +4,25 @@ import uuid
 from decimal import Decimal
 
 from django.conf import settings
+from django.contrib import messages
 from django.core.paginator import Paginator
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .cart import Cart
 from .emails import send_ebook_delivery, send_order_confirmation
 from .forms import CheckoutForm
-from .models import Order, Product, ProductCategory
+from .models import Order, Product, ProductCategory, RzutItem
 from .payment import (
     calculate_sign,
     get_payment_url,
     register_transaction,
     verify_transaction,
 )
+from .rzut_cart import DifferentRzutError, InvalidQuantityError, RzutCart
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +121,77 @@ def cart_remove(request, product_id):
     cart = Cart(request)
     cart.remove(product_id)
     return redirect("shop:cart")
+
+
+def rzut_cart_view(request):
+    cart = RzutCart(request)
+    snapshot = cart.snapshot()
+    for item_label in snapshot["removed_items"]:
+        messages.warning(
+            request,
+            f"{item_label} nie jest już dostępna i została usunięta "
+            "z Koszyka Rzutu.",
+        )
+    return render(
+        request,
+        "shop/rzut_cart.html",
+        {"cart": cart, **snapshot, "hide_newsletter": True},
+    )
+
+
+@require_POST
+def rzut_cart_add(request, rzut_item_id):
+    now = timezone.now()
+    item = get_object_or_404(
+        RzutItem.objects.select_related("rzut", "product"),
+        pk=rzut_item_id,
+    )
+    if not item.can_add_to_cart_at(now):
+        raise Http404
+    try:
+        RzutCart(request).add(item)
+    except DifferentRzutError:
+        messages.error(
+            request,
+            "Koszyk Rzutu może zawierać Pozycje tylko jednego Rzutu.",
+        )
+    return redirect("shop:rzut_cart")
+
+
+@require_POST
+def rzut_cart_update(request, rzut_item_id):
+    try:
+        quantity = int(request.POST.get("quantity", ""))
+        RzutCart(request).update(rzut_item_id, quantity)
+    except (InvalidQuantityError, ValueError):
+        messages.error(
+            request,
+            "Podaj dodatnią, całkowitą liczbę sztuk.",
+        )
+    return redirect("shop:rzut_cart")
+
+
+@require_POST
+def rzut_cart_remove(request, rzut_item_id):
+    RzutCart(request).remove(rzut_item_id)
+    return redirect("shop:rzut_cart")
+
+
+@require_POST
+def rzut_cart_accept_prices(request):
+    expected_prices = {
+        key.removeprefix("price_"): value
+        for key, value in request.POST.items()
+        if key.startswith("price_")
+    }
+    if RzutCart(request).accept_current_prices(expected_prices):
+        messages.success(request, "Nowe ceny zostały zaakceptowane.")
+    else:
+        messages.error(
+            request,
+            "Ceny ponownie się zmieniły. Sprawdź aktualną sumę.",
+        )
+    return redirect("shop:rzut_cart")
 
 
 def checkout(request):

@@ -125,7 +125,8 @@ class TestOpenRzutPage(RzutPageTestCase):
         self.assertContains(response, "Zostały 3 sztuki")
         self.assertContains(response, f'href="{detail_url}"')
         self.assertContains(response, "ul. Bukowa 14, Białystok")
-        self.assertNotContains(response, reverse("shop:cart_add", args=[item.product.pk]))
+        shop_add_url = reverse("shop:cart_add", args=[item.product.pk])
+        self.assertNotContains(response, f'action="{shop_add_url}"')
 
     def test_home_recognizes_open_rzut_built_from_rzut_items(self):
         now = timezone.now()

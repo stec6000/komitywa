@@ -599,6 +599,16 @@ class RzutItem(models.Model):
     def available_quantity(self):
         return self.pool - self.allocated_quantity
 
+    def is_offered_at(self, at=None):
+        return (
+            self.is_active
+            and self.product.type == "physical"
+            and self.rzut.phase_at(at) == OrderEdition.Phase.OPEN
+        )
+
+    def can_add_to_cart_at(self, at=None):
+        return self.is_offered_at(at) and not self.is_sold_out
+
     @property
     def is_sold_out(self):
         return self.available_quantity <= 0

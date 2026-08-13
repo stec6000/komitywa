@@ -1535,6 +1535,7 @@ section { padding: 70px 0; position: relative; z-index: 2; }
     font-family: var(--font-hand);
     font-size: 30px;
 }
+.kk-cart-item__info h2,
 .kk-cart-item__info h3 {
     font-family: var(--font-display);
     font-size: 22px;
@@ -1542,6 +1543,7 @@ section { padding: 70px 0; position: relative; z-index: 2; }
     margin-bottom: 4px;
 }
 .kk-cart-item__info a { text-decoration: none; }
+.kk-cart-item__info a:hover h2,
 .kk-cart-item__info a:hover h3 { color: var(--accent-2); }
 .kk-delivery-note {
     font-family: var(--font-hand);
@@ -1619,6 +1621,24 @@ section { padding: 70px 0; position: relative; z-index: 2; }
     justify-content: space-between;
     align-items: baseline;
     margin-bottom: 8px;
+}
+.kk-cart-notice {
+    margin: 0 0 20px;
+    padding: 16px 18px;
+    border-block: 1px solid var(--rule);
+    background: var(--paper-2);
+}
+.kk-cart-warning {
+    margin: 10px 0 0;
+    color: var(--accent-2);
+    font-weight: 600;
+}
+.kk-rzut-cart-update {
+    min-height: 44px;
+    padding: 8px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
 }
 
 /* --------- Detail / sidebar (recipe + product) --------- */

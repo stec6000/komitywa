@@ -57,6 +57,7 @@
                 <p class="kk-hand-note">zamówienia są otwarte</p>
                 <h2 id="edition-title">{{ current_rzut.title }}</h2>
                 <div class="kk-prose">{{ current_rzut.description|linebreaks }}</div>
+                <p><a href="{% url 'shop:rzut_cart' %}" class="btn btn-accent">Koszyk Rzutu ({{ rzut_cart_count }})</a></p>
             </div>
         </div>
 
@@ -77,7 +78,7 @@
 
         <div class="kk-order-products" aria-label="Menu aktualnego Rzutu">
             {% for item in current_items %}
-                {% include "pages/includes/_rzut_item_card.html" with rzut=current_rzut item=item %}
+                {% include "pages/includes/_rzut_item_card.html" with rzut=current_rzut item=item can_order=True %}
             {% endfor %}
         </div>
     </div>

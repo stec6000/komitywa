@@ -30,6 +30,12 @@
         </dl>
         <div class="kk-order-product__action">
             <a href="{% url 'rzut_item_detail' rzut_slug=rzut.slug product_slug=item.product.slug %}" class="kk-link-arrow">Pełny opis →</a>
+            {% if can_order and not item.is_sold_out %}
+            <form method="post" action="{% url 'shop:rzut_cart_add' rzut_item_id=item.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-accent">Dodaj do Koszyka Rzutu</button>
+            </form>
+            {% endif %}
         </div>
     </div>
 </article>

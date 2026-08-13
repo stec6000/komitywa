@@ -127,7 +127,10 @@ class TestCartContextProcessor(TestCase):
             }
         }
         result = cart_count(request)
-        self.assertEqual(result, {"cart_count": 3})
+        self.assertEqual(
+            result,
+            {"cart_count": 3, "rzut_cart_count": 0},
+        )
 
     def test_cart_count_empty_session(self):
         from shop.context_processors import cart_count
@@ -136,4 +139,28 @@ class TestCartContextProcessor(TestCase):
         request = factory.get("/")
         request.session = {}
         result = cart_count(request)
-        self.assertEqual(result, {"cart_count": 0})
+        self.assertEqual(
+            result,
+            {"cart_count": 0, "rzut_cart_count": 0},
+        )
+
+    def test_rzut_cart_count_is_independent(self):
+        from shop.context_processors import cart_count
+
+        factory = RequestFactory()
+        request = factory.get("/")
+        request.session = {
+            "cart": {"10": {"quantity": 1, "price": "20.00"}},
+            "rzut_cart": {
+                "rzut_id": 4,
+                "items": {
+                    "20": {"quantity": 2, "price": "15.00"},
+                    "21": {"quantity": 3, "price": "10.00"},
+                },
+            },
+        }
+
+        self.assertEqual(
+            cart_count(request),
+            {"cart_count": 1, "rzut_cart_count": 5},
+        )

@@ -9,6 +9,27 @@ urlpatterns = [
     path("sklep/", views.product_list, name="list"),
     path("sklep/<slug:slug>/", views.product_detail, name="detail"),
     path("koszyk/", views.cart_view, name="cart"),
+    path("zamowienia/koszyk/", views.rzut_cart_view, name="rzut_cart"),
+    path(
+        "zamowienia/koszyk/dodaj/<int:rzut_item_id>/",
+        views.rzut_cart_add,
+        name="rzut_cart_add",
+    ),
+    path(
+        "zamowienia/koszyk/aktualizuj/<int:rzut_item_id>/",
+        views.rzut_cart_update,
+        name="rzut_cart_update",
+    ),
+    path(
+        "zamowienia/koszyk/usun/<int:rzut_item_id>/",
+        views.rzut_cart_remove,
+        name="rzut_cart_remove",
+    ),
+    path(
+        "zamowienia/koszyk/ceny/akceptuj/",
+        views.rzut_cart_accept_prices,
+        name="rzut_cart_accept_prices",
+    ),
     path(
         "koszyk/dodaj/<int:product_id>/",
         views.cart_add,

@@ -154,7 +154,12 @@ def rzut_item_detail(request, rzut_slug, product_slug):
     )
     if not item.rzut.is_public_at():
         raise Http404
-    return render(request, "pages/rzut_item_detail.html", {"item": item})
+    can_order = item.can_add_to_cart_at()
+    return render(
+        request,
+        "pages/rzut_item_detail.html",
+        {"item": item, "can_order": can_order},
+    )
 
 
 def for_cafes(request):

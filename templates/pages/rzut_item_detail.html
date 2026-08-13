@@ -36,6 +36,12 @@
                     </div>
                 </dl>
                 {% include "pages/includes/_rzut_item_availability.html" %}
+                {% if can_order %}
+                <form method="post" action="{% url 'shop:rzut_cart_add' rzut_item_id=item.pk %}" class="product-add-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-accent">Dodaj do Koszyka Rzutu</button>
+                </form>
+                {% endif %}
             </div>
         </div>
     </div>
