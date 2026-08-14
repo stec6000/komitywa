@@ -15,12 +15,23 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .cart import Cart
-from .emails import send_ebook_delivery, send_order_confirmation
+from .emails import (
+    deliver_rzut_order_notifications,
+    send_ebook_delivery,
+    send_order_confirmation,
+)
 from .forms import CheckoutForm, RzutCheckoutForm
-from .models import Order, Product, ProductCategory, RzutItem
+from .models import (
+    Order,
+    Product,
+    ProductCategory,
+    Reservation,
+    RzutItem,
+    RzutOrder,
+)
 from .payment import (
-    calculate_sign,
     get_payment_url,
+    is_valid_p24_notification,
     register_rzut_transaction,
     register_transaction,
     verify_transaction,
@@ -30,6 +41,7 @@ from .reservations import (
     ReservationCheckoutData,
     ReservationError,
     ReservationLineRequest,
+    confirm_reservation,
     create_reservation,
     fail_reservation,
 )
@@ -295,17 +307,97 @@ def rzut_checkout(request):
 
 
 def rzut_p24_return(request):
+    session_id = request.GET.get("session", "")
+    reservation = get_object_or_404(
+        Reservation.objects.select_related("rzut"),
+        p24_session_id=session_id,
+    )
+    order = (
+        RzutOrder.objects.filter(reservation=reservation)
+        .select_related("rzut")
+        .first()
+    )
     return render(
         request,
         "shop/rzut_p24_return.html",
-        {"hide_newsletter": True},
+        {
+            "reservation": reservation,
+            "order": order,
+            "hide_newsletter": True,
+        },
+    )
+
+
+def rzut_order_detail(request, number):
+    order = get_object_or_404(
+        RzutOrder.objects.select_related("rzut").prefetch_related("items"),
+        number=number,
+    )
+    return render(
+        request,
+        "shop/rzut_order_detail.html",
+        {"order": order, "hide_newsletter": True},
     )
 
 
 @csrf_exempt
 @require_POST
 def rzut_p24_webhook(request):
-    return JsonResponse({"error": "Not implemented"}, status=501)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    if not isinstance(data, dict):
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    session_id = data.get("sessionId", "")
+    p24_order_id = data.get("orderId", 0)
+    amount = data.get("amount", 0)
+    if not is_valid_p24_notification(data):
+        logger.warning(
+            "Rzut P24 webhook: invalid sign for session %s",
+            session_id,
+        )
+        return JsonResponse({"error": "Invalid sign"}, status=400)
+
+    try:
+        reservation = Reservation.objects.get(
+            p24_session_id=session_id
+        )
+    except Reservation.DoesNotExist:
+        logger.error(
+            "Rzut P24 webhook: Reservation not found for session %s",
+            session_id,
+        )
+        return JsonResponse({"error": "Reservation not found"}, status=404)
+
+    expected_amount = int(reservation.total * 100)
+    if amount != expected_amount or data.get("currency") != "PLN":
+        logger.warning(
+            "Rzut P24 webhook: payment mismatch for Reservation %d",
+            reservation.pk,
+        )
+        return JsonResponse({"error": "Payment mismatch"}, status=400)
+
+    try:
+        verified = verify_transaction(session_id, p24_order_id, amount)
+    except Exception as exc:
+        logger.error(
+            "Rzut P24 verification failed for Reservation %d: %s",
+            reservation.pk,
+            exc,
+        )
+        return JsonResponse({"error": "Verification failed"}, status=500)
+    if not verified:
+        return JsonResponse({"error": "Payment not verified"}, status=400)
+
+    order, created = confirm_reservation(
+        reservation_id=reservation.pk,
+        p24_order_id=p24_order_id,
+    )
+    if created:
+        deliver_rzut_order_notifications(order)
+    return JsonResponse({"status": "ok", "orderNumber": order.number})
 
 
 def checkout(request):
@@ -407,27 +499,14 @@ def p24_webhook(request):
         data = json.loads(request.body)
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
+    if not isinstance(data, dict):
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
     session_id = data.get("sessionId", "")
     order_id_p24 = data.get("orderId", 0)
     amount = data.get("amount", 0)
 
-    # Verify webhook sign
-    received_sign = data.get("sign", "")
-    expected_sign = calculate_sign({
-        "merchantId": data.get("merchantId"),
-        "posId": data.get("posId"),
-        "sessionId": session_id,
-        "amount": amount,
-        "originAmount": data.get("originAmount"),
-        "currency": data.get("currency"),
-        "orderId": order_id_p24,
-        "methodId": data.get("methodId"),
-        "statement": data.get("statement"),
-        "crc": settings.P24_CRC_KEY,
-    })
-
-    if received_sign != expected_sign:
+    if not is_valid_p24_notification(data):
         logger.warning(
             "P24 webhook: invalid sign for session %s", session_id
         )

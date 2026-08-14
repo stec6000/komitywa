@@ -6,7 +6,14 @@ from django.db import OperationalError, transaction
 from django.db.models import F, Sum
 from django.utils import timezone
 
-from .models import OrderEdition, Reservation, ReservationItem, RzutItem
+from .models import (
+    OrderEdition,
+    Reservation,
+    ReservationItem,
+    RzutItem,
+    RzutOrder,
+    RzutOrderItem,
+)
 
 
 RESERVATION_TIME_LIMIT_MINUTES = 15
@@ -45,6 +52,10 @@ class ReservationPriceChanged(ReservationError):
 
 
 class ReservationCustomerLimitExceeded(ReservationError):
+    pass
+
+
+class ReservationConfirmationError(ReservationError):
     pass
 
 
@@ -225,3 +236,62 @@ def fail_reservation(reservation):
         current.status = Reservation.Status.FAILED
         current.save(update_fields=["status", "updated_at"])
         return current
+
+
+def confirm_reservation(*, reservation_id, p24_order_id, confirmed_at=None):
+    confirmed_at = confirmed_at or timezone.now()
+    with transaction.atomic():
+        reservation = (
+            Reservation.objects.select_for_update()
+            .select_related("rzut")
+            .get(pk=reservation_id)
+        )
+        existing_order = RzutOrder.objects.filter(
+            reservation=reservation
+        ).first()
+        if existing_order is not None:
+            return existing_order, False
+        if reservation.status != Reservation.Status.ACTIVE:
+            raise ReservationConfirmationError(
+                "Rezerwacja nie oczekuje na potwierdzenie płatności."
+            )
+
+        order = RzutOrder.objects.create(
+            reservation=reservation,
+            rzut=reservation.rzut,
+            customer_name=reservation.customer_name,
+            customer_email=reservation.customer_email,
+            customer_phone=reservation.customer_phone,
+            customer_notes=reservation.customer_notes,
+            pickup_starts_at=reservation.pickup_starts_at,
+            pickup_ends_at=reservation.pickup_ends_at,
+            total=reservation.total,
+            payment_status=RzutOrder.PaymentStatus.PAID,
+            payment_method=RzutOrder.PaymentMethod.P24,
+            fulfillment_stage=RzutOrder.FulfillmentStage.NEW,
+            p24_session_id=reservation.p24_session_id,
+            p24_order_id=p24_order_id,
+            data_processing_accepted_at=(
+                reservation.data_processing_accepted_at
+            ),
+            terms_accepted_at=reservation.terms_accepted_at,
+            payment_confirmed_at=confirmed_at,
+        )
+        reservation_items = reservation.items.select_related(
+            "rzut_item__product"
+        ).order_by("rzut_item_id")
+        RzutOrderItem.objects.bulk_create([
+            RzutOrderItem(
+                order=order,
+                rzut_item=line.rzut_item,
+                product_name=line.rzut_item.product.title,
+                portion=line.rzut_item.portion,
+                unit_price=line.unit_price,
+                quantity=line.quantity,
+                line_total=line.unit_price * line.quantity,
+            )
+            for line in reservation_items
+        ])
+        reservation.status = Reservation.Status.CONFIRMED
+        reservation.save(update_fields=["status", "updated_at"])
+        return order, True

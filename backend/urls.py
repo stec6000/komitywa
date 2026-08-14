@@ -34,8 +34,8 @@ urlpatterns = [
     path("przepisy/", include("recipes.urls", namespace="recipes")),
     path("blog/", include("content.urls", namespace="content")),
     path("", include("newsletter.urls")),
-    path("", include("core.urls")),
     path("", include("shop.urls")),
+    path("", include("core.urls")),
 ]
 
 if settings.DEBUG:

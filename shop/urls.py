@@ -21,6 +21,11 @@ urlpatterns = [
         name="rzut_p24_return",
     ),
     path(
+        "zamowienia/zamowienie/<str:number>/",
+        views.rzut_order_detail,
+        name="rzut_order_detail",
+    ),
+    path(
         "zamowienia/webhook/p24/",
         views.rzut_p24_webhook,
         name="rzut_p24_webhook",

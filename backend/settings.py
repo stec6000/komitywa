@@ -237,6 +237,10 @@ DEFAULT_FROM_EMAIL = env(
     default="Kuchenna Komitywa <noreply@kuchennakomitywa.pl>",
 )
 CONTACT_EMAIL = env("CONTACT_EMAIL", default="kontakt@kuchennakomitywa.pl")
+PUBLIC_SITE_URL = env(
+    "PUBLIC_SITE_URL",
+    default="https://kuchennakomitywa.pl",
+).rstrip("/")
 
 # Anthropic (weekly research pipeline — content app)
 ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")

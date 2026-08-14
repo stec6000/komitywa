@@ -21,6 +21,10 @@ def generate_rzut_p24_session_id():
     return f"rzut-{uuid.uuid4().hex}"
 
 
+def generate_rzut_order_number():
+    return f"KK-{uuid.uuid4().hex[:20].upper()}"
+
+
 class ProductCategory(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True)
@@ -768,6 +772,232 @@ class ReservationItem(models.Model):
     @property
     def line_total(self):
         return self.unit_price * self.quantity
+
+
+class RzutOrder(models.Model):
+    class PaymentStatus(models.TextChoices):
+        PENDING = "pending", "Oczekuje"
+        PAID = "paid", "Opłacona"
+        NOT_REQUIRED = "not_required", "Nie wymaga płatności"
+        REFUNDED = "refunded", "Zwrócona"
+
+    class PaymentMethod(models.TextChoices):
+        P24 = "p24", "Przelewy24"
+        CASH = "cash", "Gotówka"
+        MANUAL_TRANSFER = "manual_transfer", "Przelew ręczny"
+        OTHER = "other", "Inna"
+        NONE = "none", "Brak płatności"
+
+    class FulfillmentStage(models.TextChoices):
+        NEW = "new", "Nowe"
+        PREPARING = "preparing", "W przygotowaniu"
+        READY = "ready", "Gotowe"
+        PICKED_UP = "picked_up", "Odebrane"
+        CANCELLED = "cancelled", "Anulowane"
+
+    number = models.CharField(
+        max_length=32,
+        unique=True,
+        default=generate_rzut_order_number,
+        editable=False,
+        verbose_name="Numer Zamówienia",
+    )
+    reservation = models.OneToOneField(
+        Reservation,
+        on_delete=models.PROTECT,
+        related_name="rzut_order",
+        verbose_name="Rezerwacja",
+    )
+    rzut = models.ForeignKey(
+        OrderEdition,
+        on_delete=models.PROTECT,
+        related_name="rzut_orders",
+        verbose_name="Rzut",
+    )
+    customer_name = models.CharField(
+        max_length=200,
+        verbose_name="Imię i nazwisko",
+    )
+    customer_email = models.EmailField(
+        verbose_name="E-mail Klienta",
+    )
+    customer_phone = models.CharField(
+        max_length=30,
+        blank=True,
+        default="",
+        verbose_name="Telefon",
+    )
+    customer_notes = models.CharField(
+        max_length=500,
+        blank=True,
+        default="",
+        verbose_name="Uwagi Klienta",
+    )
+    pickup_starts_at = models.TimeField(
+        verbose_name="Początek Przedziału Odbioru",
+    )
+    pickup_ends_at = models.TimeField(
+        verbose_name="Koniec Przedziału Odbioru",
+    )
+    total = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        verbose_name="Suma",
+    )
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PaymentStatus.choices,
+        default=PaymentStatus.PENDING,
+        verbose_name="Status Płatności",
+    )
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PaymentMethod.choices,
+        default=PaymentMethod.NONE,
+        verbose_name="Metoda Płatności",
+    )
+    fulfillment_stage = models.CharField(
+        max_length=20,
+        choices=FulfillmentStage.choices,
+        default=FulfillmentStage.NEW,
+        verbose_name="Etap Realizacji",
+    )
+    p24_session_id = models.CharField(
+        max_length=64,
+        unique=True,
+        editable=False,
+        verbose_name="Identyfikator sesji P24",
+    )
+    p24_order_id = models.PositiveBigIntegerField(
+        unique=True,
+        verbose_name="Identyfikator zamówienia P24",
+    )
+    data_processing_accepted_at = models.DateTimeField(
+        verbose_name="Akceptacja przetwarzania danych",
+    )
+    terms_accepted_at = models.DateTimeField(
+        verbose_name="Akceptacja regulaminu",
+    )
+    payment_confirmed_at = models.DateTimeField(
+        verbose_name="Potwierdzenie płatności",
+    )
+    customer_confirmation_sent_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Wysłanie potwierdzenia Klientowi",
+    )
+    customer_confirmation_error = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Błąd potwierdzenia Klienta",
+    )
+    owner_notification_sent_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Wysłanie powiadomienia właścicielowi",
+    )
+    owner_notification_error = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Błąd powiadomienia właściciela",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Zamówienie Rzutu"
+        verbose_name_plural = "Zamówienia Rzutu"
+        ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(total__gte=0),
+                name="rzut_order_total_nonnegative",
+            ),
+        ]
+
+    def __str__(self):
+        return self.number
+
+    @property
+    def masked_customer_email(self):
+        local, separator, domain = self.customer_email.partition("@")
+        if not separator:
+            return "***"
+        return f"{local[:1]}***@{domain}"
+
+    @property
+    def masked_customer_phone(self):
+        if not self.customer_phone:
+            return "nie podano"
+        digits = "".join(
+            character
+            for character in self.customer_phone
+            if character.isdigit()
+        )
+        return f"*** *** {digits[-3:]}" if len(digits) >= 3 else "***"
+
+
+class RzutOrderItem(models.Model):
+    order = models.ForeignKey(
+        RzutOrder,
+        on_delete=models.CASCADE,
+        related_name="items",
+        verbose_name="Zamówienie Rzutu",
+    )
+    rzut_item = models.ForeignKey(
+        RzutItem,
+        on_delete=models.PROTECT,
+        related_name="order_items",
+        verbose_name="Źródłowa Pozycja Rzutu",
+    )
+    product_name = models.CharField(
+        max_length=200,
+        verbose_name="Nazwa Produktu",
+    )
+    portion = models.CharField(
+        max_length=120,
+        verbose_name="Porcja",
+    )
+    unit_price = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        verbose_name="Cena jednostkowa",
+    )
+    quantity = models.PositiveIntegerField(
+        validators=[MinValueValidator(1)],
+        verbose_name="Liczba sztuk",
+    )
+    line_total = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        verbose_name="Suma Pozycji Zamówienia",
+    )
+
+    class Meta:
+        verbose_name = "Pozycja Zamówienia"
+        verbose_name_plural = "Pozycje Zamówienia"
+        ordering = ["pk"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["order", "rzut_item"],
+                name="unique_rzut_item_per_order",
+            ),
+            models.CheckConstraint(
+                condition=Q(quantity__gte=1),
+                name="rzut_order_item_quantity_positive",
+            ),
+            models.CheckConstraint(
+                condition=Q(unit_price__gte=0),
+                name="rzut_order_item_price_nonnegative",
+            ),
+            models.CheckConstraint(
+                condition=Q(line_total__gte=0),
+                name="rzut_order_item_total_nonnegative",
+            ),
+        ]
 
 
 class Order(models.Model):

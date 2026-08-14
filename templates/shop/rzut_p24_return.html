@@ -1,15 +1,33 @@
 {% extends "base.html" %}
 
-{% block title %}Sprawdzamy płatność — Kuchenna Komitywa{% endblock %}
+{% block title %}{% if order %}Płatność potwierdzona{% else %}Sprawdzamy płatność{% endif %} — Kuchenna Komitywa{% endblock %}
 {% block meta_robots %}noindex,nofollow{% endblock %}
 
 {% block content %}
 <section class="kk-section" aria-labelledby="payment-check-title">
     <div class="wrap">
-        <div class="kk-empty-state">
+        <div class="kk-payment-state">
+            {% if order %}
+            <div class="kk-payment-state__mark kk-payment-state__mark--success" aria-hidden="true">✓</div>
+            <h1 id="payment-check-title">Płatność potwierdzona</h1>
+            {% if order.customer_confirmation_sent_at %}
+            <p class="lead">Twoje Zamówienie Rzutu zostało przyjęte. Potwierdzenie wysłaliśmy na podany adres e-mail.</p>
+            {% else %}
+            <p class="lead">Twoje Zamówienie Rzutu zostało przyjęte. Zachowaj Numer Zamówienia widoczny poniżej — potwierdzenie e-mail może dotrzeć z opóźnieniem.</p>
+            {% endif %}
+            <p class="kk-payment-state__number">{{ order.number }}</p>
+            <a href="{% url 'shop:rzut_order_detail' number=order.number %}" class="btn btn-accent">zobacz Zamówienie Rzutu →</a>
+            {% elif reservation.status == 'failed' or reservation.status == 'expired' %}
+            <div class="kk-payment-state__mark kk-payment-state__mark--muted" aria-hidden="true">!</div>
+            <h1 id="payment-check-title">Płatność nie jest potwierdzona</h1>
+            <p class="lead">Ta Rezerwacja nie jest już aktywna. Jeśli środki zostały pobrane, skontaktuj się z nami i podaj identyfikator płatności.</p>
+            <a href="{% url 'contact' %}" class="btn btn-accent">skontaktuj się z nami →</a>
+            {% else %}
+            <div class="kk-payment-state__mark kk-payment-state__mark--muted" aria-hidden="true">·</div>
             <h1 id="payment-check-title">Sprawdzamy płatność</h1>
-            <p>Potwierdzenie z Przelewy24 może dotrzeć chwilę po Twoim powrocie. Nie składaj w tym czasie drugiej Rezerwacji.</p>
-            <a href="{% url 'orders' %}" class="btn btn-accent">wróć do Rzutu →</a>
+            <p class="lead">Potwierdzenie z Przelewy24 może dotrzeć chwilę po Twoim powrocie. Nie składaj w tym czasie drugiej Rezerwacji.</p>
+            <a href="{{ request.get_full_path }}" class="btn btn-accent">sprawdź ponownie →</a>
+            {% endif %}
         </div>
     </div>
 </section>

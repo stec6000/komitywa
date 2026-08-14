@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Zamówienie Rzutu {{ order.number }} — Kuchenna Komitywa{% endblock %}
+{% block meta_description %}Status i szczegóły Zamówienia Rzutu w Kuchennej Komitywie.{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
+
+{% block content %}
+<section class="kk-section" aria-labelledby="rzut-order-title">
+    <div class="wrap-narrow">
+        <div class="section-head">
+            <div>
+                <div class="section-number">· {{ order.rzut.title }}</div>
+                <h1 id="rzut-order-title" class="section-title">Zamówienie Rzutu</h1>
+            </div>
+            <div class="section-meta">{{ order.number }}</div>
+        </div>
+
+        <div class="kk-order-summary">
+            <div class="summary-row">
+                <strong>Status Płatności</strong>
+                <span>{{ order.get_payment_status_display }}</span>
+            </div>
+            <div class="summary-row">
+                <strong>Etap Realizacji</strong>
+                <span>{{ order.get_fulfillment_stage_display }}</span>
+            </div>
+            <hr>
+            {% for item in order.items.all %}
+            <div class="summary-row">
+                <span class="kk-summary-item-name">{{ item.product_name }} · {{ item.quantity }} × {{ item.portion }}</span>
+                <span class="kk-summary-item-price">{{ item.line_total|floatformat:"2" }} zł</span>
+            </div>
+            {% endfor %}
+            <hr>
+            <div class="summary-row">
+                <strong>suma</strong>
+                <span class="kk-price">{{ order.total|floatformat:"2" }} zł</span>
+            </div>
+        </div>
+
+        <div class="kk-order-summary mt-3">
+            <h2>Odbiór</h2>
+            <p><strong>{{ order.rzut.pickup_date|date:"d.m.Y" }}, {{ order.pickup_starts_at|time:"H:i" }}–{{ order.pickup_ends_at|time:"H:i" }}</strong></p>
+            <p>{{ order.rzut.pickup_place_name }}<br>{{ order.rzut.pickup_address }}</p>
+            <p>{{ order.rzut.pickup_instructions }}</p>
+            <p>Kontakt zapisany przy Zamówieniu Rzutu: {{ order.masked_customer_email }} · {{ order.masked_customer_phone }}</p>
+        </div>
+
+        <p class="kk-payment-state__action">Potrzebujesz zmiany lub anulowania? <a href="{% url 'contact' %}" class="kk-link-arrow">skontaktuj się z nami →</a></p>
+    </div>
+</section>
+{% endblock %}

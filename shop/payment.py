@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import json
 import logging
 
@@ -22,6 +23,22 @@ def get_base_url():
 def calculate_sign(params):
     data = json.dumps(params, separators=(",", ":"))
     return hashlib.sha384(data.encode("utf-8")).hexdigest()
+
+
+def is_valid_p24_notification(data):
+    expected_sign = calculate_sign({
+        "merchantId": data.get("merchantId"),
+        "posId": data.get("posId"),
+        "sessionId": data.get("sessionId", ""),
+        "amount": data.get("amount", 0),
+        "originAmount": data.get("originAmount"),
+        "currency": data.get("currency"),
+        "orderId": data.get("orderId", 0),
+        "methodId": data.get("methodId"),
+        "statement": data.get("statement"),
+        "crc": settings.P24_CRC_KEY,
+    })
+    return hmac.compare_digest(str(data.get("sign", "")), expected_sign)
 
 
 def register_transaction(order, url_return, url_status):
