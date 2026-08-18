@@ -112,16 +112,31 @@ def _rzut_order_public_url(order):
     return f"{settings.PUBLIC_SITE_URL}{path}"
 
 
+def _rzut_order_discount_text(order):
+    if not order.discount_code_snapshot:
+        return ""
+    return (
+        f"Suma przed rabatem: {_format_pln(order.subtotal)}\n"
+        f"Kod Rabatowy: {order.discount_code_snapshot}\n"
+        f"Rabat: −{_format_pln(order.discount_amount)}\n"
+    )
+
+
 def send_rzut_order_customer_confirmation(order):
     rzut = order.rzut
+    opening = (
+        "Twoje Zamówienie Rzutu jest przyjęte. Płatność nie była wymagana."
+        if order.payment_status == order.PaymentStatus.NOT_REQUIRED
+        else "Płatność została potwierdzona, a Twoje Zamówienie Rzutu jest przyjęte."
+    )
     body = (
         f"Cześć {order.customer_name}!\n\n"
-        "Płatność została potwierdzona, a Twoje Zamówienie Rzutu "
-        "jest przyjęte.\n\n"
+        f"{opening}\n\n"
         f"Numer Zamówienia: {order.number}\n"
         f"Rzut: {rzut.title}\n"
         f"Pozycje Zamówienia:\n{_rzut_order_items_text(order)}\n\n"
-        f"Suma: {_format_pln(order.total)}\n"
+        f"{_rzut_order_discount_text(order)}"
+        f"Do zapłaty: {_format_pln(order.total)}\n"
         f"Odbiór: {rzut.pickup_date:%d.%m.%Y}, "
         f"{order.pickup_starts_at:%H:%M}–{order.pickup_ends_at:%H:%M}\n"
         f"Miejsce: {rzut.pickup_place_name}, {rzut.pickup_address}\n"
@@ -143,14 +158,15 @@ def send_rzut_order_customer_confirmation(order):
 def send_rzut_order_owner_notification(order):
     rzut = order.rzut
     body = (
-        "Nowe opłacone Zamówienie Rzutu.\n\n"
+        "Nowe Zamówienie Rzutu.\n\n"
         f"Numer Zamówienia: {order.number}\n"
         f"Rzut: {rzut.title}\n"
         f"Klient: {order.customer_name}\n"
         f"E-mail: {order.customer_email}\n"
         f"Telefon: {order.customer_phone or 'brak'}\n"
         f"Pozycje Zamówienia:\n{_rzut_order_items_text(order)}\n\n"
-        f"Suma: {_format_pln(order.total)}\n"
+        f"{_rzut_order_discount_text(order)}"
+        f"Do zapłaty: {_format_pln(order.total)}\n"
         f"Przedział Odbioru: {order.pickup_starts_at:%H:%M}–"
         f"{order.pickup_ends_at:%H:%M}\n"
         f"Uwagi: {order.customer_notes or 'brak'}\n"

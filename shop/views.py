@@ -38,13 +38,14 @@ from .payment import (
 )
 from .rzut_cart import DifferentRzutError, InvalidQuantityError, RzutCart
 from .reservations import (
+    OrderConfirmed,
     ReservationCheckoutData,
     ReservationError,
     ReservationLineRequest,
     confirm_reservation,
-    create_reservation,
     expire_due_reservations,
     fail_reservation,
+    start_checkout,
 )
 
 logger = logging.getLogger(__name__)
@@ -218,6 +219,24 @@ def rzut_cart_accept_prices(request):
     return redirect("shop:rzut_cart")
 
 
+@require_POST
+def rzut_cart_discount(request):
+    try:
+        RzutCart(request).apply_discount_code(request.POST.get("code", ""))
+    except ValueError as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, "Kod Rabatowy został zastosowany.")
+    return redirect("shop:rzut_cart")
+
+
+@require_POST
+def rzut_cart_discount_remove(request):
+    RzutCart(request).remove_discount_code()
+    messages.success(request, "Kod Rabatowy został usunięty.")
+    return redirect("shop:rzut_cart")
+
+
 def rzut_checkout(request):
     expire_due_reservations()
     cart = RzutCart(request)
@@ -243,6 +262,9 @@ def rzut_checkout(request):
             "Wybrana liczba sztuk nie jest już dostępna. Popraw Koszyk Rzutu.",
         )
         return redirect("shop:rzut_cart")
+    if snapshot["discount_error"]:
+        messages.error(request, snapshot["discount_error"])
+        return redirect("shop:rzut_cart")
     form = RzutCheckoutForm(
         snapshot["rzut"],
         request.POST if request.method == "POST" else None,
@@ -250,7 +272,7 @@ def rzut_checkout(request):
     if request.method == "POST" and form.is_valid():
         slot = form.cleaned_data["pickup_slot"]
         try:
-            reservation = create_reservation(
+            checkout_result = start_checkout(
                 rzut_id=snapshot["rzut"].pk,
                 lines=[
                     ReservationLineRequest(
@@ -268,10 +290,25 @@ def rzut_checkout(request):
                     pickup_starts_at=slot.starts_at,
                     pickup_ends_at=slot.ends_at,
                 ),
+                discount_code=(
+                    snapshot["discount_code"].code
+                    if snapshot["discount_code"]
+                    else ""
+                ),
             )
         except ReservationError as exc:
             messages.error(request, exc.user_message)
             return redirect("shop:rzut_cart")
+
+        if isinstance(checkout_result, OrderConfirmed):
+            deliver_rzut_order_notifications(checkout_result.order)
+            cart.clear()
+            return redirect(
+                "shop:rzut_order_detail",
+                number=checkout_result.order.number,
+            )
+
+        reservation = checkout_result.reservation
 
         url_return = request.build_absolute_uri(
             f"{reverse('shop:rzut_p24_return')}?"

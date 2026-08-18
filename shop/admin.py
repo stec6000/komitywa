@@ -4,6 +4,7 @@ from django.forms.models import BaseInlineFormSet
 from django.utils.html import format_html
 
 from .models import (
+    DiscountCode,
     Order,
     OrderEdition,
     Product,
@@ -18,6 +19,23 @@ class ProductCategoryAdmin(admin.ModelAdmin):
     list_display = ["name", "slug"]
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ["name"]
+
+
+@admin.register(DiscountCode)
+class DiscountCodeAdmin(admin.ModelAdmin):
+    list_display = [
+        "code",
+        "discount_type",
+        "value",
+        "rzut",
+        "is_active",
+        "allocated_uses",
+        "usage_limit",
+        "valid_until",
+    ]
+    list_filter = ["discount_type", "is_active", "rzut"]
+    search_fields = ["code", "rzut__title"]
+    readonly_fields = ["allocated_uses", "created_at", "updated_at"]
 
 
 class RzutItemInlineForm(forms.ModelForm):
@@ -226,6 +244,10 @@ class ReservationAdmin(admin.ModelAdmin):
         "customer_notes",
         "pickup_starts_at",
         "pickup_ends_at",
+        "subtotal",
+        "discount_amount",
+        "discount_code",
+        "discount_code_snapshot",
         "total",
         "p24_session_id",
         "data_processing_accepted_at",

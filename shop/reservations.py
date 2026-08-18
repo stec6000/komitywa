@@ -7,6 +7,12 @@ from django.db import OperationalError, transaction
 from django.db.models import F, Sum
 from django.utils import timezone
 
+from .discounts import (
+    DiscountCodeUnavailable,
+    reclaim_discount_use,
+    release_discount_use,
+    reserve_discount_use,
+)
 from .models import (
     OrderEdition,
     Reservation,
@@ -41,6 +47,16 @@ class ReservationCheckoutData:
     pickup_ends_at: time
 
 
+@dataclass(frozen=True)
+class PaymentRequired:
+    reservation: Reservation
+
+
+@dataclass(frozen=True)
+class OrderConfirmed:
+    order: RzutOrder
+
+
 class ReservationError(Exception):
     def __init__(self, message):
         self.user_message = message
@@ -67,7 +83,14 @@ def normalize_customer_email(email):
     return email.strip().casefold()
 
 
-def create_reservation(*, rzut_id, lines, checkout, now=None):
+def create_reservation(
+    *,
+    rzut_id,
+    lines,
+    checkout,
+    discount_code="",
+    now=None,
+):
     now = now or timezone.now()
     lines = sorted(lines, key=lambda line: line.item_id)
     if not lines or len({line.item_id for line in lines}) != len(lines):
@@ -90,6 +113,7 @@ def create_reservation(*, rzut_id, lines, checkout, now=None):
             rzut_id=rzut_id,
             lines=lines,
             checkout=checkout,
+            discount_code=discount_code,
             now=now,
         )
     except OperationalError as exc:
@@ -99,7 +123,7 @@ def create_reservation(*, rzut_id, lines, checkout, now=None):
         ) from exc
 
 
-def _create_reservation(*, rzut_id, lines, checkout, now):
+def _create_reservation(*, rzut_id, lines, checkout, discount_code, now):
     normalized_email = normalize_customer_email(checkout.email)
     with transaction.atomic():
         locked = OrderEdition.objects.filter(pk=rzut_id).update(
@@ -186,10 +210,27 @@ def _create_reservation(*, rzut_id, lines, checkout, now):
                     f"„{item.product.title}”. Zmień liczbę sztuk."
                 )
 
-        total = sum(
+        subtotal = sum(
             (line.expected_price * line.quantity for line in lines),
             Decimal("0.00"),
         )
+        applied_discount_code = None
+        discount_amount = Decimal("0.00")
+        if discount_code:
+            try:
+                applied_discount_code, discount_amount = (
+                    reserve_discount_use(
+                        code=discount_code,
+                        rzut_id=rzut_id,
+                        subtotal=subtotal,
+                        customer_email=normalized_email,
+                        now=now,
+                    )
+                )
+            except DiscountCodeUnavailable as exc:
+                raise ReservationUnavailable(exc.user_message) from exc
+
+        total = subtotal - discount_amount
         reservation = Reservation.objects.create(
             rzut=rzut,
             customer_name=checkout.name.strip(),
@@ -198,6 +239,12 @@ def _create_reservation(*, rzut_id, lines, checkout, now):
             customer_notes=checkout.notes.strip(),
             pickup_starts_at=checkout.pickup_starts_at,
             pickup_ends_at=checkout.pickup_ends_at,
+            subtotal=subtotal,
+            discount_amount=discount_amount,
+            discount_code=applied_discount_code,
+            discount_code_snapshot=(
+                applied_discount_code.code if applied_discount_code else ""
+            ),
             total=total,
             data_processing_accepted_at=now,
             terms_accepted_at=now,
@@ -245,6 +292,8 @@ def _release_active_reservation(
                 raise RuntimeError(
                     "Nie można zwolnić Puli dla nieaktywnej Rezerwacji."
                 )
+        if current.discount_code_id:
+            release_discount_use(discount_code_id=current.discount_code_id)
         current.status = target_status
         current.save(update_fields=["status", "updated_at"])
         return current, True
@@ -292,6 +341,61 @@ def delete_old_inactive_reservations(*, now=None):
     return deleted_count
 
 
+def _materialize_order(
+    *,
+    reservation,
+    payment_status,
+    payment_method,
+    p24_order_id,
+    confirmed_at,
+    requires_attention=False,
+    attention_message="",
+):
+    order = RzutOrder.objects.create(
+        reservation=reservation,
+        rzut=reservation.rzut,
+        customer_name=reservation.customer_name,
+        customer_email=reservation.customer_email,
+        customer_phone=reservation.customer_phone,
+        customer_notes=reservation.customer_notes,
+        pickup_starts_at=reservation.pickup_starts_at,
+        pickup_ends_at=reservation.pickup_ends_at,
+        subtotal=reservation.subtotal,
+        discount_amount=reservation.discount_amount,
+        discount_code=reservation.discount_code,
+        discount_code_snapshot=reservation.discount_code_snapshot,
+        total=reservation.total,
+        payment_status=payment_status,
+        payment_method=payment_method,
+        fulfillment_stage=RzutOrder.FulfillmentStage.NEW,
+        p24_session_id=reservation.p24_session_id,
+        p24_order_id=p24_order_id,
+        data_processing_accepted_at=reservation.data_processing_accepted_at,
+        terms_accepted_at=reservation.terms_accepted_at,
+        payment_confirmed_at=confirmed_at,
+        requires_attention=requires_attention,
+        attention_message=attention_message,
+    )
+    reservation_items = reservation.items.select_related(
+        "rzut_item__product"
+    ).order_by("rzut_item_id")
+    RzutOrderItem.objects.bulk_create([
+        RzutOrderItem(
+            order=order,
+            rzut_item=line.rzut_item,
+            product_name=line.rzut_item.product.title,
+            portion=line.rzut_item.portion,
+            unit_price=line.unit_price,
+            quantity=line.quantity,
+            line_total=line.unit_price * line.quantity,
+        )
+        for line in reservation_items
+    ])
+    reservation.status = Reservation.Status.CONFIRMED
+    reservation.save(update_fields=["status", "updated_at"])
+    return order
+
+
 def confirm_reservation(*, reservation_id, p24_order_id, confirmed_at=None):
     confirmed_at = confirmed_at or timezone.now()
     with transaction.atomic():
@@ -324,6 +428,7 @@ def confirm_reservation(*, reservation_id, p24_order_id, confirmed_at=None):
             )
 
         overallocated_items = []
+        discount_limit_warnings = ()
         if pool_was_released:
             for line in reservation.items.select_related(
                 "rzut_item__product"
@@ -337,59 +442,44 @@ def confirm_reservation(*, reservation_id, p24_order_id, confirmed_at=None):
                     overallocated_items.append(
                         f"{item.product.title}: {new_allocation}/{item.pool}"
                     )
+            if reservation.discount_code_id:
+                reclaimed = reclaim_discount_use(
+                    discount_code_id=reservation.discount_code_id,
+                    customer_email=reservation.customer_email,
+                )
+                discount_limit_warnings = reclaimed.warnings
 
         attention_message = ""
         if is_late_payment:
+            warnings = []
+            if overallocated_items:
+                warnings.append(
+                    f"Przekroczenie Puli: {', '.join(overallocated_items)}."
+                )
+            if discount_limit_warnings:
+                warnings.append(
+                    "Przekroczenie limitu Kodu Rabatowego: "
+                    f"{', '.join(discount_limit_warnings)}."
+                )
             allocation_warning = (
-                f"Przekroczenie Puli: {', '.join(overallocated_items)}."
-                if overallocated_items
-                else "Brak bieżącego przekroczenia Puli."
+                " ".join(warnings)
+                if warnings
+                else "Brak bieżącego przekroczenia przydziałów."
             )
             attention_message = (
                 "Późna płatność P24 potwierdziła Rezerwację po terminie. "
                 f"{allocation_warning} Zweryfikuj produkcję i Zamówienie."
             )
 
-        order = RzutOrder.objects.create(
+        order = _materialize_order(
             reservation=reservation,
-            rzut=reservation.rzut,
-            customer_name=reservation.customer_name,
-            customer_email=reservation.customer_email,
-            customer_phone=reservation.customer_phone,
-            customer_notes=reservation.customer_notes,
-            pickup_starts_at=reservation.pickup_starts_at,
-            pickup_ends_at=reservation.pickup_ends_at,
-            total=reservation.total,
             payment_status=RzutOrder.PaymentStatus.PAID,
             payment_method=RzutOrder.PaymentMethod.P24,
-            fulfillment_stage=RzutOrder.FulfillmentStage.NEW,
-            p24_session_id=reservation.p24_session_id,
             p24_order_id=p24_order_id,
-            data_processing_accepted_at=(
-                reservation.data_processing_accepted_at
-            ),
-            terms_accepted_at=reservation.terms_accepted_at,
-            payment_confirmed_at=confirmed_at,
+            confirmed_at=confirmed_at,
             requires_attention=is_late_payment,
             attention_message=attention_message,
         )
-        reservation_items = reservation.items.select_related(
-            "rzut_item__product"
-        ).order_by("rzut_item_id")
-        RzutOrderItem.objects.bulk_create([
-            RzutOrderItem(
-                order=order,
-                rzut_item=line.rzut_item,
-                product_name=line.rzut_item.product.title,
-                portion=line.rzut_item.portion,
-                unit_price=line.unit_price,
-                quantity=line.quantity,
-                line_total=line.unit_price * line.quantity,
-            )
-            for line in reservation_items
-        ])
-        reservation.status = Reservation.Status.CONFIRMED
-        reservation.save(update_fields=["status", "updated_at"])
         if is_late_payment:
             logger.critical(
                 "PILNE: %s Rezerwacja %d, Zamówienie Rzutu %s.",
@@ -398,3 +488,68 @@ def confirm_reservation(*, reservation_id, p24_order_id, confirmed_at=None):
                 order.number,
             )
         return order, True
+
+
+def confirm_reservation_without_payment(
+    *,
+    reservation_id,
+    confirmed_at=None,
+):
+    confirmed_at = confirmed_at or timezone.now()
+    with transaction.atomic():
+        reservation_rzut_id = Reservation.objects.values_list(
+            "rzut_id", flat=True
+        ).get(pk=reservation_id)
+        OrderEdition.objects.filter(pk=reservation_rzut_id).update(
+            allocation_revision=F("allocation_revision") + 1
+        )
+        reservation = (
+            Reservation.objects.select_for_update()
+            .select_related("rzut", "discount_code")
+            .get(pk=reservation_id)
+        )
+        existing_order = RzutOrder.objects.filter(
+            reservation=reservation
+        ).first()
+        if existing_order is not None:
+            return existing_order, False
+        if (
+            reservation.status != Reservation.Status.ACTIVE
+            or reservation.total != Decimal("0.00")
+        ):
+            raise ReservationConfirmationError(
+                "Rezerwacja nie kwalifikuje się do potwierdzenia bez płatności."
+            )
+        order = _materialize_order(
+            reservation=reservation,
+            payment_status=RzutOrder.PaymentStatus.NOT_REQUIRED,
+            payment_method=RzutOrder.PaymentMethod.NONE,
+            p24_order_id=None,
+            confirmed_at=confirmed_at,
+        )
+        return order, True
+
+
+def start_checkout(
+    *,
+    rzut_id,
+    lines,
+    checkout,
+    discount_code="",
+    now=None,
+):
+    with transaction.atomic():
+        reservation = create_reservation(
+            rzut_id=rzut_id,
+            lines=lines,
+            checkout=checkout,
+            discount_code=discount_code,
+            now=now,
+        )
+        if reservation.total == Decimal("0.00"):
+            order, _ = confirm_reservation_without_payment(
+                reservation_id=reservation.pk,
+                confirmed_at=now,
+            )
+            return OrderConfirmed(order=order)
+        return PaymentRequired(reservation=reservation)

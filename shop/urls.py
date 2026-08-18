@@ -56,6 +56,16 @@ urlpatterns = [
         name="rzut_cart_accept_prices",
     ),
     path(
+        "zamowienia/koszyk/rabat/",
+        views.rzut_cart_discount,
+        name="rzut_cart_discount",
+    ),
+    path(
+        "zamowienia/koszyk/rabat/usun/",
+        views.rzut_cart_discount_remove,
+        name="rzut_cart_discount_remove",
+    ),
+    path(
         "koszyk/dodaj/<int:product_id>/",
         views.cart_add,
         name="cart_add",

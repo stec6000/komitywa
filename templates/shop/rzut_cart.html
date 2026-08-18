@@ -53,6 +53,29 @@
             </div>
             <aside class="kk-cart-summary">
                 <div class="featured-label kk-summary-label">razem</div>
+                <form method="post" action="{% url 'shop:rzut_cart_discount' %}">
+                    {% csrf_token %}
+                    <label for="discount-code">Kod Rabatowy</label>
+                    <input id="discount-code" name="code" type="text" maxlength="50" value="{{ discount_code_input }}">
+                    <button type="submit" class="btn btn-accent w-100">Zastosuj Kod Rabatowy</button>
+                </form>
+                {% if discount_error %}<p class="kk-cart-warning" role="alert">{{ discount_error }}</p>{% endif %}
+                {% if discount_code %}
+                <div class="summary-row">
+                    <span>przed rabatem</span>
+                    <span>{{ subtotal|floatformat:"2" }} zł</span>
+                </div>
+                <div class="summary-row">
+                    <span>rabat {{ discount_code.code }}</span>
+                    <span>−{{ discount_amount|floatformat:"2" }} zł</span>
+                </div>
+                {% endif %}
+                {% if discount_code_input %}
+                <form method="post" action="{% url 'shop:rzut_cart_discount_remove' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="kk-link-inline">Usuń Kod Rabatowy</button>
+                </form>
+                {% endif %}
                 <div class="summary-row kk-summary-total-row">
                     <strong class="kk-summary-total-label">do zapłaty</strong>
                     <span class="kk-price kk-summary-total-price">{{ total|floatformat:"2" }} zł</span>

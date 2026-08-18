@@ -2,6 +2,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.utils import timezone
 
+from .discounts import get_applicable_discount
 from .models import OrderEdition, RzutItem
 
 
@@ -60,8 +61,7 @@ class RzutCart:
 
     def remove(self, item_id):
         self.items.pop(str(item_id), None)
-        if not self.items:
-            self.data["rzut_id"] = None
+        self._reset_if_empty()
         self.save()
 
     def snapshot(self):
@@ -84,12 +84,11 @@ class RzutCart:
             del self.items[item_id]
 
         if removed_items:
-            if not self.items:
-                self.data["rzut_id"] = None
+            self._reset_if_empty()
             self.save()
 
         lines = []
-        total = Decimal("0.00")
+        subtotal = Decimal("0.00")
         has_price_changes = False
         has_availability_errors = False
         for item_id, stored in self.items.items():
@@ -98,7 +97,7 @@ class RzutCart:
                 continue
             quantity = stored["quantity"]
             line_total = item.price * quantity
-            total += line_total
+            subtotal += line_total
             stored_price = Decimal(stored["price"])
             price_changed = stored_price != item.price
             has_price_changes = has_price_changes or price_changed
@@ -121,14 +120,52 @@ class RzutCart:
             rzut = OrderEdition.objects.filter(
                 pk=self.data["rzut_id"]
             ).first()
+        discount_code = None
+        discount_amount = Decimal("0.00")
+        total = subtotal
+        discount_error = ""
+        stored_discount_code = self.data.get("discount_code", "")
+        if stored_discount_code and rzut is not None:
+            try:
+                discount_code, discount_amount, total = (
+                    get_applicable_discount(
+                        code=stored_discount_code,
+                        rzut_id=rzut.pk,
+                        subtotal=subtotal,
+                        now=now,
+                    )
+                )
+            except ValueError as exc:
+                discount_error = str(exc)
         return {
             "rzut": rzut,
             "lines": lines,
+            "subtotal": subtotal,
+            "discount_code": discount_code,
+            "discount_code_input": stored_discount_code,
+            "discount_amount": discount_amount,
+            "discount_error": discount_error,
             "total": total,
             "has_price_changes": has_price_changes,
             "has_availability_errors": has_availability_errors,
             "removed_items": removed_items,
         }
+
+    def apply_discount_code(self, code):
+        snapshot = self.snapshot()
+        if snapshot["rzut"] is None or not snapshot["lines"]:
+            raise ValueError("Koszyk Rzutu jest pusty.")
+        discount_code, _, _ = get_applicable_discount(
+            code=code,
+            rzut_id=snapshot["rzut"].pk,
+            subtotal=snapshot["subtotal"],
+        )
+        self.data["discount_code"] = discount_code.code
+        self.save()
+
+    def remove_discount_code(self):
+        self.data.pop("discount_code", None)
+        self.save()
 
     def accept_current_prices(self, expected_prices):
         items = list(RzutItem.objects.filter(pk__in=self.items))
@@ -168,7 +205,15 @@ class RzutCart:
                 for line in reservation.items.order_by("rzut_item_id")
             },
         }
+        if reservation.discount_code_snapshot:
+            self.data["discount_code"] = reservation.discount_code_snapshot
         self.save()
+
+    def _reset_if_empty(self):
+        if self.items:
+            return
+        self.data["rzut_id"] = None
+        self.data.pop("discount_code", None)
 
     @staticmethod
     def _validate_quantity(quantity):

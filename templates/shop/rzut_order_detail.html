@@ -32,8 +32,18 @@
             </div>
             {% endfor %}
             <hr>
+            {% if order.discount_code_snapshot %}
             <div class="summary-row">
-                <strong>suma</strong>
+                <span>Suma przed rabatem</span>
+                <span>{{ order.subtotal|floatformat:"2" }} zł</span>
+            </div>
+            <div class="summary-row">
+                <span>Kod Rabatowy {{ order.discount_code_snapshot }}</span>
+                <span>−{{ order.discount_amount|floatformat:"2" }} zł</span>
+            </div>
+            {% endif %}
+            <div class="summary-row">
+                <strong>do zapłaty</strong>
                 <span class="kk-price">{{ order.total|floatformat:"2" }} zł</span>
             </div>
         </div>

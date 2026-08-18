@@ -638,6 +638,114 @@ class RzutItem(models.Model):
         return f"Zostało {available} sztuk"
 
 
+class DiscountCode(models.Model):
+    class Type(models.TextChoices):
+        PERCENTAGE = "percentage", "Procentowy"
+        FIXED_AMOUNT = "fixed_amount", "Kwotowy"
+
+    code = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name="Kod Rabatowy",
+    )
+    discount_type = models.CharField(
+        max_length=20,
+        choices=Type.choices,
+        verbose_name="Rodzaj rabatu",
+    )
+    value = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01"))],
+        verbose_name="Wartość rabatu",
+    )
+    rzut = models.ForeignKey(
+        OrderEdition,
+        on_delete=models.PROTECT,
+        related_name="discount_codes",
+        blank=True,
+        null=True,
+        verbose_name="Rzut",
+        help_text="Pozostaw puste, aby Kod działał we wszystkich Rzutach.",
+    )
+    is_active = models.BooleanField(default=True, verbose_name="Aktywny")
+    valid_from = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Ważny od",
+    )
+    valid_until = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Ważny do",
+    )
+    minimum_order_total = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        verbose_name="Minimalna wartość Zamówienia",
+    )
+    usage_limit = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1)],
+        verbose_name="Łączny limit użyć",
+    )
+    per_customer_limit = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)],
+        verbose_name="Limit użyć na e-mail",
+    )
+    allocated_uses = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        verbose_name="Przydzielone użycia",
+    )
+    allocation_revision = models.PositiveBigIntegerField(
+        default=0,
+        editable=False,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Kod Rabatowy"
+        verbose_name_plural = "Kody Rabatowe"
+        ordering = ["code"]
+
+    def __str__(self):
+        return self.code
+
+    def clean(self):
+        super().clean()
+        self.code = (self.code or "").strip().upper()
+        errors = {}
+        if not self.code:
+            errors["code"] = "Podaj Kod Rabatowy."
+        if (
+            self.discount_type == self.Type.PERCENTAGE
+            and self.value is not None
+            and self.value > 100
+        ):
+            errors["value"] = "Rabat procentowy nie może przekraczać 100%."
+        if (
+            self.valid_from
+            and self.valid_until
+            and self.valid_until <= self.valid_from
+        ):
+            errors["valid_until"] = (
+                "Koniec ważności musi przypadać po jej początku."
+            )
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.code = (self.code or "").strip().upper()
+        super().save(*args, **kwargs)
+
+
 class Reservation(models.Model):
     class Status(models.TextChoices):
         ACTIVE = "active", "Aktywna"
@@ -681,6 +789,34 @@ class Reservation(models.Model):
     )
     pickup_ends_at = models.TimeField(
         verbose_name="Koniec Przedziału Odbioru",
+    )
+    subtotal = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+        verbose_name="Suma przed rabatem",
+    )
+    discount_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+        verbose_name="Rabat",
+    )
+    discount_code = models.ForeignKey(
+        DiscountCode,
+        on_delete=models.PROTECT,
+        related_name="reservations",
+        blank=True,
+        null=True,
+        verbose_name="Kod Rabatowy",
+    )
+    discount_code_snapshot = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        verbose_name="Zapisany Kod Rabatowy",
     )
     total = models.DecimalField(
         max_digits=10,
@@ -835,6 +971,34 @@ class RzutOrder(models.Model):
     pickup_ends_at = models.TimeField(
         verbose_name="Koniec Przedziału Odbioru",
     )
+    subtotal = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+        verbose_name="Suma przed rabatem",
+    )
+    discount_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+        verbose_name="Rabat",
+    )
+    discount_code = models.ForeignKey(
+        DiscountCode,
+        on_delete=models.PROTECT,
+        related_name="rzut_orders",
+        blank=True,
+        null=True,
+        verbose_name="Kod Rabatowy",
+    )
+    discount_code_snapshot = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        verbose_name="Zapisany Kod Rabatowy",
+    )
     total = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -866,6 +1030,8 @@ class RzutOrder(models.Model):
         verbose_name="Identyfikator sesji P24",
     )
     p24_order_id = models.PositiveBigIntegerField(
+        blank=True,
+        null=True,
         unique=True,
         verbose_name="Identyfikator zamówienia P24",
     )
