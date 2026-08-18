@@ -21,6 +21,11 @@ urlpatterns = [
         name="rzut_p24_return",
     ),
     path(
+        "zamowienia/rezerwacja/<str:session_id>/ponow/",
+        views.rzut_reservation_retry,
+        name="rzut_reservation_retry",
+    ),
+    path(
         "zamowienia/zamowienie/<str:number>/",
         views.rzut_order_detail,
         name="rzut_order_detail",

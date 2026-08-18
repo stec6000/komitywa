@@ -164,6 +164,20 @@ def send_rzut_order_owner_notification(order):
     ).send(fail_silently=False)
 
 
+def send_rzut_order_attention_notification(order):
+    EmailMessage(
+        subject=f"PILNE: sprawdź Zamówienie Rzutu {order.number}",
+        body=(
+            f"{order.attention_message}\n\n"
+            f"Numer Zamówienia: {order.number}\n"
+            f"Rzut: {order.rzut.title}\n"
+            f"Strona Zamówienia Rzutu: {_rzut_order_public_url(order)}"
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[settings.CONTACT_EMAIL],
+    ).send(fail_silently=False)
+
+
 def deliver_rzut_order_notifications(order):
     deliveries = [
         (
@@ -177,6 +191,12 @@ def deliver_rzut_order_notifications(order):
             send_rzut_order_owner_notification,
         ),
     ]
+    if order.requires_attention:
+        deliveries.append((
+            "attention_notification_sent_at",
+            "attention_notification_error",
+            send_rzut_order_attention_notification,
+        ))
     for sent_field, error_field, sender in deliveries:
         order.refresh_from_db(fields=[sent_field, error_field])
         if getattr(order, sent_field) is not None:

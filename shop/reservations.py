@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from datetime import time, timedelta
 from decimal import Decimal
@@ -16,8 +17,11 @@ from .models import (
 )
 
 
+logger = logging.getLogger(__name__)
+
 RESERVATION_TIME_LIMIT_MINUTES = 15
 RESERVATION_LIFETIME = timedelta(minutes=RESERVATION_TIME_LIMIT_MINUTES)
+RESERVATION_RETENTION = timedelta(days=30)
 
 
 @dataclass(frozen=True)
@@ -211,7 +215,12 @@ def _create_reservation(*, rzut_id, lines, checkout, now):
         return reservation
 
 
-def fail_reservation(reservation):
+def _release_active_reservation(
+    reservation,
+    *,
+    target_status,
+    expired_by=None,
+):
     with transaction.atomic():
         OrderEdition.objects.filter(pk=reservation.rzut_id).update(
             allocation_revision=F("allocation_revision") + 1
@@ -219,8 +228,11 @@ def fail_reservation(reservation):
         current = Reservation.objects.select_for_update().get(
             pk=reservation.pk
         )
-        if current.status != Reservation.Status.ACTIVE:
-            return current
+        if (
+            current.status != Reservation.Status.ACTIVE
+            or (expired_by is not None and current.expires_at > expired_by)
+        ):
+            return current, False
 
         for line in current.items.order_by("rzut_item_id"):
             released = RzutItem.objects.filter(
@@ -231,16 +243,64 @@ def fail_reservation(reservation):
             )
             if not released:
                 raise RuntimeError(
-                    "Nie można zwolnić Puli dla nieudanej Rezerwacji."
+                    "Nie można zwolnić Puli dla nieaktywnej Rezerwacji."
                 )
-        current.status = Reservation.Status.FAILED
+        current.status = target_status
         current.save(update_fields=["status", "updated_at"])
-        return current
+        return current, True
+
+
+def fail_reservation(reservation):
+    current, _ = _release_active_reservation(
+        reservation,
+        target_status=Reservation.Status.FAILED,
+    )
+    return current
+
+
+def expire_due_reservations(*, now=None):
+    now = now or timezone.now()
+    reservations = list(
+        Reservation.objects.filter(
+            status=Reservation.Status.ACTIVE,
+            expires_at__lte=now,
+        ).only("pk", "rzut_id")
+    )
+    expired_count = 0
+    for reservation in reservations:
+        _, changed = _release_active_reservation(
+            reservation,
+            target_status=Reservation.Status.EXPIRED,
+            expired_by=now,
+        )
+        if changed:
+            expired_count += 1
+    return expired_count
+
+
+def delete_old_inactive_reservations(*, now=None):
+    now = now or timezone.now()
+    reservations = Reservation.objects.filter(
+        status__in=[
+            Reservation.Status.EXPIRED,
+            Reservation.Status.FAILED,
+        ],
+        updated_at__lt=now - RESERVATION_RETENTION,
+    )
+    deleted_count = reservations.count()
+    reservations.delete()
+    return deleted_count
 
 
 def confirm_reservation(*, reservation_id, p24_order_id, confirmed_at=None):
     confirmed_at = confirmed_at or timezone.now()
     with transaction.atomic():
+        reservation_rzut_id = Reservation.objects.values_list(
+            "rzut_id", flat=True
+        ).get(pk=reservation_id)
+        OrderEdition.objects.filter(pk=reservation_rzut_id).update(
+            allocation_revision=F("allocation_revision") + 1
+        )
         reservation = (
             Reservation.objects.select_for_update()
             .select_related("rzut")
@@ -251,9 +311,43 @@ def confirm_reservation(*, reservation_id, p24_order_id, confirmed_at=None):
         ).first()
         if existing_order is not None:
             return existing_order, False
-        if reservation.status != Reservation.Status.ACTIVE:
+        pool_was_released = reservation.status == Reservation.Status.EXPIRED
+        is_late_payment = (
+            pool_was_released or confirmed_at >= reservation.expires_at
+        )
+        if reservation.status not in [
+            Reservation.Status.ACTIVE,
+            Reservation.Status.EXPIRED,
+        ]:
             raise ReservationConfirmationError(
                 "Rezerwacja nie oczekuje na potwierdzenie płatności."
+            )
+
+        overallocated_items = []
+        if pool_was_released:
+            for line in reservation.items.select_related(
+                "rzut_item__product"
+            ).order_by("rzut_item_id"):
+                item = RzutItem.objects.get(pk=line.rzut_item_id)
+                new_allocation = item.allocated_quantity + line.quantity
+                RzutItem.objects.filter(pk=item.pk).update(
+                    allocated_quantity=F("allocated_quantity") + line.quantity
+                )
+                if new_allocation > item.pool:
+                    overallocated_items.append(
+                        f"{item.product.title}: {new_allocation}/{item.pool}"
+                    )
+
+        attention_message = ""
+        if is_late_payment:
+            allocation_warning = (
+                f"Przekroczenie Puli: {', '.join(overallocated_items)}."
+                if overallocated_items
+                else "Brak bieżącego przekroczenia Puli."
+            )
+            attention_message = (
+                "Późna płatność P24 potwierdziła Rezerwację po terminie. "
+                f"{allocation_warning} Zweryfikuj produkcję i Zamówienie."
             )
 
         order = RzutOrder.objects.create(
@@ -276,6 +370,8 @@ def confirm_reservation(*, reservation_id, p24_order_id, confirmed_at=None):
             ),
             terms_accepted_at=reservation.terms_accepted_at,
             payment_confirmed_at=confirmed_at,
+            requires_attention=is_late_payment,
+            attention_message=attention_message,
         )
         reservation_items = reservation.items.select_related(
             "rzut_item__product"
@@ -294,4 +390,11 @@ def confirm_reservation(*, reservation_id, p24_order_id, confirmed_at=None):
         ])
         reservation.status = Reservation.Status.CONFIRMED
         reservation.save(update_fields=["status", "updated_at"])
+        if is_late_payment:
+            logger.critical(
+                "PILNE: %s Rezerwacja %d, Zamówienie Rzutu %s.",
+                attention_message,
+                reservation.pk,
+                order.number,
+            )
         return order, True

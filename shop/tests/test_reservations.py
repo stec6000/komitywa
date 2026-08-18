@@ -195,6 +195,29 @@ class TestCreateReservation(ReservationTestCase):
         item.refresh_from_db()
         self.assertEqual(item.allocated_quantity, 0)
 
+    def test_paused_and_closed_rzut_reject_new_reservations(self):
+        for status in [OrderEdition.Status.PAUSED, OrderEdition.Status.CLOSED]:
+            with self.subTest(status=status):
+                rzut = self.create_open_rzut()
+                item = self.create_item(rzut, title=f"Chleb {status}")
+                rzut.status = status
+                rzut.save(update_fields=["status"])
+
+                with self.assertRaisesMessage(
+                    ReservationUnavailable,
+                    "nie przyjmuje już nowych Rezerwacji",
+                ):
+                    create_reservation(
+                        rzut_id=rzut.pk,
+                        lines=[
+                            ReservationLineRequest(item.pk, 1, item.price)
+                        ],
+                        checkout=self.checkout_data(),
+                    )
+
+                item.refresh_from_db()
+                self.assertEqual(item.allocated_quantity, 0)
+
 
 class TestFailReservation(ReservationTestCase):
     def test_failure_releases_every_quantity_once(self):

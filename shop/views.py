@@ -43,6 +43,7 @@ from .reservations import (
     ReservationLineRequest,
     confirm_reservation,
     create_reservation,
+    expire_due_reservations,
     fail_reservation,
 )
 
@@ -146,6 +147,7 @@ def cart_remove(request, product_id):
 
 
 def rzut_cart_view(request):
+    expire_due_reservations()
     cart = RzutCart(request)
     snapshot = cart.snapshot()
     for item_label in snapshot["removed_items"]:
@@ -217,6 +219,7 @@ def rzut_cart_accept_prices(request):
 
 
 def rzut_checkout(request):
+    expire_due_reservations()
     cart = RzutCart(request)
     snapshot = cart.snapshot()
     if snapshot["removed_items"]:
@@ -326,6 +329,26 @@ def rzut_p24_return(request):
             "hide_newsletter": True,
         },
     )
+
+
+@require_POST
+def rzut_reservation_retry(request, session_id):
+    reservation = get_object_or_404(
+        Reservation.objects.filter(
+            status__in=[
+                Reservation.Status.EXPIRED,
+                Reservation.Status.FAILED,
+            ]
+        ).prefetch_related("items"),
+        p24_session_id=session_id,
+    )
+    RzutCart(request).restore(reservation)
+    messages.success(
+        request,
+        "Koszyk Rzutu został odtworzony. Sprawdź aktualne ceny i Dostępność "
+        "przed ponowną próbą.",
+    )
+    return redirect("shop:rzut_cart")
 
 
 def rzut_order_detail(request, number):

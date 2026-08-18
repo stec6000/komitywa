@@ -21,6 +21,10 @@
             <div class="kk-payment-state__mark kk-payment-state__mark--muted" aria-hidden="true">!</div>
             <h1 id="payment-check-title">Płatność nie jest potwierdzona</h1>
             <p class="lead">Ta Rezerwacja nie jest już aktywna. Jeśli środki zostały pobrane, skontaktuj się z nami i podaj identyfikator płatności.</p>
+            <form method="post" action="{% url 'shop:rzut_reservation_retry' session_id=reservation.p24_session_id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-accent">Przywróć Koszyk Rzutu →</button>
+            </form>
             <a href="{% url 'contact' %}" class="btn btn-accent">skontaktuj się z nami →</a>
             {% else %}
             <div class="kk-payment-state__mark kk-payment-state__mark--muted" aria-hidden="true">·</div>

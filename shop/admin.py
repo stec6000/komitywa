@@ -3,7 +3,14 @@ from django.contrib import admin
 from django.forms.models import BaseInlineFormSet
 from django.utils.html import format_html
 
-from .models import Order, OrderEdition, Product, ProductCategory, RzutItem
+from .models import (
+    Order,
+    OrderEdition,
+    Product,
+    ProductCategory,
+    Reservation,
+    RzutItem,
+)
 
 
 @admin.register(ProductCategory)
@@ -188,6 +195,56 @@ class OrderEditionAdmin(admin.ModelAdmin):
     def phase_display(self, obj):
         phase = obj.phase_at()
         return OrderEdition.Phase(phase).label if phase else "—"
+
+
+@admin.register(Reservation)
+class ReservationAdmin(admin.ModelAdmin):
+    actions = None
+    list_select_related = ["rzut", "rzut_order"]
+    list_display = [
+        "id",
+        "rzut",
+        "customer_email",
+        "status",
+        "requires_attention",
+        "expires_at",
+        "updated_at",
+    ]
+    list_filter = ["status", "rzut"]
+    search_fields = [
+        "customer_name",
+        "customer_email",
+        "p24_session_id",
+        "rzut__title",
+    ]
+    readonly_fields = [
+        "rzut",
+        "status",
+        "customer_name",
+        "customer_email",
+        "customer_phone",
+        "customer_notes",
+        "pickup_starts_at",
+        "pickup_ends_at",
+        "total",
+        "p24_session_id",
+        "data_processing_accepted_at",
+        "terms_accepted_at",
+        "expires_at",
+        "created_at",
+        "updated_at",
+    ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @admin.display(boolean=True, description="Pilna uwaga")
+    def requires_attention(self, obj):
+        order = getattr(obj, "rzut_order", None)
+        return bool(order and order.requires_attention)
 
 
 @admin.register(Product)

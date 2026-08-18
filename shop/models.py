@@ -561,10 +561,6 @@ class RzutItem(models.Model):
                 ),
                 name="rzut_item_customer_limit_positive",
             ),
-            models.CheckConstraint(
-                condition=Q(allocated_quantity__lte=F("pool")),
-                name="rzut_item_allocation_within_pool",
-            ),
         ]
 
     def __str__(self):
@@ -901,6 +897,25 @@ class RzutOrder(models.Model):
         blank=True,
         default="",
         verbose_name="Błąd powiadomienia właściciela",
+    )
+    requires_attention = models.BooleanField(
+        default=False,
+        verbose_name="Wymaga pilnej uwagi",
+    )
+    attention_message = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Powód pilnej uwagi",
+    )
+    attention_notification_sent_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Wysłanie pilnego alertu",
+    )
+    attention_notification_error = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Błąd pilnego alertu",
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

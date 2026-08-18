@@ -10,13 +10,21 @@ from django.urls import reverse
 from django.utils import timezone
 
 from shop.emails import send_rzut_order_customer_confirmation
-from shop.models import Order, OrderEdition, Product, RzutItem, RzutOrder
+from shop.models import (
+    Order,
+    OrderEdition,
+    Product,
+    Reservation,
+    RzutItem,
+    RzutOrder,
+)
 from shop.payment import calculate_sign
 from shop.reservations import (
     ReservationCheckoutData,
     ReservationLineRequest,
     confirm_reservation,
     create_reservation,
+    expire_due_reservations,
 )
 
 
@@ -103,6 +111,19 @@ class TestConfirmReservation(RzutOrderTestCase):
     def test_active_reservation_can_finish_after_rzut_is_closed(self):
         reservation, _ = self.create_reservation()
         reservation.rzut.status = OrderEdition.Status.CLOSED
+        reservation.rzut.save(update_fields=["status"])
+
+        order, created = confirm_reservation(
+            reservation_id=reservation.pk,
+            p24_order_id=987654,
+        )
+
+        self.assertTrue(created)
+        self.assertEqual(order.payment_status, "paid")
+
+    def test_active_reservation_can_finish_after_rzut_is_paused(self):
+        reservation, _ = self.create_reservation()
+        reservation.rzut.status = OrderEdition.Status.PAUSED
         reservation.rzut.save(update_fields=["status"])
 
         order, created = confirm_reservation(
@@ -254,6 +275,103 @@ class TestRzutP24Webhook(RzutOrderTestCase):
         self.assertEqual(self.item.allocated_quantity, 2)
         self.assertEqual(len(mail.outbox), 2)
         self.assertEqual(verify_payment.call_count, 2)
+
+    @patch("shop.views.verify_transaction", return_value=True)
+    def test_late_payment_creates_order_and_raises_overallocation_alert(
+        self,
+        verify_payment,
+    ):
+        RzutItem.objects.filter(pk=self.item.pk).update(pool=2)
+        expire_due_reservations(now=self.reservation.expires_at)
+        create_reservation(
+            rzut_id=self.reservation.rzut_id,
+            lines=[ReservationLineRequest(self.item.pk, 2, self.item.price)],
+            checkout=ReservationCheckoutData(
+                name="Anna Nowak",
+                email="anna@example.com",
+                phone="",
+                notes="",
+                pickup_starts_at=time(10, 0),
+                pickup_ends_at=time(11, 0),
+            ),
+        )
+
+        with self.assertLogs("shop.reservations", level="CRITICAL") as logs:
+            response = self.client.post(
+                reverse("shop:rzut_p24_webhook"),
+                data=json.dumps(self.payload()),
+                content_type="application/json",
+            )
+
+        self.reservation.refresh_from_db()
+        self.item.refresh_from_db()
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(self.reservation.status, "confirmed")
+        self.assertEqual(RzutOrder.objects.count(), 1)
+        order = RzutOrder.objects.get()
+        self.assertTrue(order.requires_attention)
+        self.assertIn("Przekroczenie Puli", order.attention_message)
+        self.assertIsNotNone(order.attention_notification_sent_at)
+        self.assertEqual(self.item.allocated_quantity, 4)
+        self.assertEqual(self.item.available_quantity, -2)
+        self.assertIn("PILNE", " ".join(logs.output))
+        self.assertEqual(len(mail.outbox), 3)
+        self.assertEqual(mail.outbox[2].to, ["owner@example.com"])
+        self.assertIn("PILNE", mail.outbox[2].subject)
+        verify_payment.assert_called_once()
+
+    @patch("shop.views.verify_transaction", return_value=True)
+    def test_overdue_active_payment_is_alerted_without_reallocating_pool(
+        self,
+        verify_payment,
+    ):
+        Reservation.objects.filter(pk=self.reservation.pk).update(
+            expires_at=timezone.now() - timedelta(seconds=1)
+        )
+
+        with self.assertLogs("shop.reservations", level="CRITICAL"):
+            response = self.client.post(
+                reverse("shop:rzut_p24_webhook"),
+                data=json.dumps(self.payload()),
+                content_type="application/json",
+            )
+
+        order = RzutOrder.objects.get()
+        self.item.refresh_from_db()
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertTrue(order.requires_attention)
+        self.assertIn("Późna płatność", order.attention_message)
+        self.assertEqual(self.item.allocated_quantity, 2)
+        self.assertEqual(len(mail.outbox), 3)
+        verify_payment.assert_called_once()
+
+    @patch("shop.emails.EmailMessage.send")
+    @patch("shop.views.verify_transaction", return_value=True)
+    def test_late_alert_email_failure_does_not_roll_back_order(
+        self,
+        verify_payment,
+        send_email,
+    ):
+        Reservation.objects.filter(pk=self.reservation.pk).update(
+            expires_at=timezone.now() - timedelta(seconds=1)
+        )
+        send_email.side_effect = [1, 1, RuntimeError("SMTP niedostępne")]
+
+        with self.assertLogs("shop.reservations", level="CRITICAL"):
+            response = self.client.post(
+                reverse("shop:rzut_p24_webhook"),
+                data=json.dumps(self.payload()),
+                content_type="application/json",
+            )
+
+        order = RzutOrder.objects.get()
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(order.payment_status, "paid")
+        self.assertTrue(order.requires_attention)
+        self.assertIsNone(order.attention_notification_sent_at)
+        self.assertIn("SMTP niedostępne", order.attention_notification_error)
+        self.assertEqual(send_email.call_count, 3)
+        verify_payment.assert_called_once()
 
     @patch("shop.views.verify_transaction")
     def test_invalid_signature_is_rejected_before_p24_verification(

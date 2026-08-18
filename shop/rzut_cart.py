@@ -157,6 +157,19 @@ class RzutCart:
         self.session.pop(RZUT_CART_SESSION_KEY, None)
         self.session.modified = True
 
+    def restore(self, reservation):
+        self.data = {
+            "rzut_id": reservation.rzut_id,
+            "items": {
+                str(line.rzut_item_id): {
+                    "quantity": line.quantity,
+                    "price": str(line.unit_price),
+                }
+                for line in reservation.items.order_by("rzut_item_id")
+            },
+        }
+        self.save()
+
     @staticmethod
     def _validate_quantity(quantity):
         if not isinstance(quantity, int) or isinstance(quantity, bool):
