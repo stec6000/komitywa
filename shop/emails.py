@@ -122,13 +122,30 @@ def _rzut_order_discount_text(order):
     )
 
 
+def _rzut_order_payment_text(order):
+    text = (
+        f"Status Płatności: {order.get_payment_status_display()}\n"
+        f"Metoda Płatności: {order.get_payment_method_display()}\n"
+    )
+    if order.payment_method_details:
+        text += f"Wyjaśnienie płatności: {order.payment_method_details}\n"
+    return text
+
+
 def send_rzut_order_customer_confirmation(order):
     rzut = order.rzut
-    opening = (
-        "Twoje Zamówienie Rzutu jest przyjęte. Płatność nie była wymagana."
-        if order.payment_status == order.PaymentStatus.NOT_REQUIRED
-        else "Płatność została potwierdzona, a Twoje Zamówienie Rzutu jest przyjęte."
-    )
+    if order.is_manual:
+        opening = "Twoje Zamówienie Ręczne jest przyjęte."
+    elif order.payment_status == order.PaymentStatus.NOT_REQUIRED:
+        opening = (
+            "Twoje Zamówienie Rzutu jest przyjęte. "
+            "Płatność nie była wymagana."
+        )
+    else:
+        opening = (
+            "Płatność została potwierdzona, a Twoje Zamówienie Rzutu "
+            "jest przyjęte."
+        )
     body = (
         f"Cześć {order.customer_name}!\n\n"
         f"{opening}\n\n"
@@ -137,6 +154,7 @@ def send_rzut_order_customer_confirmation(order):
         f"Pozycje Zamówienia:\n{_rzut_order_items_text(order)}\n\n"
         f"{_rzut_order_discount_text(order)}"
         f"Do zapłaty: {_format_pln(order.total)}\n"
+        f"{_rzut_order_payment_text(order)}"
         f"Odbiór: {rzut.pickup_date:%d.%m.%Y}, "
         f"{order.pickup_starts_at:%H:%M}–{order.pickup_ends_at:%H:%M}\n"
         f"Miejsce: {rzut.pickup_place_name}, {rzut.pickup_address}\n"
@@ -148,7 +166,10 @@ def send_rzut_order_customer_confirmation(order):
         "https://kuchennakomitywa.pl"
     )
     EmailMessage(
-        subject=f"Zamówienie Rzutu {order.number} — Kuchenna Komitywa",
+        subject=(
+            f"{'Zamówienie Ręczne' if order.is_manual else 'Zamówienie Rzutu'} "
+            f"{order.number} — Kuchenna Komitywa"
+        ),
         body=body,
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[order.customer_email],
@@ -201,12 +222,13 @@ def deliver_rzut_order_notifications(order):
             "customer_confirmation_error",
             send_rzut_order_customer_confirmation,
         ),
-        (
+    ]
+    if not order.is_manual:
+        deliveries.append((
             "owner_notification_sent_at",
             "owner_notification_error",
             send_rzut_order_owner_notification,
-        ),
-    ]
+        ))
     if order.requires_attention:
         deliveries.append((
             "attention_notification_sent_at",

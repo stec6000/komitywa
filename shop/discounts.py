@@ -5,7 +5,7 @@ from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
 
-from .models import DiscountCode, Reservation
+from .models import DiscountCode, Reservation, RzutOrder
 
 
 MONEY_QUANTUM = Decimal("0.01")
@@ -95,6 +95,23 @@ def validate_discount_code(*, discount_code, rzut_id, subtotal, now=None):
     return discount_amount
 
 
+def _customer_discount_uses(*, discount_code, customer_email):
+    reservation_uses = Reservation.objects.filter(
+        discount_code=discount_code,
+        customer_email=customer_email,
+        status__in=[
+            Reservation.Status.ACTIVE,
+            Reservation.Status.CONFIRMED,
+        ],
+    ).count()
+    manual_order_uses = RzutOrder.objects.filter(
+        is_manual=True,
+        discount_code=discount_code,
+        customer_email=customer_email,
+    ).count()
+    return reservation_uses + manual_order_uses
+
+
 def reserve_discount_use(
     *,
     code,
@@ -119,14 +136,10 @@ def reserve_discount_use(
             subtotal=subtotal,
             now=now,
         )
-        customer_uses = Reservation.objects.filter(
+        customer_uses = _customer_discount_uses(
             discount_code=discount_code,
             customer_email=customer_email,
-            status__in=[
-                Reservation.Status.ACTIVE,
-                Reservation.Status.CONFIRMED,
-            ],
-        ).count()
+        )
         if customer_uses >= discount_code.per_customer_limit:
             raise DiscountCodeUnavailable(
                 "Limit użyć tego Kodu Rabatowego dla podanego e-maila "
@@ -161,14 +174,10 @@ def reclaim_discount_use(*, discount_code_id, customer_email):
             )
         discount_code = DiscountCode.objects.get(pk=discount_code_id)
         new_uses = discount_code.allocated_uses + 1
-        customer_uses = Reservation.objects.filter(
+        customer_uses = _customer_discount_uses(
             discount_code=discount_code,
             customer_email=customer_email,
-            status__in=[
-                Reservation.Status.ACTIVE,
-                Reservation.Status.CONFIRMED,
-            ],
-        ).count()
+        )
         DiscountCode.objects.filter(pk=discount_code.pk).update(
             allocated_uses=F("allocated_uses") + 1
         )

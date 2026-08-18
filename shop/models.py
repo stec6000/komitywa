@@ -938,7 +938,20 @@ class RzutOrder(models.Model):
         Reservation,
         on_delete=models.PROTECT,
         related_name="rzut_order",
+        blank=True,
+        null=True,
         verbose_name="Rezerwacja",
+    )
+    is_manual = models.BooleanField(
+        default=False,
+        verbose_name="Zamówienie Ręczne",
+    )
+    manual_creation_token = models.UUIDField(
+        blank=True,
+        null=True,
+        unique=True,
+        editable=False,
+        verbose_name="Token utworzenia Zamówienia Ręcznego",
     )
     rzut = models.ForeignKey(
         OrderEdition,
@@ -1017,6 +1030,12 @@ class RzutOrder(models.Model):
         default=PaymentMethod.NONE,
         verbose_name="Metoda Płatności",
     )
+    payment_method_details = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        verbose_name="Wyjaśnienie Metody Płatności",
+    )
     fulfillment_stage = models.CharField(
         max_length=20,
         choices=FulfillmentStage.choices,
@@ -1026,6 +1045,8 @@ class RzutOrder(models.Model):
     p24_session_id = models.CharField(
         max_length=64,
         unique=True,
+        blank=True,
+        null=True,
         editable=False,
         verbose_name="Identyfikator sesji P24",
     )
@@ -1036,12 +1057,18 @@ class RzutOrder(models.Model):
         verbose_name="Identyfikator zamówienia P24",
     )
     data_processing_accepted_at = models.DateTimeField(
+        blank=True,
+        null=True,
         verbose_name="Akceptacja przetwarzania danych",
     )
     terms_accepted_at = models.DateTimeField(
+        blank=True,
+        null=True,
         verbose_name="Akceptacja regulaminu",
     )
     payment_confirmed_at = models.DateTimeField(
+        blank=True,
+        null=True,
         verbose_name="Potwierdzenie płatności",
     )
     customer_confirmation_sent_at = models.DateTimeField(
@@ -1094,6 +1121,21 @@ class RzutOrder(models.Model):
             models.CheckConstraint(
                 condition=Q(total__gte=0),
                 name="rzut_order_total_nonnegative",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(
+                        is_manual=True,
+                        reservation__isnull=True,
+                        p24_session_id__isnull=True,
+                    )
+                    | Q(
+                        is_manual=False,
+                        reservation__isnull=False,
+                        p24_session_id__isnull=False,
+                    )
+                ),
+                name="rzut_order_source_consistent",
             ),
         ]
 

@@ -4,7 +4,7 @@ from datetime import time, timedelta
 from decimal import Decimal
 
 from django.db import OperationalError, transaction
-from django.db.models import F, Sum
+from django.db.models import F
 from django.utils import timezone
 
 from .discounts import (
@@ -19,7 +19,11 @@ from .models import (
     ReservationItem,
     RzutItem,
     RzutOrder,
-    RzutOrderItem,
+)
+from .rzut_orders import (
+    RzutOrderLineSource,
+    customer_allocated_quantity,
+    materialize_rzut_order_items,
 )
 
 
@@ -175,19 +179,14 @@ def _create_reservation(*, rzut_id, lines, checkout, discount_code, now):
                 )
 
             if item.per_customer_limit is not None:
-                already_allocated = (
-                    ReservationItem.objects.filter(
+                if (
+                    customer_allocated_quantity(
                         rzut_item_id=item.pk,
-                        reservation__rzut_id=rzut_id,
-                        reservation__customer_email=normalized_email,
-                        reservation__status__in=[
-                            Reservation.Status.ACTIVE,
-                            Reservation.Status.CONFIRMED,
-                        ],
-                    ).aggregate(total=Sum("quantity"))["total"]
-                    or 0
-                )
-                if already_allocated + line.quantity > item.per_customer_limit:
+                        customer_email=normalized_email,
+                    )
+                    + line.quantity
+                    > item.per_customer_limit
+                ):
                     raise ReservationCustomerLimitExceeded(
                         f"Limit Klienta dla Pozycji Rzutu "
                         f"„{item.product.title}” "
@@ -379,18 +378,17 @@ def _materialize_order(
     reservation_items = reservation.items.select_related(
         "rzut_item__product"
     ).order_by("rzut_item_id")
-    RzutOrderItem.objects.bulk_create([
-        RzutOrderItem(
-            order=order,
-            rzut_item=line.rzut_item,
-            product_name=line.rzut_item.product.title,
-            portion=line.rzut_item.portion,
-            unit_price=line.unit_price,
-            quantity=line.quantity,
-            line_total=line.unit_price * line.quantity,
-        )
-        for line in reservation_items
-    ])
+    materialize_rzut_order_items(
+        order=order,
+        lines=[
+            RzutOrderLineSource(
+                rzut_item=line.rzut_item,
+                unit_price=line.unit_price,
+                quantity=line.quantity,
+            )
+            for line in reservation_items
+        ],
+    )
     reservation.status = Reservation.Status.CONFIRMED
     reservation.save(update_fields=["status", "updated_at"])
     return order

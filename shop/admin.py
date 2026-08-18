@@ -1,8 +1,22 @@
+import uuid
+
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.core.exceptions import PermissionDenied
 from django.forms.models import BaseInlineFormSet
+from django.shortcuts import redirect
+from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils.html import format_html
 
+from .emails import deliver_rzut_order_notifications
+from .forms import ManualRzutOrderAdminForm
+from .manual_orders import (
+    ManualOrderData,
+    ManualOrderError,
+    ManualOrderLineRequest,
+    create_manual_order,
+)
 from .models import (
     DiscountCode,
     Order,
@@ -11,6 +25,8 @@ from .models import (
     ProductCategory,
     Reservation,
     RzutItem,
+    RzutOrder,
+    RzutOrderItem,
 )
 
 
@@ -267,6 +283,163 @@ class ReservationAdmin(admin.ModelAdmin):
     def requires_attention(self, obj):
         order = getattr(obj, "rzut_order", None)
         return bool(order and order.requires_attention)
+
+
+class RzutOrderItemReadonlyInline(admin.TabularInline):
+    model = RzutOrderItem
+    extra = 0
+    can_delete = False
+    fields = [
+        "product_name",
+        "portion",
+        "unit_price",
+        "quantity",
+        "line_total",
+        "rzut_item",
+    ]
+    readonly_fields = fields
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(RzutOrder)
+class RzutOrderAdmin(admin.ModelAdmin):
+    add_form_template = "admin/shop/rzutorder/add_form.html"
+    actions = None
+    inlines = [RzutOrderItemReadonlyInline]
+    list_select_related = ["rzut", "discount_code"]
+    list_display = [
+        "number",
+        "is_manual",
+        "rzut",
+        "customer_email",
+        "payment_status",
+        "payment_method",
+        "fulfillment_stage",
+        "total",
+        "created_at",
+    ]
+    list_filter = [
+        "is_manual",
+        "payment_status",
+        "payment_method",
+        "fulfillment_stage",
+        "rzut",
+    ]
+    search_fields = [
+        "number",
+        "customer_name",
+        "customer_email",
+        "rzut__title",
+    ]
+    readonly_fields = [
+        "number",
+        "reservation",
+        "is_manual",
+        "manual_creation_token",
+        "rzut",
+        "customer_name",
+        "customer_email",
+        "customer_phone",
+        "customer_notes",
+        "pickup_starts_at",
+        "pickup_ends_at",
+        "subtotal",
+        "discount_amount",
+        "discount_code",
+        "discount_code_snapshot",
+        "total",
+        "payment_status",
+        "payment_method",
+        "payment_method_details",
+        "fulfillment_stage",
+        "p24_session_id",
+        "p24_order_id",
+        "data_processing_accepted_at",
+        "terms_accepted_at",
+        "payment_confirmed_at",
+        "customer_confirmation_sent_at",
+        "customer_confirmation_error",
+        "owner_notification_sent_at",
+        "owner_notification_error",
+        "requires_attention",
+        "attention_message",
+        "attention_notification_sent_at",
+        "attention_notification_error",
+        "created_at",
+        "updated_at",
+    ]
+
+    def add_view(self, request, form_url="", extra_context=None):
+        if not self.has_add_permission(request):
+            raise PermissionDenied
+        initial = {"creation_token": uuid.uuid4()}
+        if request.method == "GET" and request.GET.get("rzut"):
+            initial["rzut"] = request.GET["rzut"]
+        form = ManualRzutOrderAdminForm(
+            request.POST or None,
+            initial=initial,
+        )
+        if request.method == "POST" and form.is_valid():
+            slot = form.cleaned_data["pickup_slot"]
+            try:
+                order = create_manual_order(
+                    data=ManualOrderData(
+                        rzut_id=form.cleaned_data["rzut"].pk,
+                        customer_name=form.cleaned_data["customer_name"],
+                        customer_email=form.cleaned_data["customer_email"],
+                        customer_phone=form.cleaned_data["customer_phone"],
+                        customer_notes=form.cleaned_data["customer_notes"],
+                        pickup_slot=slot,
+                        payment_status=form.cleaned_data["payment_status"],
+                        payment_method=form.cleaned_data["payment_method"],
+                        payment_method_details=form.cleaned_data[
+                            "payment_method_details"
+                        ],
+                        discount_code=form.cleaned_data["discount_code"],
+                        creation_token=form.cleaned_data["creation_token"],
+                    ),
+                    lines=[
+                        ManualOrderLineRequest(item_id, quantity)
+                        for item_id, quantity in form.cleaned_lines
+                    ],
+                )
+            except ManualOrderError as exc:
+                form.add_error(None, exc.user_message)
+            else:
+                deliver_rzut_order_notifications(order)
+                messages.success(
+                    request,
+                    f"Zamówienie Ręczne {order.number} zostało utworzone.",
+                )
+                return self._redirect_to_change(order)
+
+        context = {
+            **self.admin_site.each_context(request),
+            "opts": self.model._meta,
+            "title": "Dodaj Zamówienie Ręczne",
+            "form": form,
+            "media": form.media,
+            "has_view_permission": self.has_view_permission(request),
+            "has_add_permission": self.has_add_permission(request),
+            "extra_context": extra_context or {},
+        }
+        return TemplateResponse(request, self.add_form_template, context)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.method not in {"GET", "HEAD", "OPTIONS"}:
+            return False
+        return super().has_change_permission(request, obj)
+
+    @staticmethod
+    def _redirect_to_change(order):
+        return redirect(
+            reverse("admin:shop_rzutorder_change", args=[order.pk])
+        )
 
 
 @admin.register(Product)
