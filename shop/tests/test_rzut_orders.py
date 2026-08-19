@@ -4,6 +4,7 @@ import json
 from unittest.mock import patch
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -11,6 +12,7 @@ from django.utils import timezone
 
 from core import legal
 from shop.emails import send_rzut_order_customer_confirmation
+from shop.fulfillment import cancel_rzut_order
 from shop.models import (
     Order,
     OrderEdition,
@@ -107,6 +109,42 @@ class TestConfirmReservation(RzutOrderTestCase):
         self.assertEqual(order_item.unit_price, Decimal("26.00"))
         self.assertEqual(order_item.quantity, 2)
         self.assertEqual(order_item.line_total, Decimal("52.00"))
+        item.refresh_from_db()
+        self.assertEqual(item.allocated_quantity, 2)
+
+    def test_cancelled_online_order_no_longer_uses_customer_item_limit(self):
+        reservation, item = self.create_reservation()
+        item.per_customer_limit = 2
+        item.save(update_fields=["per_customer_limit"])
+        order, _ = confirm_reservation(
+            reservation_id=reservation.pk,
+            p24_order_id=12345,
+        )
+        actor = get_user_model().objects.create_superuser(
+            email="anulowanie@example.com",
+            password="testpass123",
+        )
+        cancel_rzut_order(
+            order_id=order.pk,
+            actor=actor,
+            restore_pool=True,
+        )
+
+        replacement = create_reservation(
+            rzut_id=item.rzut_id,
+            lines=[ReservationLineRequest(item.pk, 2, item.price)],
+            checkout=ReservationCheckoutData(
+                name="Jan Kowalski",
+                email="jan@example.com",
+                phone="+48 500 600 700",
+                notes="Ponowione Zamówienie Rzutu.",
+                pickup_starts_at=time(10, 0),
+                pickup_ends_at=time(11, 0),
+                terms_version=legal.CURRENT_TERMS.identifier,
+            ),
+        )
+
+        self.assertEqual(replacement.status, "active")
         item.refresh_from_db()
         self.assertEqual(item.allocated_quantity, 2)
 

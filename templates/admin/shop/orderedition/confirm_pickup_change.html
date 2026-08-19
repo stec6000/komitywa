@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    &rsaquo; <a href="{% url opts|admin_urlname:'change' rzut.pk %}">{{ rzut }}</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <ul class="messagelist">
+        <li class="warning">Zmiana wpłynie na {{ affected_count }} {% if affected_count == 1 %}istniejące Zamówienie Rzutu{% else %}istniejące Zamówienia Rzutu{% endif %}. Po zapisie będzie można sprawdzić odbiorców i wysłać wiadomość o zmianie.</li>
+    </ul>
+
+    <div class="module">
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Dane odbioru</th>
+                    <th scope="col">Przed zmianą</th>
+                    <th scope="col">Po zmianie</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><th scope="row">Dzień</th><td>{{ current_pickup.date|date:"d.m.Y" }}</td><td>{{ proposed_pickup.date|date:"d.m.Y" }}</td></tr>
+                <tr><th scope="row">Miejsce</th><td>{{ current_pickup.place }}</td><td>{{ proposed_pickup.place }}</td></tr>
+                <tr><th scope="row">Adres</th><td>{{ current_pickup.address }}</td><td>{{ proposed_pickup.address }}</td></tr>
+                <tr><th scope="row">Godziny</th><td>{{ current_pickup.starts_at|time:"H:i" }}–{{ current_pickup.ends_at|time:"H:i" }}</td><td>{{ proposed_pickup.starts_at|time:"H:i" }}–{{ proposed_pickup.ends_at|time:"H:i" }}</td></tr>
+                <tr><th scope="row">Instrukcja</th><td>{{ current_pickup.instructions }}</td><td>{{ proposed_pickup.instructions }}</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    {% if conflicting_orders %}
+    <ul class="messagelist">
+        <li class="error">Co najmniej jeden Przedział Odbioru nie mieści się w nowych godzinach. Najpierw popraw te Zamówienia Rzutu:</li>
+    </ul>
+    <ul>
+        {% for order in conflicting_orders %}
+        <li><a href="{% url 'admin:shop_rzutorder_change' order.pk %}">{{ order.number }}</a> — {{ order.pickup_starts_at|time:"H:i" }}–{{ order.pickup_ends_at|time:"H:i" }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <form method="post">
+        {% csrf_token %}
+        {% for key, value in post_data %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endfor %}
+        <input type="hidden" name="confirm_pickup_change" value="1">
+        <div class="submit-row">
+            <input type="submit" class="default" value="Potwierdzam zmianę odbioru">
+            <a href="{% url opts|admin_urlname:'change' rzut.pk %}" class="closelink">Anuluj</a>
+        </div>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

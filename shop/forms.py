@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 
 from core import legal
 
-from .models import OrderEdition, RzutItem, RzutOrder
+from .models import OrderEdition, PickupSlot, RzutItem, RzutOrder
 
 
 def pickup_slot_value(slot):
@@ -17,6 +17,142 @@ def pickup_slot_label(slot):
         f"{slot.starts_at.strftime('%H:%M')}–"
         f"{slot.ends_at.strftime('%H:%M')}"
     )
+
+
+ALLOWED_FULFILLMENT_TRANSITIONS = {
+    RzutOrder.FulfillmentStage.NEW: {
+        RzutOrder.FulfillmentStage.PREPARING,
+        RzutOrder.FulfillmentStage.CANCELLED,
+    },
+    RzutOrder.FulfillmentStage.PREPARING: {
+        RzutOrder.FulfillmentStage.READY,
+        RzutOrder.FulfillmentStage.CANCELLED,
+    },
+    RzutOrder.FulfillmentStage.READY: {
+        RzutOrder.FulfillmentStage.PICKED_UP,
+        RzutOrder.FulfillmentStage.CANCELLED,
+    },
+    RzutOrder.FulfillmentStage.PICKED_UP: set(),
+    RzutOrder.FulfillmentStage.CANCELLED: set(),
+}
+
+
+class CancellationDecisionForm(forms.Form):
+    restore_pool = forms.ChoiceField(
+        label="Decyzja o Puli",
+        choices=(
+            ("1", "Przywróć sztuki do Puli — mogą zostać ponownie zamówione."),
+            (
+                "0",
+                "Nie przywracaj sztuk — są już przygotowane lub nie mogą "
+                "wrócić do sprzedaży.",
+            ),
+        ),
+        widget=forms.RadioSelect,
+        error_messages={"required": "Wybierz, co zrobić ze sztukami."},
+    )
+
+    def clean_restore_pool(self):
+        return self.cleaned_data["restore_pool"] == "1"
+
+
+class RzutOrderFulfillmentAdminForm(forms.ModelForm):
+    EDITABLE_MODEL_FIELDS = (
+        "customer_name",
+        "customer_email",
+        "customer_phone",
+        "customer_notes",
+        "internal_note",
+        "payment_status",
+        "fulfillment_stage",
+    )
+    pickup_slot = forms.ChoiceField(label="Przedział Odbioru")
+
+    class Meta:
+        model = RzutOrder
+        fields = [
+            "customer_name",
+            "customer_email",
+            "customer_phone",
+            "customer_notes",
+            "pickup_slot",
+            "internal_note",
+            "payment_status",
+            "fulfillment_stage",
+        ]
+        widgets = {
+            "internal_note": forms.Textarea(attrs={"rows": 4}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.original_values = {
+            field: getattr(self.instance, field)
+            for field in self.EDITABLE_MODEL_FIELDS
+        }
+        self.original_values.update(
+            pickup_starts_at=self.instance.pickup_starts_at,
+            pickup_ends_at=self.instance.pickup_ends_at,
+        )
+        slots = list(self.instance.rzut.pickup_slots())
+        current_slot = PickupSlot(
+            self.instance.pickup_starts_at,
+            self.instance.pickup_ends_at,
+        )
+        if current_slot not in slots:
+            slots.append(current_slot)
+        self._pickup_slots = {
+            pickup_slot_value(slot): slot for slot in slots
+        }
+        self.fields["pickup_slot"].choices = [
+            (value, pickup_slot_label(slot))
+            for value, slot in self._pickup_slots.items()
+        ]
+        self.fields["pickup_slot"].initial = pickup_slot_value(current_slot)
+        current_payment_status = self.instance.payment_status
+        allowed_payment_statuses = {current_payment_status}
+        if current_payment_status == RzutOrder.PaymentStatus.PENDING:
+            allowed_payment_statuses.add(RzutOrder.PaymentStatus.PAID)
+        self.fields["payment_status"].choices = [
+            choice
+            for choice in RzutOrder.PaymentStatus.choices
+            if choice[0] in allowed_payment_statuses
+        ]
+
+    def clean_customer_email(self):
+        return self.cleaned_data["customer_email"].strip().casefold()
+
+    def clean_pickup_slot(self):
+        value = self.cleaned_data["pickup_slot"]
+        try:
+            return self._pickup_slots[value]
+        except KeyError as exc:
+            raise forms.ValidationError(
+                "Wybierz Przedział Odbioru dostępny dla tego Rzutu."
+            ) from exc
+
+    def clean_fulfillment_stage(self):
+        new_stage = self.cleaned_data["fulfillment_stage"]
+        old_stage = self.original_values["fulfillment_stage"]
+        if new_stage == old_stage:
+            return new_stage
+        if new_stage not in ALLOWED_FULFILLMENT_TRANSITIONS[old_stage]:
+            old_label = RzutOrder.FulfillmentStage(old_stage).label
+            new_label = RzutOrder.FulfillmentStage(new_stage).label
+            raise forms.ValidationError(
+                f"Nie można zmienić Etapu Realizacji z „{old_label}” "
+                f"na „{new_label}”."
+            )
+        return new_stage
+
+    def save(self, commit=True):
+        order = super().save(commit=False)
+        slot = self.cleaned_data["pickup_slot"]
+        order.pickup_starts_at = slot.starts_at
+        order.pickup_ends_at = slot.ends_at
+        if commit:
+            order.save()
+        return order
 
 
 class CheckoutForm(forms.Form):

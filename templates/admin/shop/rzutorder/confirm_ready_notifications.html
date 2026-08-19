@@ -1,0 +1,116 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .notification-table { width: 100%; }
+
+    @media (max-width: 767px) {
+        .notification-table thead {
+            clip: rect(0 0 0 0);
+            clip-path: inset(50%);
+            height: 1px;
+            overflow: hidden;
+            position: absolute;
+            white-space: nowrap;
+            width: 1px;
+        }
+
+        .notification-table tr,
+        .notification-table th,
+        .notification-table td {
+            display: block;
+        }
+
+        .notification-table tr {
+            border-bottom: 1px solid var(--hairline-color);
+            padding: 0.5rem 0;
+        }
+
+        .notification-table th,
+        .notification-table td {
+            overflow-wrap: anywhere;
+            padding: 0.35rem 0.75rem;
+        }
+
+        .notification-table th::before,
+        .notification-table td::before {
+            color: var(--body-quiet-color);
+            content: attr(data-label);
+            display: block;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <p>Sprawdź odbiorców przed zmianą Etapu Realizacji i wysłaniem wiadomości.</p>
+
+    <div class="module">
+        <table class="notification-table">
+            <thead>
+                <tr>
+                    <th scope="col">Numer Zamówienia</th>
+                    <th scope="col">Klient</th>
+                    <th scope="col">E-mail</th>
+                    <th scope="col">Etap Realizacji i wysyłka</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <th scope="row" data-label="Numer Zamówienia">{{ order.number }}</th>
+                    <td data-label="Klient">{{ order.customer_name }}</td>
+                    <td data-label="E-mail">{{ order.customer_email }}</td>
+                    <td data-label="Etap Realizacji i wysyłka">
+                        {{ order.get_fulfillment_stage_display }}
+                        {% if order.ready_notification_sent_at and not order.ready_notification_error %}
+                        <br><strong>Wiadomość została już wysłana {{ order.ready_notification_sent_at|date:"d.m.Y o H:i" }} — pominięto.</strong>
+                        {% elif order.ready_notification_error %}
+                        <br><strong>Poprzednia wysyłka nie powiodła się — akcja ponowi wiadomość.</strong>
+                        {% elif order.fulfillment_stage != "preparing" %}
+                        <br><strong>Najpierw ustaw Etap Realizacji „W przygotowaniu”.</strong>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for order in eligible_orders %}
+        <input type="hidden" name="_selected_action" value="{{ order.pk }}">
+        {% endfor %}
+        <input type="hidden" name="action" value="send_ready_notifications">
+        {% if eligible_orders %}
+        <input type="hidden" name="confirm_ready" value="1">
+        <div class="submit-row">
+            <input type="submit" class="default" value="Wyślij wiadomość do {{ recipient_count }} {% if recipient_count == 1 %}Klienta{% else %}Klientów{% endif %}">
+            <a href="{% url opts|admin_urlname:'changelist' %}" class="closelink">Anuluj</a>
+        </div>
+        {% else %}
+        <p><strong>Brak wiadomości do wysłania.</strong></p>
+        <div class="submit-row">
+            <a href="{% url opts|admin_urlname:'changelist' %}" class="closelink">Wróć do Zamówień Rzutu</a>
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

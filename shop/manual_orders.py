@@ -150,11 +150,8 @@ def _create_manual_order(*, data, lines, now=None):
                         f"„{item.product.title}” wynosi "
                         f"{item.per_customer_limit} szt. w tym Rzucie."
                     )
-            allocated = RzutItem.objects.filter(
-                pk=item.pk,
-                allocated_quantity__lte=F("pool") - line.quantity,
-            ).update(
-                allocated_quantity=F("allocated_quantity") + line.quantity
+            allocated = RzutItem.objects.filter(pk=item.pk).allocate(
+                line.quantity
             )
             if not allocated:
                 raise ManualOrderUnavailable(

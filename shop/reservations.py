@@ -206,10 +206,7 @@ def _create_reservation(*, rzut_id, lines, checkout, discount_code, now):
                 is_active=True,
                 product__type="physical",
                 price=line.expected_price,
-                allocated_quantity__lte=F("pool") - line.quantity,
-            ).update(
-                allocated_quantity=F("allocated_quantity") + line.quantity
-            )
+            ).allocate(line.quantity)
             if not updated:
                 raise ReservationUnavailable(
                     f"Brakuje Dostępności dla Pozycji Rzutu "
@@ -445,7 +442,7 @@ def confirm_reservation(*, reservation_id, p24_order_id, confirmed_at=None):
                 RzutItem.objects.filter(pk=item.pk).update(
                     allocated_quantity=F("allocated_quantity") + line.quantity
                 )
-                if new_allocation > item.pool:
+                if new_allocation + item.withdrawn_quantity > item.pool:
                     overallocated_items.append(
                         f"{item.product.title}: {new_allocation}/{item.pool}"
                     )

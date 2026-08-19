@@ -1,0 +1,37 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    &rsaquo; <a href="{% url opts|admin_urlname:'change' order.pk %}">{{ order.number }}</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <p>Anulowanie Zamówienia Rzutu jest nieodwracalne. Wybierz osobno, co zrobić z zamówionymi sztukami.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for key, value in post_data %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endfor %}
+        <input type="hidden" name="confirm_cancellation" value="1">
+
+        <fieldset class="module aligned">
+            <h2>Decyzja o Puli</h2>
+            {{ cancellation_form.restore_pool.errors }}
+            {{ cancellation_form.restore_pool }}
+        </fieldset>
+
+        <div class="submit-row">
+            <input type="submit" class="default" value="Anuluj Zamówienie Rzutu">
+            <a href="{% url opts|admin_urlname:'change' order.pk %}" class="closelink">Wróć bez anulowania</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -3,6 +3,7 @@ from datetime import datetime, time as datetime_time, timedelta
 from decimal import Decimal
 import uuid
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -474,6 +475,13 @@ class RzutItemQuerySet(models.QuerySet):
             product__type="physical",
         ).select_related("product", "product__category")
 
+    def allocate(self, quantity):
+        return self.filter(
+            allocated_quantity__lte=(
+                F("pool") - F("withdrawn_quantity") - quantity
+            )
+        ).update(allocated_quantity=F("allocated_quantity") + quantity)
+
 
 class RzutItem(models.Model):
     rzut = models.ForeignKey(
@@ -517,6 +525,15 @@ class RzutItem(models.Model):
         help_text=(
             "Łączna ilość zablokowana przez aktywne Rezerwacje i "
             "potwierdzone Zamówienia Rzutu."
+        ),
+    )
+    withdrawn_quantity = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+        verbose_name="Ilość wycofana z dostępności",
+        help_text=(
+            "Sztuki z anulowanych Zamówień Rzutu, które nie wróciły "
+            "do sprzedaży."
         ),
     )
     sort_order = models.PositiveIntegerField(
@@ -571,13 +588,17 @@ class RzutItem(models.Model):
         if (
             self.pool is not None
             and self.allocated_quantity is not None
-            and self.allocated_quantity > self.pool
+            and self.allocated_quantity + self.withdrawn_quantity > self.pool
         ):
-            raise ValidationError({
-                "pool": (
-                    "Pula nie może być mniejsza niż "
-                    f"{self.allocated_quantity} już przydzielonych sztuk."
+            if self.withdrawn_quantity:
+                detail = (
+                    f"{self.allocated_quantity} przydzielonych i "
+                    f"{self.withdrawn_quantity} wycofanych sztuk"
                 )
+            else:
+                detail = f"{self.allocated_quantity} już przydzielonych sztuk"
+            raise ValidationError({
+                "pool": f"Pula nie może być mniejsza niż {detail}."
             })
 
     def publication_errors(self):
@@ -607,7 +628,7 @@ class RzutItem(models.Model):
 
     @property
     def available_quantity(self):
-        return self.pool - self.allocated_quantity
+        return self.pool - self.allocated_quantity - self.withdrawn_quantity
 
     def is_offered_at(self, at=None):
         return (
@@ -1047,6 +1068,22 @@ class RzutOrder(models.Model):
         default=FulfillmentStage.NEW,
         verbose_name="Etap Realizacji",
     )
+    internal_note = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Notatka wewnętrzna",
+        help_text="Widoczna wyłącznie dla administratorów.",
+    )
+    ready_notification_sent_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Wysłanie wiadomości „gotowe”",
+    )
+    ready_notification_error = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Błąd wiadomości „gotowe”",
+    )
     p24_session_id = models.CharField(
         max_length=64,
         unique=True,
@@ -1170,6 +1207,139 @@ class RzutOrder(models.Model):
             if character.isdigit()
         )
         return f"*** *** {digits[-3:]}" if len(digits) >= 3 else "***"
+
+
+class RzutOrderEvent(models.Model):
+    class Kind(models.TextChoices):
+        CUSTOMER_DATA_CHANGED = (
+            "customer_data_changed",
+            "Zmiana danych Zamówienia Rzutu",
+        )
+        FULFILLMENT_STAGE_CHANGED = (
+            "fulfillment_stage_changed",
+            "Zmiana Etapu Realizacji",
+        )
+        PAYMENT_STATUS_CHANGED = (
+            "payment_status_changed",
+            "Zmiana Statusu Płatności",
+        )
+        READY_NOTIFICATION_SENT = (
+            "ready_notification_sent",
+            "Wysłanie wiadomości „gotowe”",
+        )
+        READY_NOTIFICATION_FAILED = (
+            "ready_notification_failed",
+            "Błąd wiadomości „gotowe”",
+        )
+        PICKUP_CHANGED = (
+            "pickup_changed",
+            "Zmiana odbioru Rzutu",
+        )
+        PICKUP_NOTIFICATION_SENT = (
+            "pickup_notification_sent",
+            "Wysłanie wiadomości o zmianie odbioru",
+        )
+        PICKUP_NOTIFICATION_FAILED = (
+            "pickup_notification_failed",
+            "Błąd wiadomości o zmianie odbioru",
+        )
+
+    order = models.ForeignKey(
+        RzutOrder,
+        on_delete=models.CASCADE,
+        related_name="events",
+        verbose_name="Zamówienie Rzutu",
+    )
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="rzut_order_events",
+        blank=True,
+        null=True,
+        verbose_name="Administrator",
+    )
+    actor_email = models.EmailField(
+        blank=True,
+        default="",
+        verbose_name="E-mail administratora",
+    )
+    kind = models.CharField(
+        max_length=40,
+        choices=Kind.choices,
+        verbose_name="Rodzaj działania",
+    )
+    context = models.JSONField(default=dict, blank=True, verbose_name="Kontekst")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Czas")
+
+    class Meta:
+        verbose_name = "Zdarzenie Zamówienia Rzutu"
+        verbose_name_plural = "Historia Zamówienia Rzutu"
+        ordering = ["-created_at", "-pk"]
+
+
+class RzutPickupChange(models.Model):
+    rzut = models.ForeignKey(
+        OrderEdition,
+        on_delete=models.PROTECT,
+        related_name="pickup_changes",
+        verbose_name="Rzut",
+    )
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="rzut_pickup_changes",
+        blank=True,
+        null=True,
+        verbose_name="Administrator",
+    )
+    actor_email = models.EmailField(
+        blank=True,
+        default="",
+        verbose_name="E-mail administratora",
+    )
+    before = models.JSONField(verbose_name="Dane odbioru przed zmianą")
+    after = models.JSONField(verbose_name="Dane odbioru po zmianie")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Czas")
+
+    class Meta:
+        verbose_name = "Zmiana odbioru Rzutu"
+        verbose_name_plural = "Zmiany odbioru Rzutu"
+        ordering = ["-created_at", "-pk"]
+
+
+class RzutPickupNotification(models.Model):
+    change = models.ForeignKey(
+        RzutPickupChange,
+        on_delete=models.CASCADE,
+        related_name="notifications",
+        verbose_name="Zmiana odbioru Rzutu",
+    )
+    order = models.ForeignKey(
+        RzutOrder,
+        on_delete=models.CASCADE,
+        related_name="pickup_notifications",
+        verbose_name="Zamówienie Rzutu",
+    )
+    sent_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name="Wysłano",
+    )
+    error = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Błąd wysyłki",
+    )
+
+    class Meta:
+        verbose_name = "Wiadomość o zmianie odbioru"
+        verbose_name_plural = "Wiadomości o zmianie odbioru"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["change", "order"],
+                name="unique_pickup_notification_per_order_change",
+            )
+        ]
 
 
 class RzutOrderItem(models.Model):

@@ -1,0 +1,60 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    &rsaquo; <a href="{% url opts|admin_urlname:'change' rzut.pk %}">{{ rzut }}</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <p>Zmiana odbioru została zapisana. Sprawdź nowe dane i odbiorców przed wysłaniem wiadomości.</p>
+
+    <fieldset class="module aligned">
+        <h2>Nowe dane odbioru</h2>
+        <div class="form-row"><div class="flex-container"><label>Dzień:</label><div class="readonly">{{ pickup.date|date:"d.m.Y" }}</div></div></div>
+        <div class="form-row"><div class="flex-container"><label>Miejsce:</label><div class="readonly">{{ pickup.place }}</div></div></div>
+        <div class="form-row"><div class="flex-container"><label>Adres:</label><div class="readonly">{{ pickup.address }}</div></div></div>
+        <div class="form-row"><div class="flex-container"><label>Godziny:</label><div class="readonly">{{ pickup.starts_at|time:"H:i" }}–{{ pickup.ends_at|time:"H:i" }}</div></div></div>
+        <div class="form-row"><div class="flex-container"><label>Instrukcja:</label><div class="readonly">{{ pickup.instructions }}</div></div></div>
+    </fieldset>
+
+    <div class="module">
+        <table>
+            <thead>
+                <tr><th scope="col">Numer Zamówienia</th><th scope="col">Klient</th><th scope="col">E-mail</th><th scope="col">Stan wysyłki</th></tr>
+            </thead>
+            <tbody>
+                {% for notification in notifications %}
+                <tr>
+                    <th scope="row">{{ notification.order.number }}</th>
+                    <td>{{ notification.order.customer_name }}</td>
+                    <td>{{ notification.order.customer_email }}</td>
+                    <td>{% if notification.sent_at %}Wysłano {{ notification.sent_at|date:"d.m.Y o H:i" }}{% elif notification.error %}Błąd: {{ notification.error }}{% else %}Nie wysłano{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">Brak potwierdzonych Zamówień Rzutu do powiadomienia.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if pending_notifications %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="confirm_pickup_notification" value="1">
+        <div class="submit-row">
+            <input type="submit" class="default" value="Wyślij wiadomość do {{ recipient_count }} {% if recipient_count == 1 %}Klienta{% else %}Klientów{% endif %}">
+            <a href="{% url opts|admin_urlname:'change' rzut.pk %}" class="closelink">Nie wysyłaj teraz</a>
+        </div>
+    </form>
+    {% else %}
+    <div class="submit-row"><a href="{% url opts|admin_urlname:'change' rzut.pk %}" class="closelink">Wróć do Rzutu</a></div>
+    {% endif %}
+</div>
+{% endblock %}

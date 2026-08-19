@@ -576,21 +576,23 @@ class TestManualOrderAdmin(ManualOrderTestCase):
         self.assertEqual(self.item.allocated_quantity, 0)
         self.assertEqual(len(mail.outbox), 0)
 
-    def test_admin_cannot_rewrite_manual_order_history(self):
+    def test_admin_keeps_order_items_and_amounts_read_only(self):
         order = create_manual_order(
             data=self.manual_data(),
             lines=[ManualOrderLineRequest(self.item.pk, 1)],
         )
 
-        response = self.client.post(
-            reverse("admin:shop_rzutorder_change", args=[order.pk]),
-            {"customer_name": "Zmienione dane", "_save": "Zapisz"},
+        response = self.client.get(
+            reverse("admin:shop_rzutorder_change", args=[order.pk])
         )
 
-        order.refresh_from_db()
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(order.customer_name, "Jan Kowalski")
-        self.assertEqual(order.items.get().product_name, "Chleb wiejski")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Chleb wiejski")
+        self.assertContains(response, "26,00")
+        self.assertNotContains(response, 'name="total"', html=False)
+        self.assertNotContains(response, 'name="subtotal"', html=False)
+        self.assertNotContains(response, 'name="items-0-product_name"', html=False)
+        self.assertNotContains(response, 'name="items-0-quantity"', html=False)
 
     def test_repeated_admin_post_creates_order_and_email_once(self):
         creation_token = str(uuid.uuid4())

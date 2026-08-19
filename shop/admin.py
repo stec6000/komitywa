@@ -4,13 +4,28 @@ from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
 from django.forms.models import BaseInlineFormSet
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
-from django.urls import reverse
+from django.urls import path, reverse
+from django.utils import timezone
 from django.utils.html import format_html
 
-from .emails import deliver_rzut_order_notifications
-from .forms import ManualRzutOrderAdminForm
+from .emails import (
+    deliver_rzut_order_notifications,
+)
+from .fulfillment import (
+    FulfillmentAllocationError,
+    PickupDetails,
+    TERMINAL_FULFILLMENT_STAGES,
+    cancel_rzut_order,
+    deliver_pickup_notification,
+    deliver_ready_notification,
+)
+from .forms import (
+    CancellationDecisionForm,
+    ManualRzutOrderAdminForm,
+    RzutOrderFulfillmentAdminForm,
+)
 from .manual_orders import (
     ManualOrderData,
     ManualOrderError,
@@ -21,12 +36,16 @@ from .models import (
     DiscountCode,
     Order,
     OrderEdition,
+    PickupSlot,
     Product,
     ProductCategory,
     Reservation,
     RzutItem,
     RzutOrder,
+    RzutOrderEvent,
     RzutOrderItem,
+    RzutPickupChange,
+    RzutPickupNotification,
 )
 
 
@@ -133,12 +152,15 @@ class RzutItemInline(admin.TabularInline):
         "price",
         "portion",
         "pool",
+        "allocated_quantity",
+        "withdrawn_quantity",
         "per_customer_limit",
         "is_active",
         "production_note",
     ]
     ordering = ["sort_order", "product__title"]
     autocomplete_fields = ["product"]
+    readonly_fields = ["allocated_quantity", "withdrawn_quantity"]
     show_change_link = True
 
 
@@ -210,6 +232,16 @@ class OrderEditionAdmin(admin.ModelAdmin):
         ),
     ]
 
+    def get_urls(self):
+        custom_urls = [
+            path(
+                "<path:object_id>/pickup-changes/<int:change_id>/notify/",
+                self.admin_site.admin_view(self.pickup_notification_view),
+                name="shop_orderedition_pickup_notify",
+            )
+        ]
+        return custom_urls + super().get_urls()
+
     @admin.display(description="Podgląd")
     def image_preview(self, obj):
         if obj.image:
@@ -230,6 +262,236 @@ class OrderEditionAdmin(admin.ModelAdmin):
         phase = obj.phase_at()
         return OrderEdition.Phase(phase).label if phase else "—"
 
+    def change_view(
+        self,
+        request,
+        object_id,
+        form_url="",
+        extra_context=None,
+    ):
+        rzut = self.get_object(request, object_id)
+        if rzut is not None and not self.has_change_permission(request, rzut):
+            return super().change_view(
+                request,
+                object_id,
+                form_url=form_url,
+                extra_context=extra_context,
+            )
+        affected_orders = (
+            rzut.rzut_orders.exclude(
+                fulfillment_stage__in=TERMINAL_FULFILLMENT_STAGES
+            )
+            if rzut is not None
+            else RzutOrder.objects.none()
+        )
+        if request.method == "POST" and rzut is not None and affected_orders.exists():
+            try:
+                proposed = PickupDetails(
+                    date=forms.DateField().clean(
+                        request.POST.get("pickup_date")
+                    ),
+                    place=request.POST.get("pickup_place_name", ""),
+                    address=request.POST.get("pickup_address", ""),
+                    starts_at=forms.TimeField().clean(
+                        request.POST.get("pickup_starts_at")
+                    ),
+                    ends_at=forms.TimeField().clean(
+                        request.POST.get("pickup_ends_at")
+                    ),
+                    instructions=request.POST.get("pickup_instructions", ""),
+                )
+            except forms.ValidationError:
+                proposed = None
+            current = PickupDetails.from_source(rzut)
+            if proposed is not None and proposed != current:
+                conflicting_orders = []
+                for order in affected_orders:
+                    try:
+                        proposed.map_slot_from(
+                            current,
+                            PickupSlot(
+                                order.pickup_starts_at,
+                                order.pickup_ends_at,
+                            ),
+                        )
+                    except FulfillmentAllocationError:
+                        conflicting_orders.append(order)
+                context = {
+                    **self.admin_site.each_context(request),
+                    "opts": self.model._meta,
+                    "title": "Potwierdź zmianę danych odbioru",
+                    "rzut": rzut,
+                    "current_pickup": current,
+                    "proposed_pickup": proposed,
+                    "affected_count": affected_orders.count(),
+                    "conflicting_orders": conflicting_orders,
+                    "post_data": [
+                        (key, value)
+                        for key in request.POST
+                        if key != "csrfmiddlewaretoken"
+                        for value in request.POST.getlist(key)
+                    ],
+                }
+                if (
+                    conflicting_orders
+                    or not request.POST.get("confirm_pickup_change")
+                ):
+                    return TemplateResponse(
+                        request,
+                        "admin/shop/orderedition/confirm_pickup_change.html",
+                        context,
+                    )
+        return super().change_view(
+            request,
+            object_id,
+            form_url=form_url,
+            extra_context=extra_context,
+        )
+
+    def save_model(self, request, obj, form, change):
+        before = None
+        if change:
+            persisted = OrderEdition.objects.get(pk=obj.pk)
+            before = PickupDetails.from_source(persisted)
+        super().save_model(request, obj, form, change)
+        after = PickupDetails.from_source(obj)
+        if before is None or before == after:
+            return
+
+        orders = list(
+            obj.rzut_orders.exclude(
+                fulfillment_stage__in=TERMINAL_FULFILLMENT_STAGES
+            )
+        )
+        if not orders:
+            return
+
+        updated_at = timezone.now()
+        for order in orders:
+            mapped_slot = after.map_slot_from(
+                before,
+                PickupSlot(
+                    order.pickup_starts_at,
+                    order.pickup_ends_at,
+                ),
+            )
+            order.pickup_starts_at = mapped_slot.starts_at
+            order.pickup_ends_at = mapped_slot.ends_at
+            order.updated_at = updated_at
+        RzutOrder.objects.bulk_update(
+            orders,
+            ["pickup_starts_at", "pickup_ends_at", "updated_at"],
+        )
+
+        pickup_change = RzutPickupChange.objects.create(
+            rzut=obj,
+            actor=request.user,
+            actor_email=request.user.email,
+            before=before.to_json(),
+            after=after.to_json(),
+        )
+        RzutPickupNotification.objects.bulk_create(
+            [
+                RzutPickupNotification(change=pickup_change, order=order)
+                for order in orders
+            ]
+        )
+        RzutOrderEvent.objects.bulk_create(
+            [
+                RzutOrderEvent(
+                    order=order,
+                    actor=request.user,
+                    actor_email=request.user.email,
+                    kind=RzutOrderEvent.Kind.PICKUP_CHANGED,
+                    context={
+                        "pickup_change_id": pickup_change.pk,
+                        "before": before.to_json(),
+                        "after": after.to_json(),
+                        "pickup_starts_at": order.pickup_starts_at.isoformat(),
+                        "pickup_ends_at": order.pickup_ends_at.isoformat(),
+                    },
+                )
+                for order in orders
+            ]
+        )
+        request._rzut_pickup_change_id = pickup_change.pk
+
+    def response_change(self, request, obj):
+        pickup_change_id = getattr(request, "_rzut_pickup_change_id", None)
+        if pickup_change_id is not None:
+            return redirect(
+                reverse(
+                    "admin:shop_orderedition_pickup_notify",
+                    args=[obj.pk, pickup_change_id],
+                )
+            )
+        return super().response_change(request, obj)
+
+    def pickup_notification_view(self, request, object_id, change_id):
+        rzut = get_object_or_404(OrderEdition, pk=object_id)
+        if not self.has_change_permission(request, rzut):
+            raise PermissionDenied
+        pickup_change = get_object_or_404(
+            RzutPickupChange,
+            pk=change_id,
+            rzut=rzut,
+        )
+        notifications = list(
+            pickup_change.notifications.select_related(
+                "order", "change", "change__rzut"
+            ).order_by("order__created_at")
+        )
+        pending_notifications = [
+            notification
+            for notification in notifications
+            if notification.sent_at is None
+            and notification.order.fulfillment_stage
+            not in TERMINAL_FULFILLMENT_STAGES
+        ]
+        if request.method == "POST" and request.POST.get(
+            "confirm_pickup_notification"
+        ):
+            sent = 0
+            failed = 0
+            for notification in pending_notifications:
+                result = deliver_pickup_notification(
+                    notification=notification,
+                    actor=request.user,
+                )
+                if not result.sent:
+                    failed += 1
+                    continue
+                sent += 1
+            if sent:
+                messages.success(
+                    request,
+                    f"Wysłano wiadomość o zmianie odbioru do {sent} "
+                    f"{'Klienta' if sent == 1 else 'Klientów'}.",
+                )
+            if failed:
+                messages.error(
+                    request,
+                    f"Nie udało się wysłać wiadomości do {failed} "
+                    f"{'Klienta' if failed == 1 else 'Klientów'}. "
+                    "Ponów wysyłkę po usunięciu problemu z pocztą.",
+                )
+            return redirect(request.path)
+        context = {
+            **self.admin_site.each_context(request),
+            "opts": self.model._meta,
+            "title": "Wyślij wiadomość o zmianie odbioru",
+            "rzut": rzut,
+            "pickup_change": pickup_change,
+            "pickup": PickupDetails.from_source(rzut),
+            "notifications": notifications,
+            "pending_notifications": pending_notifications,
+            "recipient_count": len(pending_notifications),
+        }
+        return TemplateResponse(
+            request,
+            "admin/shop/orderedition/pickup_notification.html",
+            context,
+        )
 
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
@@ -304,11 +566,25 @@ class RzutOrderItemReadonlyInline(admin.TabularInline):
         return False
 
 
+class RzutOrderEventReadonlyInline(admin.TabularInline):
+    model = RzutOrderEvent
+    extra = 0
+    can_delete = False
+    fields = ["created_at", "kind", "actor_email", "context"]
+    readonly_fields = fields
+    ordering = ["-created_at", "-pk"]
+    verbose_name_plural = "Historia istotnych działań"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(RzutOrder)
 class RzutOrderAdmin(admin.ModelAdmin):
     add_form_template = "admin/shop/rzutorder/add_form.html"
-    actions = None
-    inlines = [RzutOrderItemReadonlyInline]
+    form = RzutOrderFulfillmentAdminForm
+    actions = ["send_ready_notifications"]
+    inlines = [RzutOrderItemReadonlyInline, RzutOrderEventReadonlyInline]
     list_select_related = ["rzut", "discount_code"]
     list_display = [
         "number",
@@ -340,10 +616,6 @@ class RzutOrderAdmin(admin.ModelAdmin):
         "is_manual",
         "manual_creation_token",
         "rzut",
-        "customer_name",
-        "customer_email",
-        "customer_phone",
-        "customer_notes",
         "pickup_starts_at",
         "pickup_ends_at",
         "subtotal",
@@ -351,10 +623,8 @@ class RzutOrderAdmin(admin.ModelAdmin):
         "discount_code",
         "discount_code_snapshot",
         "total",
-        "payment_status",
         "payment_method",
         "payment_method_details",
-        "fulfillment_stage",
         "p24_session_id",
         "p24_order_id",
         "data_processing_accepted_at",
@@ -369,9 +639,284 @@ class RzutOrderAdmin(admin.ModelAdmin):
         "attention_message",
         "attention_notification_sent_at",
         "attention_notification_error",
+        "ready_notification_sent_at",
+        "ready_notification_error",
+        "ready_notification_status",
         "created_at",
         "updated_at",
     ]
+
+    fieldsets = [
+        (
+            "Realizacja",
+            {
+                "fields": (
+                    "fulfillment_stage",
+                    "internal_note",
+                    "ready_notification_status",
+                )
+            },
+        ),
+        (
+            "Klient i odbiór",
+            {
+                "fields": (
+                    "customer_name",
+                    "customer_email",
+                    "customer_phone",
+                    "customer_notes",
+                    "pickup_slot",
+                )
+            },
+        ),
+        (
+            "Rozliczenie",
+            {
+                "fields": (
+                    "payment_status",
+                    "payment_method",
+                    "payment_method_details",
+                )
+            },
+        ),
+        (
+            "Niezmienna historia Zamówienia Rzutu",
+            {
+                "fields": (
+                    "number",
+                    "reservation",
+                    "is_manual",
+                    "manual_creation_token",
+                    "rzut",
+                    "subtotal",
+                    "discount_amount",
+                    "discount_code",
+                    "discount_code_snapshot",
+                    "total",
+                    "p24_session_id",
+                    "p24_order_id",
+                    "data_processing_accepted_at",
+                    "terms_accepted_at",
+                    "terms_version",
+                    "payment_confirmed_at",
+                    "customer_confirmation_sent_at",
+                    "customer_confirmation_error",
+                    "owner_notification_sent_at",
+                    "owner_notification_error",
+                    "requires_attention",
+                    "attention_message",
+                    "attention_notification_sent_at",
+                    "attention_notification_error",
+                    "created_at",
+                    "updated_at",
+                )
+            },
+        ),
+    ]
+
+    def change_view(
+        self,
+        request,
+        object_id,
+        form_url="",
+        extra_context=None,
+    ):
+        order = self.get_object(request, object_id)
+        is_cancellation = (
+            request.method == "POST"
+            and order is not None
+            and self.has_change_permission(request, order)
+            and request.POST.get("fulfillment_stage")
+            == RzutOrder.FulfillmentStage.CANCELLED
+            and order.fulfillment_stage
+            != RzutOrder.FulfillmentStage.CANCELLED
+        )
+        if is_cancellation:
+            confirmed = bool(request.POST.get("confirm_cancellation"))
+            cancellation_form = CancellationDecisionForm(
+                request.POST if confirmed else None
+            )
+            if confirmed and cancellation_form.is_valid():
+                request._restore_cancelled_quantity = (
+                    cancellation_form.cleaned_data["restore_pool"]
+                )
+            else:
+                context = {
+                    **self.admin_site.each_context(request),
+                    "opts": self.model._meta,
+                    "title": "Potwierdź anulowanie Zamówienia Rzutu",
+                    "order": order,
+                    "cancellation_form": cancellation_form,
+                    "post_data": [
+                        (key, value)
+                        for key in request.POST
+                        if key not in {
+                            "csrfmiddlewaretoken",
+                            "confirm_cancellation",
+                            "restore_pool",
+                        }
+                        for value in request.POST.getlist(key)
+                    ],
+                }
+                return TemplateResponse(
+                    request,
+                    "admin/shop/rzutorder/confirm_cancellation.html",
+                    context,
+                )
+        return super().change_view(
+            request,
+            object_id,
+            form_url=form_url,
+            extra_context=extra_context,
+        )
+
+    def save_model(self, request, obj, form, change):
+        original = form.original_values
+        target_stage = obj.fulfillment_stage
+        is_cancellation = (
+            original["fulfillment_stage"] != target_stage
+            and target_stage == RzutOrder.FulfillmentStage.CANCELLED
+        )
+        if is_cancellation:
+            obj.fulfillment_stage = original["fulfillment_stage"]
+        super().save_model(request, obj, form, change)
+        if is_cancellation:
+            cancelled = cancel_rzut_order(
+                order_id=obj.pk,
+                actor=request.user,
+                restore_pool=request._restore_cancelled_quantity,
+            )
+            obj.fulfillment_stage = cancelled.fulfillment_stage
+        data_fields = [
+            "customer_name",
+            "customer_email",
+            "customer_phone",
+            "customer_notes",
+            "internal_note",
+            "pickup_starts_at",
+            "pickup_ends_at",
+        ]
+        data_changes = {
+            field: {
+                "from": str(original[field]),
+                "to": str(getattr(obj, field)),
+            }
+            for field in data_fields
+            if original[field] != getattr(obj, field)
+        }
+        if data_changes:
+            RzutOrderEvent.objects.create(
+                order=obj,
+                actor=request.user,
+                actor_email=request.user.email,
+                kind=RzutOrderEvent.Kind.CUSTOMER_DATA_CHANGED,
+                context={"changes": data_changes},
+            )
+        if (
+            not is_cancellation
+            and original["fulfillment_stage"] != obj.fulfillment_stage
+        ):
+            RzutOrderEvent.objects.create(
+                order=obj,
+                actor=request.user,
+                actor_email=request.user.email,
+                kind=RzutOrderEvent.Kind.FULFILLMENT_STAGE_CHANGED,
+                context={
+                    "from": original["fulfillment_stage"],
+                    "to": obj.fulfillment_stage,
+                },
+            )
+        if original["payment_status"] != obj.payment_status:
+            RzutOrderEvent.objects.create(
+                order=obj,
+                actor=request.user,
+                actor_email=request.user.email,
+                kind=RzutOrderEvent.Kind.PAYMENT_STATUS_CHANGED,
+                context={
+                    "from": original["payment_status"],
+                    "to": obj.payment_status,
+                },
+            )
+
+    @admin.action(description="Wyślij wiadomość „gotowe do odbioru”")
+    def send_ready_notifications(self, request, queryset):
+        orders = list(queryset.select_related("rzut").order_by("created_at"))
+        if request.POST.get("confirm_ready"):
+            sent = 0
+            failed = 0
+            for order in orders:
+                is_preparing = (
+                    order.fulfillment_stage
+                    == RzutOrder.FulfillmentStage.PREPARING
+                )
+                is_retry = (
+                    order.fulfillment_stage
+                    == RzutOrder.FulfillmentStage.READY
+                    and bool(order.ready_notification_error)
+                )
+                if not (is_preparing or is_retry):
+                    continue
+                result = deliver_ready_notification(
+                    order=order,
+                    actor=request.user,
+                )
+                if not result.sent:
+                    failed += 1
+                    continue
+                sent += 1
+            if sent:
+                messages.success(
+                    request,
+                    f"Wysłano wiadomość „gotowe” do {sent} "
+                    f"{'Klienta' if sent == 1 else 'Klientów'}.",
+                )
+            if failed:
+                messages.error(
+                    request,
+                    f"Nie udało się wysłać wiadomości do {failed} "
+                    f"{'Klienta' if failed == 1 else 'Klientów'}. "
+                    "Etap Realizacji pozostał zapisany; ponów akcję po "
+                    "usunięciu problemu z pocztą.",
+                )
+            return redirect(reverse("admin:shop_rzutorder_changelist"))
+        eligible_orders = [
+            order
+            for order in orders
+            if order.fulfillment_stage == RzutOrder.FulfillmentStage.PREPARING
+            or (
+                order.fulfillment_stage == RzutOrder.FulfillmentStage.READY
+                and bool(order.ready_notification_error)
+            )
+        ]
+        context = {
+            **self.admin_site.each_context(request),
+            "opts": self.model._meta,
+            "title": "Potwierdź wiadomość „gotowe do odbioru”",
+            "orders": orders,
+            "eligible_orders": eligible_orders,
+            "recipient_count": len(eligible_orders),
+        }
+        return TemplateResponse(
+            request,
+            "admin/shop/rzutorder/confirm_ready_notifications.html",
+            context,
+        )
+
+    @admin.display(description="Wiadomość „gotowe do odbioru”")
+    def ready_notification_status(self, obj):
+        if not obj:
+            return "—"
+        if obj.ready_notification_error:
+            return format_html(
+                'Błąd: {} — <a href="{}?q={}">ponów wysyłkę</a>',
+                obj.ready_notification_error,
+                reverse("admin:shop_rzutorder_changelist"),
+                obj.number,
+            )
+        if obj.ready_notification_sent_at:
+            sent_at = timezone.localtime(obj.ready_notification_sent_at)
+            return f"Wysłano {sent_at:%d.%m.%Y o %H:%M}"
+        return "Nie wysłano"
 
     def add_view(self, request, form_url="", extra_context=None):
         if not self.has_add_permission(request):
@@ -433,8 +978,6 @@ class RzutOrderAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
-        if request.method not in {"GET", "HEAD", "OPTIONS"}:
-            return False
         return super().has_change_permission(request, obj)
 
     @staticmethod

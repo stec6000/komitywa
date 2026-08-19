@@ -37,8 +37,12 @@ Orientacyjny godzinny przedział wybrany przez Klienta w ramach czasu i miejsca 
 _Avoid_: Termin dostawy, rezerwacja godziny
 
 **Pula**:
-Całkowita liczba sztuk Pozycji Rzutu przeznaczona do sprzedaży, pomniejszana przez aktywne Rezerwacje i potwierdzone, nieanulowane Zamówienia Rzutu.
+Całkowita liczba sztuk Pozycji Rzutu przeznaczona do sprzedaży. Jej Dostępność pomniejszają aktywne Rezerwacje, potwierdzone nieanulowane Zamówienia Rzutu oraz Ilość Wycofana.
 _Avoid_: Stan magazynowy, liczba Produktów
+
+**Ilość Wycofana**:
+Liczba sztuk z anulowanych Zamówień Rzutu, których administrator świadomie nie przywrócił do sprzedaży, na przykład dlatego, że zostały już przygotowane.
+_Avoid_: Rezerwacja, Zamówienie Rzutu, strata
 
 **Zamówienie Ręczne**:
 Zamówienie Rzutu wprowadzone przez administratora na podstawie ustaleń dokonanych poza stroną internetową.
@@ -81,7 +85,7 @@ Nieprzewidywalny publiczny identyfikator Zamówienia Rzutu używany w wiadomośc
 _Avoid_: ID, numer transakcji
 
 **Dostępność**:
-Liczba sztuk Pozycji Rzutu z Puli, która nie jest objęta aktywną Rezerwacją ani potwierdzonym, nieanulowanym Zamówieniem Rzutu.
+Liczba sztuk Pozycji Rzutu z Puli, która nie jest objęta aktywną Rezerwacją, potwierdzonym nieanulowanym Zamówieniem Rzutu ani Ilością Wycofaną.
 _Avoid_: Pula, stan magazynowy
 
 **Podsumowanie Rzutu**:

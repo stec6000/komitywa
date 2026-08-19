@@ -195,6 +195,58 @@ def send_rzut_order_customer_confirmation(order):
     ).send(fail_silently=False)
 
 
+def send_rzut_order_ready_notification(order):
+    rzut = order.rzut
+    body = (
+        f"Cześć {order.customer_name}!\n\n"
+        "Twoje Zamówienie Rzutu jest gotowe do odbioru.\n\n"
+        f"Numer Zamówienia: {order.number}\n"
+        f"Rzut: {rzut.title}\n"
+        f"Odbiór: {rzut.pickup_date:%d.%m.%Y}, "
+        f"{order.pickup_starts_at:%H:%M}–{order.pickup_ends_at:%H:%M}\n"
+        f"Miejsce: {rzut.pickup_place_name}, {rzut.pickup_address}\n"
+        f"Instrukcja: {rzut.pickup_instructions}\n\n"
+        f"Strona Zamówienia Rzutu: {_rzut_order_public_url(order)}\n\n"
+        "Do zobaczenia!\n\n"
+        "Kuchenna Komitywa\n"
+        "https://kuchennakomitywa.pl"
+    )
+    EmailMessage(
+        subject=f"Zamówienie Rzutu {order.number} jest gotowe do odbioru",
+        body=body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[order.customer_email],
+    ).send(fail_silently=False)
+
+
+def _pickup_change_text(snapshot):
+    from .fulfillment import PickupDetails
+
+    return PickupDetails.from_json(snapshot).as_email_text()
+
+
+def send_rzut_pickup_change_notification(notification):
+    order = notification.order
+    change = notification.change
+    body = (
+        f"Cześć {order.customer_name}!\n\n"
+        f"Zmieniły się dane odbioru Rzutu „{change.rzut.title}”.\n\n"
+        f"Numer Zamówienia: {order.number}\n\n"
+        f"Przed zmianą:\n{_pickup_change_text(change.before)}\n\n"
+        f"Nowe dane odbioru:\n{_pickup_change_text(change.after)}\n\n"
+        f"Strona Zamówienia Rzutu: {_rzut_order_public_url(order)}\n\n"
+        f"W razie pytań skontaktuj się z nami: {_contact_public_url()}\n\n"
+        "Kuchenna Komitywa\n"
+        "https://kuchennakomitywa.pl"
+    )
+    EmailMessage(
+        subject=f"Zmiana odbioru Zamówienia Rzutu {order.number}",
+        body=body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[order.customer_email],
+    ).send(fail_silently=False)
+
+
 def send_rzut_order_owner_notification(order):
     rzut = order.rzut
     body = (
