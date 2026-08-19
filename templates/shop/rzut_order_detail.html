@@ -24,6 +24,12 @@
                 <strong>Etap Realizacji</strong>
                 <span>{{ order.get_fulfillment_stage_display }}</span>
             </div>
+            {% if order.terms_version %}
+            <div class="summary-row kk-summary-row--terms">
+                <strong>Regulamin</strong>
+                <span>wersja {{ order.terms_version }} · {{ order.terms_accepted_at|date:"d.m.Y, H:i" }}</span>
+            </div>
+            {% endif %}
             <hr>
             {% for item in order.items.all %}
             <div class="summary-row">
@@ -56,7 +62,10 @@
             <p>Kontakt zapisany przy Zamówieniu Rzutu: {{ order.masked_customer_email }} · {{ order.masked_customer_phone }}</p>
         </div>
 
-        <p class="kk-payment-state__action">Potrzebujesz zmiany lub anulowania? <a href="{% url 'contact' %}" class="kk-link-arrow">skontaktuj się z nami →</a></p>
+        <div class="kk-cart-notice kk-payment-state__action">
+            <p>{% include "includes/_rzut_cancellation_notice.html" %}</p>
+            <p>Nie można anulować Zamówienia Rzutu samodzielnie na tej stronie.</p>
+        </div>
     </div>
 </section>
 {% endblock %}

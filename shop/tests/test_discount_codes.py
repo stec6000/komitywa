@@ -11,6 +11,7 @@ from django.test import TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from core import legal
 from shop.models import (
     DiscountCode,
     OrderEdition,
@@ -223,6 +224,7 @@ class DiscountCodeHttpTestCase(TestCase):
             notes="",
             pickup_starts_at=time(10, 0),
             pickup_ends_at=time(11, 0),
+            terms_version=legal.CURRENT_TERMS.identifier,
         )
 
     def checkout_form_data(self, *, email="jan@example.com"):
@@ -234,6 +236,7 @@ class DiscountCodeHttpTestCase(TestCase):
             "pickup_slot": "10:00:00|11:00:00",
             "consent_data": "on",
             "consent_terms": "on",
+            "terms_version": legal.CURRENT_TERMS.identifier,
         }
 
 
@@ -853,6 +856,7 @@ class TestConcurrentDiscountCode(TransactionTestCase):
                         notes="",
                         pickup_starts_at=time(10, 0),
                         pickup_ends_at=time(11, 0),
+                        terms_version=legal.CURRENT_TERMS.identifier,
                     ),
                     discount_code=self.code.code,
                 )
@@ -897,6 +901,7 @@ class TestConcurrentDiscountCode(TransactionTestCase):
                         notes="",
                         pickup_starts_at=time(10, 0),
                         pickup_ends_at=time(11, 0),
+                        terms_version=legal.CURRENT_TERMS.identifier,
                     ),
                     discount_code=self.code.code,
                 )

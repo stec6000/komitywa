@@ -5,6 +5,8 @@ from django.core.mail import EmailMessage
 from django.urls import reverse
 from django.utils import timezone
 
+from core.legal import CANCELLATION_NOTICE
+
 from .models import Product
 
 logger = logging.getLogger(__name__)
@@ -109,7 +111,11 @@ def _rzut_order_items_text(order):
 
 def _rzut_order_public_url(order):
     path = reverse("shop:rzut_order_detail", args=[order.number])
-    return f"{settings.PUBLIC_SITE_URL}{path}"
+    return f"{settings.PUBLIC_SITE_URL.rstrip('/')}{path}"
+
+
+def _contact_public_url():
+    return f"{settings.PUBLIC_SITE_URL.rstrip('/')}{reverse('contact')}"
 
 
 def _rzut_order_discount_text(order):
@@ -130,6 +136,16 @@ def _rzut_order_payment_text(order):
     if order.payment_method_details:
         text += f"Wyjaśnienie płatności: {order.payment_method_details}\n"
     return text
+
+
+def _rzut_order_terms_text(order):
+    if not order.terms_version:
+        return ""
+    accepted_at = timezone.localtime(order.terms_accepted_at)
+    return (
+        f"Regulamin: wersja {order.terms_version}, zaakceptowana "
+        f"{accepted_at:%d.%m.%Y o %H:%M}\n"
+    )
 
 
 def send_rzut_order_customer_confirmation(order):
@@ -160,6 +176,9 @@ def send_rzut_order_customer_confirmation(order):
         f"Miejsce: {rzut.pickup_place_name}, {rzut.pickup_address}\n"
         f"Instrukcja: {rzut.pickup_instructions}\n"
         f"Uwagi: {order.customer_notes or 'brak'}\n\n"
+        f"{_rzut_order_terms_text(order)}"
+        f"{CANCELLATION_NOTICE}\n"
+        f"Kontakt: {_contact_public_url()}\n\n"
         f"Strona Zamówienia Rzutu: {_rzut_order_public_url(order)}\n\n"
         "Do zobaczenia!\n\n"
         "Kuchenna Komitywa\n"

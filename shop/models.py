@@ -837,6 +837,11 @@ class Reservation(models.Model):
     terms_accepted_at = models.DateTimeField(
         verbose_name="Akceptacja regulaminu",
     )
+    terms_version = models.CharField(
+        max_length=50,
+        default="",
+        verbose_name="Wersja zaakceptowanego regulaminu",
+    )
     expires_at = models.DateTimeField(
         verbose_name="Termin wygaśnięcia",
     )
@@ -1065,6 +1070,12 @@ class RzutOrder(models.Model):
         blank=True,
         null=True,
         verbose_name="Akceptacja regulaminu",
+    )
+    terms_version = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        verbose_name="Wersja zaakceptowanego regulaminu",
     )
     payment_confirmed_at = models.DateTimeField(
         blank=True,

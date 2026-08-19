@@ -7,6 +7,7 @@ from django.db import close_old_connections
 from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 
+from core import legal
 from shop.models import OrderEdition, Product, RzutItem
 from shop.reservations import (
     ReservationCheckoutData,
@@ -64,6 +65,7 @@ class ReservationTestCase(TestCase):
             "notes": "Odbierze siostra.",
             "pickup_starts_at": time(10, 0),
             "pickup_ends_at": time(11, 0),
+            "terms_version": legal.CURRENT_TERMS.identifier,
         }
         values.update(overrides)
         return ReservationCheckoutData(**values)
@@ -276,6 +278,7 @@ class TestConcurrentReservation(TransactionTestCase):
                         notes="",
                         pickup_starts_at=time(10, 0),
                         pickup_ends_at=time(11, 0),
+                        terms_version=legal.CURRENT_TERMS.identifier,
                     ),
                 )
                 return "reserved"
@@ -321,6 +324,7 @@ class TestConcurrentReservation(TransactionTestCase):
                         notes="",
                         pickup_starts_at=time(10, 0),
                         pickup_ends_at=time(11, 0),
+                        terms_version=legal.CURRENT_TERMS.identifier,
                     ),
                 )
                 return "reserved"

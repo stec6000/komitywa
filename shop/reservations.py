@@ -7,6 +7,8 @@ from django.db import OperationalError, transaction
 from django.db.models import F
 from django.utils import timezone
 
+from core import legal
+
 from .discounts import (
     DiscountCodeUnavailable,
     reclaim_discount_use,
@@ -49,6 +51,7 @@ class ReservationCheckoutData:
     notes: str
     pickup_starts_at: time
     pickup_ends_at: time
+    terms_version: str
 
 
 @dataclass(frozen=True)
@@ -96,6 +99,10 @@ def create_reservation(
     now=None,
 ):
     now = now or timezone.now()
+    try:
+        legal.require_current_terms(checkout.terms_version)
+    except legal.OutdatedTermsVersion as exc:
+        raise ReservationUnavailable(str(exc)) from exc
     lines = sorted(lines, key=lambda line: line.item_id)
     if not lines or len({line.item_id for line in lines}) != len(lines):
         raise ReservationUnavailable(
@@ -247,6 +254,7 @@ def _create_reservation(*, rzut_id, lines, checkout, discount_code, now):
             total=total,
             data_processing_accepted_at=now,
             terms_accepted_at=now,
+            terms_version=checkout.terms_version,
             expires_at=now + RESERVATION_LIFETIME,
         )
         ReservationItem.objects.bulk_create([
@@ -371,6 +379,7 @@ def _materialize_order(
         p24_order_id=p24_order_id,
         data_processing_accepted_at=reservation.data_processing_accepted_at,
         terms_accepted_at=reservation.terms_accepted_at,
+        terms_version=reservation.terms_version,
         payment_confirmed_at=confirmed_at,
         requires_attention=requires_attention,
         attention_message=attention_message,

@@ -3011,6 +3011,11 @@ main h1 {
     .kk-order-edition__photo { width: calc(100% - 16px); }
     .kk-order-product__heading { display: block; }
     .kk-order-product__price { margin-top: 8px; }
+    .kk-order-summary .kk-summary-row--terms { display: block; }
+    .kk-order-summary .kk-summary-row--terms span {
+        display: block;
+        margin-top: 4px;
+    }
     .kk-public-form { padding: 22px 18px; }
     .kk-footer { padding-right: 20px; padding-left: 20px; }
     .footer-col a { min-height: 42px; display: flex; align-items: center; }

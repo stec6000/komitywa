@@ -1,4 +1,4 @@
-from datetime import time, timedelta
+from datetime import date, time, timedelta
 from decimal import Decimal
 import json
 from unittest.mock import patch
@@ -9,6 +9,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from core import legal
 from shop.emails import send_rzut_order_customer_confirmation
 from shop.models import (
     Order,
@@ -70,6 +71,7 @@ class RzutOrderTestCase(TestCase):
                 notes="Odbierze siostra.",
                 pickup_starts_at=time(10, 0),
                 pickup_ends_at=time(11, 0),
+                terms_version=legal.CURRENT_TERMS.identifier,
             ),
         )
         return reservation, item
@@ -107,6 +109,27 @@ class TestConfirmReservation(RzutOrderTestCase):
         self.assertEqual(order_item.line_total, Decimal("52.00"))
         item.refresh_from_db()
         self.assertEqual(item.allocated_quantity, 2)
+
+    def test_confirmation_preserves_the_terms_version_accepted_at_checkout(self):
+        reservation, _ = self.create_reservation()
+        accepted_version = reservation.terms_version
+        accepted_at = reservation.terms_accepted_at
+
+        with patch(
+            "core.legal.CURRENT_TERMS",
+            legal.TermsVersion(
+                identifier="2026-09-01-rzuty-v2",
+                published_on=date(2026, 9, 1),
+            ),
+        ):
+            order, _ = confirm_reservation(
+                reservation_id=reservation.pk,
+                p24_order_id=987654,
+            )
+
+        self.assertEqual(accepted_version, "2026-08-19-rzuty-v1")
+        self.assertEqual(order.terms_version, accepted_version)
+        self.assertEqual(order.terms_accepted_at, accepted_at)
 
     def test_active_reservation_can_finish_after_rzut_is_closed(self):
         reservation, _ = self.create_reservation()
@@ -246,6 +269,42 @@ class TestRzutP24Webhook(RzutOrderTestCase):
         )
 
     @patch("shop.views.verify_transaction", return_value=True)
+    def test_webhook_preserves_terms_after_new_version_and_emails_policy(
+        self,
+        verify_payment,
+    ):
+        accepted_at = self.reservation.terms_accepted_at
+
+        with patch(
+            "core.legal.CURRENT_TERMS",
+            legal.TermsVersion(
+                identifier="2026-09-01-rzuty-v2",
+                published_on=date(2026, 9, 1),
+            ),
+        ):
+            response = self.client.post(
+                reverse("shop:rzut_p24_webhook"),
+                data=json.dumps(self.payload()),
+                content_type="application/json",
+            )
+
+        order = RzutOrder.objects.get()
+        customer_email = mail.outbox[0]
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(order.terms_version, "2026-08-19-rzuty-v1")
+        self.assertEqual(order.terms_accepted_at, accepted_at)
+        self.assertIn(
+            "Regulamin: wersja 2026-08-19-rzuty-v1",
+            customer_email.body,
+        )
+        self.assertIn(
+            "Zmiana lub anulowanie Zamówienia Rzutu wymaga kontaktu z nami.",
+            customer_email.body,
+        )
+        self.assertIn("https://example.com/kontakt/", customer_email.body)
+        verify_payment.assert_called_once()
+
+    @patch("shop.views.verify_transaction", return_value=True)
     def test_repeated_webhook_does_not_duplicate_order_pool_or_emails(
         self,
         verify_payment,
@@ -293,6 +352,7 @@ class TestRzutP24Webhook(RzutOrderTestCase):
                 notes="",
                 pickup_starts_at=time(10, 0),
                 pickup_ends_at=time(11, 0),
+                terms_version=legal.CURRENT_TERMS.identifier,
             ),
         )
 
@@ -518,6 +578,16 @@ class TestRzutOrderPublicPages(RzutOrderTestCase):
         self.assertContains(response, "Nowe")
         self.assertContains(response, "j***@example.com")
         self.assertContains(response, "*** *** 700")
+        self.assertContains(response, "2026-08-19-rzuty-v1")
+        self.assertContains(
+            response,
+            "Zmiana lub anulowanie Zamówienia Rzutu wymaga kontaktu z nami.",
+        )
+        self.assertContains(
+            response,
+            "Nie można anulować Zamówienia Rzutu samodzielnie na tej stronie.",
+        )
+        self.assertContains(response, reverse("contact"))
         self.assertNotContains(response, "jan@example.com")
         self.assertNotContains(response, "+48 500 600 700")
         self.assertNotContains(response, "Jan Kowalski")

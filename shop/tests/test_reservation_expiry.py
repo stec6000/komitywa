@@ -9,6 +9,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from core import legal
 from shop.models import OrderEdition, Product, Reservation, RzutItem
 from shop.reservations import (
     ReservationCheckoutData,
@@ -70,6 +71,7 @@ class ReservationExpiryTestCase(TestCase):
                 notes="Odbierze siostra.",
                 pickup_starts_at=time(10, 0),
                 pickup_ends_at=time(11, 0),
+                terms_version=legal.CURRENT_TERMS.identifier,
             ),
             now=now,
         )
@@ -244,6 +246,7 @@ class TestReservationRetry(ReservationExpiryTestCase):
                 "pickup_slot": "10:00:00|11:00:00",
                 "consent_data": "on",
                 "consent_terms": "on",
+                "terms_version": legal.CURRENT_TERMS.identifier,
             },
         )
 
@@ -297,6 +300,7 @@ class TestReservationRetry(ReservationExpiryTestCase):
                 notes="",
                 pickup_starts_at=time(10, 0),
                 pickup_ends_at=time(11, 0),
+                terms_version=legal.CURRENT_TERMS.identifier,
             ),
         )
         self.client.post(

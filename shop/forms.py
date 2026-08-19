@@ -1,5 +1,9 @@
 from django import forms
+from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+
+from core import legal
 
 from .models import OrderEdition, RzutItem, RzutOrder
 
@@ -52,6 +56,7 @@ class CheckoutForm(forms.Form):
 
 
 class RzutCheckoutForm(forms.Form):
+    terms_version = forms.CharField(widget=forms.HiddenInput)
     name = forms.CharField(
         max_length=200,
         label="Imię i nazwisko",
@@ -100,15 +105,21 @@ class RzutCheckoutForm(forms.Form):
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
     consent_terms = forms.BooleanField(
-        label=mark_safe(
-            'Akceptuję <a href="/regulamin/" target="_blank">'
-            "regulamin sklepu</a>"
-        ),
+        label="Akceptuję regulamin sklepu",
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
 
     def __init__(self, rzut, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.current_terms = legal.CURRENT_TERMS
+        self.fields["terms_version"].initial = self.current_terms.identifier
+        self.fields["consent_terms"].label = format_html(
+            'Akceptuję <a href="{}" target="_blank" rel="noopener">'
+            "regulamin sklepu</a> "
+            "(wersja {})",
+            reverse("regulations"),
+            self.current_terms.identifier,
+        )
         self._pickup_slots = {
             pickup_slot_value(slot): slot for slot in rzut.pickup_slots()
         }
@@ -128,6 +139,22 @@ class RzutCheckoutForm(forms.Form):
             raise forms.ValidationError(
                 "Wybierz dostępny Przedział Odbioru."
             ) from exc
+
+    def clean(self):
+        cleaned_data = super().clean()
+        try:
+            legal.require_current_terms(cleaned_data.get("terms_version"))
+        except legal.OutdatedTermsVersion as exc:
+            self.add_error(
+                None,
+                str(exc),
+            )
+            submitted_data = self.data.copy()
+            submitted_data["terms_version"] = self.current_terms.identifier
+            submitted_data.pop("consent_terms", None)
+            self.data = submitted_data
+        return cleaned_data
+
 
 class ManualRzutChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):

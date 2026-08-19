@@ -8,6 +8,10 @@
     <div class="wrap-narrow">
         <div class="hero-eyebrow">zasady sklepu</div>
         <h1>Regulamin sklepu internetowego</h1>
+        <p>
+            Wersja: <strong>{{ terms.identifier }}</strong> · opublikowana
+            <time datetime="{{ terms.published_on|date:'Y-m-d' }}">{{ terms.published_on|date:"d.m.Y" }}</time>
+        </p>
 
         <h2>1. Postanowienia ogólne</h2>
         <p>Niniejszy regulamin określa zasady korzystania ze sklepu internetowego Kuchenna Komitywa, dostępnego pod adresem https://www.kuchennakomitywa.pl/ (dalej: „Sklep").</p>
@@ -26,6 +30,10 @@
         <p>Zamówienia można składać przez stronę internetową 24 godziny na dobę, 7 dni w tygodniu.</p>
         <p>Po złożeniu zamówienia Klient otrzymuje potwierdzenie na podany adres e-mail.</p>
         <p>Przed złożeniem zamówienia Klient zapoznaje się z charakterystyką produktu (opis, cena brutto), sposobem płatności oraz warunkami dostawy lub odbioru.</p>
+
+        <h3>3.1. Zamówienia Rzutu</h3>
+        <p>Jeśli Zamówienie Rzutu wymaga płatności internetowej, Klient płaci bezpośrednio po złożeniu Rezerwacji przez Przelewy24. Rezerwacja nie jest jeszcze Zamówieniem Rzutu; Zamówienie Rzutu zostaje przyjęte po potwierdzeniu płatności.</p>
+        <p>{% include "includes/_rzut_cancellation_notice.html" %}</p>
 
         <h2>4. Płatności</h2>
         <p>Sklep akceptuje płatności za pośrednictwem serwisu Przelewy24 (przelewy bankowe, BLIK, karty płatnicze). Operatorem płatności jest PayPro SA, ul. Pastelowa 8, 60-198 Poznań, KRS 0000347935.</p>

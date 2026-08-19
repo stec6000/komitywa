@@ -14,6 +14,8 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from core.legal import CANCELLATION_NOTICE
+
 from .cart import Cart
 from .emails import (
     deliver_rzut_order_notifications,
@@ -289,6 +291,7 @@ def rzut_checkout(request):
                     notes=form.cleaned_data["notes"],
                     pickup_starts_at=slot.starts_at,
                     pickup_ends_at=slot.ends_at,
+                    terms_version=form.cleaned_data["terms_version"],
                 ),
                 discount_code=(
                     snapshot["discount_code"].code
@@ -342,7 +345,12 @@ def rzut_checkout(request):
     return render(
         request,
         "shop/rzut_checkout.html",
-        {"form": form, **snapshot, "hide_newsletter": True},
+        {
+            "form": form,
+            **snapshot,
+            "cancellation_notice": CANCELLATION_NOTICE,
+            "hide_newsletter": True,
+        },
     )
 
 
@@ -396,7 +404,11 @@ def rzut_order_detail(request, number):
     return render(
         request,
         "shop/rzut_order_detail.html",
-        {"order": order, "hide_newsletter": True},
+        {
+            "order": order,
+            "cancellation_notice": CANCELLATION_NOTICE,
+            "hide_newsletter": True,
+        },
     )
 
 

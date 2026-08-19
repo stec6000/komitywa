@@ -476,6 +476,20 @@ class TestRegulationsPage(TestCase):
         response = self.client.get("/regulamin/")
         self.assertContains(response, "14 dni kalendarzowych")
 
+    def test_regulations_identifies_version_and_rzut_cancellation_rules(self):
+        response = self.client.get("/regulamin/")
+
+        self.assertContains(response, "2026-08-19-rzuty-v1")
+        self.assertContains(
+            response,
+            "Zmiana lub anulowanie Zamówienia Rzutu wymaga kontaktu z nami.",
+        )
+        self.assertContains(
+            response,
+            "bezpośrednio po złożeniu Rezerwacji przez Przelewy24",
+        )
+        self.assertContains(response, 'href="/kontakt/"')
+
 
 class TestNavbarLinks(TestCase):
     """Phase 2: Navbar links wired to real URLs."""

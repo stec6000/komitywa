@@ -13,6 +13,7 @@ from recipes.models import Recipe
 from shop.models import OrderEdition, RzutItem
 
 from .forms import CafeInquiryForm, WorkshopInterestForm
+from . import legal
 from .models import CafeLocation
 
 
@@ -137,6 +138,7 @@ def orders(request):
 
     return render(request, "pages/orders.html", {
         "archived_rzuty": archived_rzuty,
+        "cancellation_notice": legal.CANCELLATION_NOTICE,
         "current_rzut": current_rzut,
         "current_items": current_items,
         "upcoming_rzut": upcoming_rzut,
@@ -226,4 +228,11 @@ def privacy_policy(request):
 
 
 def regulations(request):
-    return render(request, "pages/regulations.html")
+    return render(
+        request,
+        "pages/regulations.html",
+        {
+            "cancellation_notice": legal.CANCELLATION_NOTICE,
+            "terms": legal.CURRENT_TERMS,
+        },
+    )

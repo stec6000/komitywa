@@ -11,6 +11,7 @@ from django.test import TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from core import legal
 from shop.manual_orders import (
     ManualOrderData,
     ManualOrderLineRequest,
@@ -157,6 +158,7 @@ class TestCreateManualOrder(ManualOrderTestCase):
                     notes="",
                     pickup_starts_at=time(10, 0),
                     pickup_ends_at=time(11, 0),
+                    terms_version=legal.CURRENT_TERMS.identifier,
                 ),
             )
 
@@ -176,6 +178,7 @@ class TestCreateManualOrder(ManualOrderTestCase):
                 notes="",
                 pickup_starts_at=time(10, 0),
                 pickup_ends_at=time(11, 0),
+                terms_version=legal.CURRENT_TERMS.identifier,
             ),
         )
 

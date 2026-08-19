@@ -76,6 +76,10 @@
             </div>
         </dl>
 
+        <p class="kk-cart-notice">
+            {% include "includes/_rzut_cancellation_notice.html" %}
+        </p>
+
         <div class="kk-order-products" aria-label="Menu aktualnego Rzutu">
             {% for item in current_items %}
                 {% include "pages/includes/_rzut_item_card.html" with rzut=current_rzut item=item can_order=True %}
