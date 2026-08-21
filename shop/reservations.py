@@ -174,7 +174,11 @@ def _create_reservation(*, rzut_id, lines, checkout, discount_code, now):
 
         for line in lines:
             item = items[line.item_id]
-            if not item.is_active or item.product.type != "physical":
+            if (
+                not item.is_active
+                or item.product.type != "physical"
+                or item.product.is_archived
+            ):
                 raise ReservationUnavailable(
                     f"Pozycja Rzutu „{item.product.title}” nie jest już "
                     "aktywna."
@@ -205,6 +209,7 @@ def _create_reservation(*, rzut_id, lines, checkout, discount_code, now):
                 rzut_id=rzut_id,
                 is_active=True,
                 product__type="physical",
+                product__is_archived=False,
                 price=line.expected_price,
             ).allocate(line.quantity)
             if not updated:

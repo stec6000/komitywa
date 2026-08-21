@@ -473,6 +473,7 @@ class RzutItemQuerySet(models.QuerySet):
         return self.filter(
             is_active=True,
             product__type="physical",
+            product__is_archived=False,
         ).select_related("product", "product__category")
 
     def allocate(self, quantity):
@@ -634,6 +635,7 @@ class RzutItem(models.Model):
         return (
             self.is_active
             and self.product.type == "physical"
+            and not self.product.is_archived
             and self.rzut.phase_at(at) == OrderEdition.Phase.OPEN
         )
 
@@ -765,6 +767,48 @@ class DiscountCode(models.Model):
     def save(self, *args, **kwargs):
         self.code = (self.code or "").strip().upper()
         super().save(*args, **kwargs)
+
+
+class RzutEvent(models.Model):
+    class Kind(models.TextChoices):
+        STATUS_CHANGED = "status_changed", "Zmiana statusu Rzutu"
+        POOL_CHANGED = "pool_changed", "Zmiana Puli"
+        ARCHIVE_VISIBILITY_CHANGED = (
+            "archive_visibility_changed",
+            "Zmiana widoczności Rzutu w archiwum",
+        )
+
+    rzut = models.ForeignKey(
+        OrderEdition,
+        on_delete=models.CASCADE,
+        related_name="events",
+        verbose_name="Rzut",
+    )
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="rzut_events",
+        blank=True,
+        null=True,
+        verbose_name="Administrator",
+    )
+    actor_email = models.EmailField(
+        blank=True,
+        default="",
+        verbose_name="E-mail administratora",
+    )
+    kind = models.CharField(
+        max_length=30,
+        choices=Kind.choices,
+        verbose_name="Rodzaj działania",
+    )
+    context = models.JSONField(default=dict, blank=True, verbose_name="Kontekst")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Czas")
+
+    class Meta:
+        verbose_name = "Zdarzenie Rzutu"
+        verbose_name_plural = "Historia Rzutu"
+        ordering = ["-created_at", "-pk"]
 
 
 class Reservation(models.Model):

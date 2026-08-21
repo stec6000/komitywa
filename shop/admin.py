@@ -3,6 +3,8 @@ import uuid
 from django import forms
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
+from django.db.models import F
 from django.forms.models import BaseInlineFormSet
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
@@ -43,6 +45,7 @@ from .models import (
     Product,
     ProductCategory,
     Reservation,
+    RzutEvent,
     RzutItem,
     RzutOrder,
     RzutOrderEvent,
@@ -50,6 +53,33 @@ from .models import (
     RzutPickupChange,
     RzutPickupNotification,
 )
+
+
+class ArchiveOrDeleteAdminMixin:
+    def get_deleted_objects(self, objs, request):
+        objects = list(objs)
+        if objects:
+            return (
+                [str(obj) for obj in objects],
+                {self.model._meta.verbose_name_plural: len(objects)},
+                set(),
+                [],
+            )
+        return super().get_deleted_objects(objects, request)
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            self.delete_model(request, obj)
+
+
+def record_rzut_change(request, rzut, kind, before, after):
+    RzutEvent.objects.create(
+        rzut=rzut,
+        actor=request.user,
+        actor_email=request.user.email,
+        kind=kind,
+        context={"before": before, "after": after},
+    )
 
 
 @admin.register(ProductCategory)
@@ -60,7 +90,7 @@ class ProductCategoryAdmin(admin.ModelAdmin):
 
 
 @admin.register(DiscountCode)
-class DiscountCodeAdmin(admin.ModelAdmin):
+class DiscountCodeAdmin(ArchiveOrDeleteAdminMixin, admin.ModelAdmin):
     list_display = [
         "code",
         "discount_type",
@@ -75,6 +105,16 @@ class DiscountCodeAdmin(admin.ModelAdmin):
     search_fields = ["code", "rzut__title"]
     readonly_fields = ["allocated_uses", "created_at", "updated_at"]
 
+    @staticmethod
+    def _is_used(obj):
+        return obj.reservations.exists() or obj.rzut_orders.exists()
+
+    def delete_model(self, request, obj):
+        if self._is_used(obj):
+            obj.is_active = False
+            obj.save(update_fields=["is_active", "updated_at"])
+            return
+        super().delete_model(request, obj)
 
 class RzutItemInlineForm(forms.ModelForm):
     class Meta:
@@ -116,9 +156,25 @@ class RzutItemInlineForm(forms.ModelForm):
 
 class RzutItemInlineFormSet(BaseInlineFormSet):
     def clean(self):
+        for form in self.forms:
+            cleaned_data = form.cleaned_data
+            item = form.instance
+            if (
+                cleaned_data.get("DELETE")
+                and item.pk
+                and (
+                    item.reservation_items.exists()
+                    or item.order_items.exists()
+                )
+            ):
+                cleaned_data["DELETE"] = False
+                cleaned_data["is_active"] = False
+                item.is_active = False
+
         super().clean()
         if any(self.errors):
             return
+
         if self.instance.status != OrderEdition.Status.PUBLISHED:
             return
 
@@ -168,7 +224,8 @@ class RzutItemInline(admin.TabularInline):
 
 
 @admin.register(OrderEdition)
-class OrderEditionAdmin(admin.ModelAdmin):
+class OrderEditionAdmin(ArchiveOrDeleteAdminMixin, admin.ModelAdmin):
+    actions = ["copy_as_draft"]
     list_display = [
         "title",
         "status",
@@ -235,6 +292,79 @@ class OrderEditionAdmin(admin.ModelAdmin):
         ),
     ]
 
+    @admin.action(description="Skopiuj jako ukryty szkic")
+    def copy_as_draft(self, request, queryset):
+        copied = 0
+        with transaction.atomic():
+            for source in queryset.prefetch_related("items"):
+                draft = OrderEdition.objects.create(
+                    title=f"Kopia – {source.title}",
+                    description=source.description,
+                    image=source.image,
+                    image_alt=source.image_alt,
+                    status=OrderEdition.Status.DRAFT,
+                    pickup_place_name=source.pickup_place_name,
+                    pickup_address=source.pickup_address,
+                    pickup_instructions=source.pickup_instructions,
+                    payment_details=source.payment_details,
+                    show_in_archive=False,
+                    show_upcoming_menu=False,
+                )
+                RzutItem.objects.bulk_create(
+                    [
+                        RzutItem(
+                            rzut=draft,
+                            product=item.product,
+                            price=item.price,
+                            portion=item.portion,
+                            pool=item.pool,
+                            per_customer_limit=item.per_customer_limit,
+                            sort_order=item.sort_order,
+                            is_active=item.is_active,
+                            production_note=item.production_note,
+                        )
+                        for item in source.items.all()
+                    ]
+                )
+                copied += 1
+        self.message_user(
+            request,
+            f"Utworzono {copied} ukrytych szkiców Rzutu.",
+            messages.SUCCESS,
+        )
+
+    @staticmethod
+    def _has_history(obj):
+        return obj.reservations.exists() or obj.rzut_orders.exists()
+
+    def delete_model(self, request, obj):
+        if self._has_history(obj) or obj.status != OrderEdition.Status.DRAFT:
+            previous_status = obj.status
+            was_shown_in_archive = obj.show_in_archive
+            obj.status = OrderEdition.Status.CLOSED
+            obj.show_in_archive = False
+            obj.save(update_fields=["status", "show_in_archive", "updated_at"])
+            if previous_status != obj.status:
+                record_rzut_change(
+                    request,
+                    obj,
+                    RzutEvent.Kind.STATUS_CHANGED,
+                    previous_status,
+                    obj.status,
+                )
+            if was_shown_in_archive:
+                record_rzut_change(
+                    request,
+                    obj,
+                    RzutEvent.Kind.ARCHIVE_VISIBILITY_CHANGED,
+                    True,
+                    False,
+                )
+            return
+        obj.discount_codes.all().delete()
+        obj.items.all().delete()
+        super().delete_model(request, obj)
+
     def get_urls(self):
         custom_urls = [
             path(
@@ -244,6 +374,31 @@ class OrderEditionAdmin(admin.ModelAdmin):
             )
         ]
         return custom_urls + super().get_urls()
+
+    def changeform_view(
+        self,
+        request,
+        object_id=None,
+        form_url="",
+        extra_context=None,
+    ):
+        if request.method != "POST" or object_id is None:
+            return super().changeform_view(
+                request,
+                object_id=object_id,
+                form_url=form_url,
+                extra_context=extra_context,
+            )
+        with transaction.atomic():
+            OrderEdition.objects.filter(pk=object_id).update(
+                allocation_revision=F("allocation_revision") + 1
+            )
+            return super().changeform_view(
+                request,
+                object_id=object_id,
+                form_url=form_url,
+                extra_context=extra_context,
+            )
 
     @admin.display(description="Podgląd")
     def image_preview(self, obj):
@@ -353,10 +508,33 @@ class OrderEditionAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         before = None
+        previous_status = None
+        previous_archive_visibility = None
         if change:
             persisted = OrderEdition.objects.get(pk=obj.pk)
             before = PickupDetails.from_source(persisted)
+            previous_status = persisted.status
+            previous_archive_visibility = persisted.show_in_archive
         super().save_model(request, obj, form, change)
+        if previous_status is not None and previous_status != obj.status:
+            record_rzut_change(
+                request,
+                obj,
+                RzutEvent.Kind.STATUS_CHANGED,
+                previous_status,
+                obj.status,
+            )
+        if (
+            previous_archive_visibility is not None
+            and previous_archive_visibility != obj.show_in_archive
+        ):
+            record_rzut_change(
+                request,
+                obj,
+                RzutEvent.Kind.ARCHIVE_VISIBILITY_CHANGED,
+                previous_archive_visibility,
+                obj.show_in_archive,
+            )
         after = PickupDetails.from_source(obj)
         if before is None or before == after:
             return
@@ -418,6 +596,35 @@ class OrderEditionAdmin(admin.ModelAdmin):
             ]
         )
         request._rzut_pickup_change_id = pickup_change.pk
+
+    def save_formset(self, request, form, formset, change):
+        if formset.model is not RzutItem:
+            return super().save_formset(request, form, formset, change)
+        previous_pools = {
+            item.pk: item.pool
+            for item in RzutItem.objects.filter(rzut=form.instance)
+        }
+        super().save_formset(request, form, formset, change)
+        events = []
+        for item in RzutItem.objects.filter(rzut=form.instance):
+            previous_pool = previous_pools.get(item.pk)
+            if previous_pool is None or previous_pool == item.pool:
+                continue
+            events.append(
+                RzutEvent(
+                    rzut=form.instance,
+                    actor=request.user,
+                    actor_email=request.user.email,
+                    kind=RzutEvent.Kind.POOL_CHANGED,
+                    context={
+                        "rzut_item_id": item.pk,
+                        "product_id": item.product_id,
+                        "before": previous_pool,
+                        "after": item.pool,
+                    },
+                )
+            )
+        RzutEvent.objects.bulk_create(events)
 
     def response_change(self, request, obj):
         pickup_change_id = getattr(request, "_rzut_pickup_change_id", None)
@@ -495,6 +702,33 @@ class OrderEditionAdmin(admin.ModelAdmin):
             "admin/shop/orderedition/pickup_notification.html",
             context,
         )
+
+
+@admin.register(RzutEvent)
+class RzutEventAdmin(admin.ModelAdmin):
+    actions = None
+    list_select_related = ["rzut", "actor"]
+    list_display = ["created_at", "rzut", "kind", "actor_email"]
+    list_filter = ["kind", "rzut"]
+    search_fields = ["rzut__title", "actor_email"]
+    readonly_fields = [
+        "rzut",
+        "created_at",
+        "kind",
+        "actor",
+        "actor_email",
+        "context",
+    ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
 
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
@@ -1084,7 +1318,7 @@ class RzutOrderAdmin(admin.ModelAdmin):
 
 
 @admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
+class ProductAdmin(ArchiveOrDeleteAdminMixin, admin.ModelAdmin):
     list_display = [
         "title",
         "category",
@@ -1157,6 +1391,17 @@ class ProductAdmin(admin.ModelAdmin):
             },
         ),
     ]
+
+    def delete_model(self, request, obj):
+        if obj.rzut_items.exists():
+            obj.is_archived = True
+            obj.is_available_in_shop = False
+            obj.save(
+                update_fields=["is_archived", "is_available_in_shop", "updated_at"]
+            )
+            obj.rzut_items.update(is_active=False)
+            return
+        super().delete_model(request, obj)
 
     def image_preview(self, obj):
         if obj.image:
