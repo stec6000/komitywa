@@ -16,10 +16,13 @@ from .emails import (
 from .fulfillment import (
     FulfillmentAllocationError,
     PickupDetails,
+    RefundOutcome,
     TERMINAL_FULFILLMENT_STAGES,
     cancel_rzut_order,
     deliver_pickup_notification,
     deliver_ready_notification,
+    is_rzut_order_refundable,
+    refund_rzut_order,
 )
 from .forms import (
     CancellationDecisionForm,
@@ -583,7 +586,7 @@ class RzutOrderEventReadonlyInline(admin.TabularInline):
 class RzutOrderAdmin(admin.ModelAdmin):
     add_form_template = "admin/shop/rzutorder/add_form.html"
     form = RzutOrderFulfillmentAdminForm
-    actions = ["send_ready_notifications"]
+    actions = ["send_ready_notifications", "refund_p24_payment"]
     inlines = [RzutOrderItemReadonlyInline, RzutOrderEventReadonlyInline]
     list_select_related = ["rzut", "discount_code"]
     list_display = [
@@ -627,6 +630,12 @@ class RzutOrderAdmin(admin.ModelAdmin):
         "payment_method_details",
         "p24_session_id",
         "p24_order_id",
+        "p24_refund_request_id",
+        "p24_refunds_uuid",
+        "p24_refunded_at",
+        "p24_refund_error",
+        "p24_refund_result",
+        "cancelled_quantity_restored",
         "data_processing_accepted_at",
         "terms_accepted_at",
         "terms_version",
@@ -654,6 +663,7 @@ class RzutOrderAdmin(admin.ModelAdmin):
                     "fulfillment_stage",
                     "internal_note",
                     "ready_notification_status",
+                    "cancelled_quantity_restored",
                 )
             },
         ),
@@ -676,6 +686,18 @@ class RzutOrderAdmin(admin.ModelAdmin):
                     "payment_status",
                     "payment_method",
                     "payment_method_details",
+                )
+            },
+        ),
+        (
+            "Pełny zwrot Przelewy24",
+            {
+                "fields": (
+                    "p24_refund_request_id",
+                    "p24_refunds_uuid",
+                    "p24_refunded_at",
+                    "p24_refund_error",
+                    "p24_refund_result",
                 )
             },
         ),
@@ -837,6 +859,80 @@ class RzutOrderAdmin(admin.ModelAdmin):
                     "to": obj.payment_status,
                 },
             )
+
+    @admin.action(description="Zwróć pełną płatność Przelewy24")
+    def refund_p24_payment(self, request, queryset):
+        orders = list(queryset)
+        if len(orders) != 1:
+            self.message_user(
+                request,
+                "Wybierz dokładnie jedno Zamówienie Rzutu do zwrotu.",
+                level=messages.ERROR,
+            )
+            return None
+        order = orders[0]
+        if not is_rzut_order_refundable(order):
+            self.message_user(
+                request,
+                "To Zamówienie Rzutu nie kwalifikuje się do pełnego "
+                "zwrotu Przelewy24.",
+                level=messages.ERROR,
+            )
+            return None
+        refund_form = CancellationDecisionForm(
+            request.POST if request.POST.get("confirm_refund") else None
+        )
+        if request.POST.get("confirm_refund") and refund_form.is_valid():
+            result = refund_rzut_order(
+                order_id=order.pk,
+                actor=request.user,
+                restore_pool=refund_form.cleaned_data["restore_pool"],
+            )
+            if result.outcome == RefundOutcome.COMPLETED:
+                self.message_user(
+                    request,
+                    "Pełny zwrot Przelewy24 został przyjęty, a Zamówienie "
+                    "Rzutu anulowane.",
+                    level=messages.SUCCESS,
+                )
+            elif result.outcome == RefundOutcome.COMPLETED_WITH_WARNING:
+                self.message_user(
+                    request,
+                    "Pełny zwrot Przelewy24 został potwierdzony, ale "
+                    "rozliczenie Puli i anulowanie realizacji wymaga pilnej "
+                    "uwagi: "
+                    f"{result.error}",
+                    level=messages.WARNING,
+                )
+            elif result.outcome == RefundOutcome.REQUESTED:
+                self.message_user(
+                    request,
+                    "Zlecenie pełnego zwrotu zostało przyjęte. Zwrot "
+                    "oczekuje na zakończenie w Przelewy24; ponów akcję, "
+                    "aby odświeżyć wynik.",
+                    level=messages.WARNING,
+                )
+            else:
+                self.message_user(
+                    request,
+                    f"Zwrot Przelewy24 nie powiódł się: {result.error}",
+                    level=messages.ERROR,
+                )
+            return redirect(
+                reverse("admin:shop_rzutorder_change", args=[order.pk])
+            )
+        return TemplateResponse(
+            request,
+            "admin/shop/rzutorder/confirm_refund.html",
+            {
+                **self.admin_site.each_context(request),
+                "opts": self.model._meta,
+                "title": "Potwierdź pełny zwrot Przelewy24",
+                "order": order,
+                "refund_form": refund_form,
+                "action_name": "refund_p24_payment",
+            },
+        )
 
     @admin.action(description="Wyślij wiadomość „gotowe do odbioru”")
     def send_ready_notifications(self, request, queryset):

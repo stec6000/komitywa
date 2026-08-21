@@ -197,6 +197,186 @@ class TestVerifyTransaction(TestCase):
         self.assertTrue(result)
 
 
+@override_settings(
+    P24_MERCHANT_ID=12345,
+    P24_POS_ID=12345,
+    P24_API_KEY="testapikey",
+    P24_SANDBOX=True,
+    P24_HTTP_TIMEOUT=(3.05, 10),
+)
+class TestRefundRzutTransaction(TestCase):
+    def refund_request(self, **overrides):
+        from shop.payment import P24RefundRequest
+
+        values = {
+            "p24_order_id": 987654,
+            "p24_session_id": "rzut-session-1",
+            "amount": Decimal("48.99"),
+            "request_id": "refund-request-1",
+            "refunds_uuid": "refunds-uuid-1",
+            "description": "Zwrot KK ABC123",
+        }
+        values.update(overrides)
+        return P24RefundRequest(**values)
+
+    @patch("shop.payment.requests.post")
+    def test_requests_full_refund_with_stable_identifiers(self, mock_post):
+        from shop.payment import refund_rzut_transaction
+
+        response = MagicMock()
+        response.json.return_value = {
+            "data": [
+                {
+                    "orderId": 987654,
+                    "sessionId": "rzut-session-1",
+                    "amount": 4899,
+                    "status": True,
+                    "message": "success",
+                }
+            ],
+            "responseCode": 0,
+        }
+        mock_post.return_value = response
+
+        result = refund_rzut_transaction(self.refund_request())
+
+        self.assertEqual(result["message"], "success")
+        self.assertFalse(result["completed"])
+        mock_post.assert_called_once_with(
+            "https://sandbox.przelewy24.pl/api/v1/transaction/refund",
+            json={
+                "requestId": "refund-request-1",
+                "refundsUuid": "refunds-uuid-1",
+                "refunds": [
+                    {
+                        "orderId": 987654,
+                        "sessionId": "rzut-session-1",
+                        "amount": 4899,
+                        "description": "Zwrot KK ABC123",
+                    }
+                ],
+            },
+            auth=("12345", "testapikey"),
+            timeout=(3.05, 10),
+        )
+
+    @patch("shop.payment.requests.post")
+    def test_raises_when_p24_rejects_refund_in_successful_http_response(
+        self, mock_post
+    ):
+        from shop.payment import P24RefundError, refund_rzut_transaction
+
+        response = MagicMock()
+        response.json.return_value = {
+            "data": [
+                {
+                    "orderId": 987654,
+                    "sessionId": "rzut-session-1",
+                    "amount": 4899,
+                    "status": False,
+                    "message": "Insufficient funds available",
+                }
+            ],
+            "responseCode": 0,
+        }
+        mock_post.return_value = response
+
+        with self.assertRaisesMessage(
+            P24RefundError, "Insufficient funds available"
+        ):
+            refund_rzut_transaction(self.refund_request())
+
+    @patch("shop.payment.requests.post")
+    def test_rejects_success_response_for_different_refund(self, mock_post):
+        from shop.payment import P24RefundError, refund_rzut_transaction
+
+        response = MagicMock()
+        response.json.return_value = {
+            "data": [
+                {
+                    "orderId": 987654,
+                    "sessionId": "different-session",
+                    "amount": 1,
+                    "status": True,
+                    "message": "success",
+                }
+            ],
+            "responseCode": 0,
+        }
+        mock_post.return_value = response
+
+        with self.assertRaisesMessage(
+            P24RefundError, "nie odpowiada żądanemu pełnemu zwrotowi"
+        ):
+            refund_rzut_transaction(self.refund_request())
+
+    @patch("shop.payment.requests.get")
+    def test_finds_previously_accepted_refund_for_safe_retry(self, mock_get):
+        from shop.payment import get_rzut_refund
+
+        response = MagicMock()
+        response.status_code = 200
+        response.json.return_value = {
+            "data": {
+                "orderId": 987654,
+                "sessionId": "rzut-session-1",
+                "amount": 4899,
+                "currency": "PLN",
+                "refunds": [
+                    {
+                        "requestId": "refund-request-1",
+                        "status": 2,
+                        "amount": 4899,
+                        "description": "Zwrot KK ABC123",
+                    }
+                ],
+            },
+            "responseCode": 0,
+        }
+        mock_get.return_value = response
+
+        result = get_rzut_refund(self.refund_request())
+
+        self.assertTrue(result["status"])
+        self.assertFalse(result["completed"])
+        self.assertEqual(result["refundStatus"], 2)
+        self.assertEqual(result["requestId"], "refund-request-1")
+        mock_get.assert_called_once_with(
+            "https://sandbox.przelewy24.pl/api/v1/refund/by/orderId/987654",
+            auth=("12345", "testapikey"),
+            timeout=(3.05, 10),
+        )
+
+    @patch("shop.payment.requests.get")
+    def test_marks_only_completed_p24_refund_as_completed(self, mock_get):
+        from shop.payment import get_rzut_refund
+
+        response = MagicMock()
+        response.status_code = 200
+        response.json.return_value = {
+            "data": {
+                "orderId": 987654,
+                "sessionId": "rzut-session-1",
+                "amount": 4899,
+                "currency": "PLN",
+                "refunds": [
+                    {
+                        "requestId": "refund-request-1",
+                        "status": 1,
+                        "amount": 4899,
+                    }
+                ],
+            },
+            "responseCode": 0,
+        }
+        mock_get.return_value = response
+
+        result = get_rzut_refund(self.refund_request())
+
+        self.assertTrue(result["completed"])
+        self.assertEqual(result["refundStatus"], 1)
+
+
 @override_settings(P24_SANDBOX=True)
 class TestGetBaseUrl(TestCase):
     def test_sandbox_url(self):

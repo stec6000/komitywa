@@ -2,6 +2,8 @@ import hashlib
 import hmac
 import json
 import logging
+from dataclasses import dataclass
+from decimal import Decimal
 
 import requests
 from django.conf import settings
@@ -12,6 +14,24 @@ logger = logging.getLogger(__name__)
 
 P24_SANDBOX_URL = "https://sandbox.przelewy24.pl"
 P24_PRODUCTION_URL = "https://secure.przelewy24.pl"
+
+
+class P24RefundError(RuntimeError):
+    pass
+
+
+@dataclass(frozen=True)
+class P24RefundRequest:
+    p24_order_id: int
+    p24_session_id: str
+    amount: Decimal
+    request_id: str
+    refunds_uuid: str
+    description: str
+
+    @property
+    def amount_in_grosze(self):
+        return int(self.amount * 100)
 
 
 def get_base_url():
@@ -134,6 +154,96 @@ def verify_transaction(session_id, order_id_p24, amount):
     response.raise_for_status()
     data = response.json()
     return data.get("data", {}).get("status") == "success"
+
+
+def refund_rzut_transaction(refund):
+    payload = {
+        "requestId": refund.request_id,
+        "refundsUuid": refund.refunds_uuid,
+        "refunds": [
+            {
+                "orderId": refund.p24_order_id,
+                "sessionId": refund.p24_session_id,
+                "amount": refund.amount_in_grosze,
+                "description": refund.description,
+            }
+        ],
+    }
+    response = requests.post(
+        f"{get_base_url()}/api/v1/transaction/refund",
+        json=payload,
+        auth=(str(settings.P24_POS_ID), settings.P24_API_KEY),
+        timeout=settings.P24_HTTP_TIMEOUT,
+    )
+    response.raise_for_status()
+    try:
+        result = response.json()["data"][0]
+    except (KeyError, IndexError, TypeError, ValueError) as exc:
+        raise P24RefundError(
+            "Przelewy24 zwróciło nieprawidłową odpowiedź dla zwrotu."
+        ) from exc
+    if not result.get("status"):
+        raise P24RefundError(result.get("message") or "Przelewy24 odrzuciło zwrot.")
+    if (
+        result.get("orderId") != refund.p24_order_id
+        or result.get("sessionId") != refund.p24_session_id
+        or result.get("amount") != refund.amount_in_grosze
+    ):
+        raise P24RefundError(
+            "Odpowiedź Przelewy24 nie odpowiada żądanemu pełnemu zwrotowi."
+        )
+    return {**result, "completed": False}
+
+
+def get_rzut_refund(refund_request):
+    response = requests.get(
+        f"{get_base_url()}/api/v1/refund/by/orderId/{refund_request.p24_order_id}",
+        auth=(str(settings.P24_POS_ID), settings.P24_API_KEY),
+        timeout=settings.P24_HTTP_TIMEOUT,
+    )
+    if response.status_code == 404:
+        return None
+    response.raise_for_status()
+    try:
+        data = response.json()["data"]
+        refunds = data["refunds"]
+    except (KeyError, TypeError, ValueError) as exc:
+        raise P24RefundError(
+            "Przelewy24 zwróciło nieprawidłowe dane istniejącego zwrotu."
+        ) from exc
+    if (
+        data.get("orderId") != refund_request.p24_order_id
+        or data.get("sessionId") != refund_request.p24_session_id
+    ):
+        raise P24RefundError(
+            "Dane istniejącego zwrotu Przelewy24 dotyczą innej transakcji."
+        )
+    for refund_data in refunds:
+        if refund_data.get("requestId") != refund_request.request_id:
+            continue
+        if refund_data.get("amount") != refund_request.amount_in_grosze:
+            raise P24RefundError(
+                "Istniejący zwrot Przelewy24 ma inną kwotę."
+            )
+        refund_status = refund_data.get("status")
+        if refund_status == 4:
+            raise P24RefundError(
+                refund_data.get("description") or "Przelewy24 odrzuciło zwrot."
+            )
+        if refund_status not in {1, 2, 3}:
+            raise P24RefundError(
+                "Przelewy24 zwróciło nieznany status zwrotu."
+            )
+        return {
+            "orderId": refund_request.p24_order_id,
+            "sessionId": refund_request.p24_session_id,
+            "amount": refund_request.amount_in_grosze,
+            "status": True,
+            "completed": refund_status == 1,
+            "refundStatus": refund_status,
+            "requestId": refund_request.request_id,
+        }
+    return None
 
 
 def get_payment_url(token):

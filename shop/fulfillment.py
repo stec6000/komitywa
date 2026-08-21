@@ -1,10 +1,13 @@
+import uuid
 from dataclasses import dataclass
 from datetime import date, datetime, time
+from enum import Enum
 from typing import Callable
 
 from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
+from requests import RequestException
 
 from .emails import (
     send_rzut_order_ready_notification,
@@ -16,6 +19,12 @@ from .models import (
     RzutItem,
     RzutOrder,
     RzutOrderEvent,
+)
+from .payment import (
+    P24RefundError,
+    P24RefundRequest,
+    get_rzut_refund,
+    refund_rzut_transaction,
 )
 
 
@@ -101,6 +110,34 @@ class DeliveryResult:
     error: str = ""
 
 
+@dataclass(frozen=True)
+class RefundResult:
+    outcome: "RefundOutcome"
+    order: RzutOrder
+    error: str = ""
+
+    @property
+    def completed(self):
+        return self.outcome in {
+            RefundOutcome.COMPLETED,
+            RefundOutcome.COMPLETED_WITH_WARNING,
+        }
+
+
+class RefundOutcome(Enum):
+    REQUESTED = "requested"
+    COMPLETED = "completed"
+    COMPLETED_WITH_WARNING = "completed_with_warning"
+    FAILED = "failed"
+
+
+@dataclass(frozen=True)
+class PreparedRefund:
+    order: RzutOrder
+    request: P24RefundRequest
+    was_previously_requested: bool
+
+
 def _actor_values(actor):
     return {"actor": actor, "actor_email": actor.email}
 
@@ -139,18 +176,65 @@ def _deliver_with_audit(
     return DeliveryResult(sent=True)
 
 
-@transaction.atomic
-def cancel_rzut_order(*, order_id, actor, restore_pool):
-    rzut_id = RzutOrder.objects.values_list("rzut_id", flat=True).get(
-        pk=order_id
-    )
-    OrderEdition.objects.filter(pk=rzut_id).update(
-        allocation_revision=F("allocation_revision") + 1
-    )
-    order = RzutOrder.objects.select_for_update().get(pk=order_id)
+def _recorded_pool_decision(order):
+    if order.cancelled_quantity_restored is not None:
+        return order.cancelled_quantity_restored
+    event = order.events.filter(
+        kind=RzutOrderEvent.Kind.FULFILLMENT_STAGE_CHANGED,
+        context__to=RzutOrder.FulfillmentStage.CANCELLED,
+    ).first()
+    if event is None:
+        return None
+    return event.context.get("pool_restored")
+
+
+def _change_cancelled_pool_decision(*, order, restore_pool):
+    previous_decision = _recorded_pool_decision(order)
+    if previous_decision is None:
+        raise FulfillmentAllocationError(
+            "Nie można ustalić wcześniejszej decyzji o Puli anulowanego "
+            "Zamówienia Rzutu."
+        )
+    if previous_decision == restore_pool:
+        return previous_decision
+    for line in order.items.order_by("rzut_item_id"):
+        rzut_item = RzutItem.objects.filter(pk=line.rzut_item_id)
+        if restore_pool:
+            changed = rzut_item.filter(
+                withdrawn_quantity__gte=line.quantity
+            ).update(
+                withdrawn_quantity=F("withdrawn_quantity") - line.quantity
+            )
+        else:
+            changed = rzut_item.filter(
+                pool__gte=(
+                    F("allocated_quantity")
+                    + F("withdrawn_quantity")
+                    + line.quantity
+                )
+            ).update(
+                withdrawn_quantity=F("withdrawn_quantity") + line.quantity
+            )
+        if not changed:
+            raise FulfillmentAllocationError(
+                "Nie można zmienić decyzji o Puli anulowanego Zamówienia Rzutu."
+            )
+    order.cancelled_quantity_restored = restore_pool
+    order.save(update_fields=["cancelled_quantity_restored", "updated_at"])
+    return restore_pool
+
+
+def _cancel_locked_order(*, order, actor, restore_pool, allow_picked_up=False):
     if order.fulfillment_stage == RzutOrder.FulfillmentStage.CANCELLED:
-        return order
-    if order.fulfillment_stage == RzutOrder.FulfillmentStage.PICKED_UP:
+        actual_pool_decision = _change_cancelled_pool_decision(
+            order=order,
+            restore_pool=restore_pool,
+        )
+        return order, actual_pool_decision
+    if (
+        order.fulfillment_stage == RzutOrder.FulfillmentStage.PICKED_UP
+        and not allow_picked_up
+    ):
         raise FulfillmentAllocationError(
             "Nie można anulować odebranego Zamówienia Rzutu."
         )
@@ -173,7 +257,14 @@ def cancel_rzut_order(*, order_id, actor, restore_pool):
                 "Nie można zwolnić Puli anulowanego Zamówienia Rzutu."
             )
     order.fulfillment_stage = RzutOrder.FulfillmentStage.CANCELLED
-    order.save(update_fields=["fulfillment_stage", "updated_at"])
+    order.cancelled_quantity_restored = restore_pool
+    order.save(
+        update_fields=[
+            "fulfillment_stage",
+            "cancelled_quantity_restored",
+            "updated_at",
+        ]
+    )
     RzutOrderEvent.objects.create(
         order=order,
         kind=RzutOrderEvent.Kind.FULFILLMENT_STAGE_CHANGED,
@@ -184,7 +275,240 @@ def cancel_rzut_order(*, order_id, actor, restore_pool):
         },
         **_actor_values(actor),
     )
+    return order, restore_pool
+
+
+@transaction.atomic
+def cancel_rzut_order(*, order_id, actor, restore_pool):
+    order = RzutOrder.objects.select_for_update().get(pk=order_id)
+    OrderEdition.objects.filter(pk=order.rzut_id).update(
+        allocation_revision=F("allocation_revision") + 1
+    )
+    order, _ = _cancel_locked_order(
+        order=order,
+        actor=actor,
+        restore_pool=restore_pool,
+    )
     return order
+
+
+def is_rzut_order_refundable(order):
+    return (
+        order.payment_status == RzutOrder.PaymentStatus.PAID
+        and order.payment_method == RzutOrder.PaymentMethod.P24
+        and order.p24_order_id is not None
+        and bool(order.p24_session_id)
+        and order.total > 0
+    )
+
+
+@transaction.atomic
+def _prepare_refund(order_id):
+    order = RzutOrder.objects.select_for_update().get(pk=order_id)
+    if not is_rzut_order_refundable(order):
+        raise P24RefundError(
+            "To Zamówienie Rzutu nie kwalifikuje się do pełnego zwrotu Przelewy24."
+        )
+    was_previously_requested = bool(
+        order.p24_refund_request_id and order.p24_refunds_uuid
+    )
+    fields = []
+    if not order.p24_refund_request_id:
+        order.p24_refund_request_id = f"refund-{uuid.uuid4().hex}"
+        fields.append("p24_refund_request_id")
+    if not order.p24_refunds_uuid:
+        order.p24_refunds_uuid = uuid.uuid4().hex
+        fields.append("p24_refunds_uuid")
+    if fields:
+        order.save(update_fields=[*fields, "updated_at"])
+    refund_request = P24RefundRequest(
+        p24_order_id=order.p24_order_id,
+        p24_session_id=order.p24_session_id,
+        amount=order.total,
+        request_id=order.p24_refund_request_id,
+        refunds_uuid=order.p24_refunds_uuid,
+        description=f"Zwrot KK {order.number}"[:35],
+    )
+    return PreparedRefund(
+        order=order,
+        request=refund_request,
+        was_previously_requested=was_previously_requested,
+    )
+
+
+@transaction.atomic
+def _record_refund_failure(*, order_id, actor, error, restore_pool):
+    order = RzutOrder.objects.select_for_update().get(pk=order_id)
+    if order.payment_status == RzutOrder.PaymentStatus.REFUNDED:
+        return RefundResult(outcome=RefundOutcome.COMPLETED, order=order)
+    order.p24_refund_error = error
+    order.save(update_fields=["p24_refund_error", "updated_at"])
+    RzutOrderEvent.objects.create(
+        order=order,
+        kind=RzutOrderEvent.Kind.REFUND_FAILED,
+        context={
+            "amount": str(order.total),
+            "requested_pool_restore": restore_pool,
+            "pool_restored": None,
+            "error": error,
+            "request_id": order.p24_refund_request_id,
+        },
+        **_actor_values(actor),
+    )
+    return RefundResult(
+        outcome=RefundOutcome.FAILED,
+        order=order,
+        error=error,
+    )
+
+
+@transaction.atomic
+def _record_refund_requested(*, order_id, actor, provider_result, restore_pool):
+    order = RzutOrder.objects.select_for_update().get(pk=order_id)
+    if order.payment_status == RzutOrder.PaymentStatus.REFUNDED:
+        return RefundResult(outcome=RefundOutcome.COMPLETED, order=order)
+    order.p24_refund_error = ""
+    order.p24_refund_result = provider_result
+    order.save(
+        update_fields=[
+            "p24_refund_error",
+            "p24_refund_result",
+            "updated_at",
+        ]
+    )
+    RzutOrderEvent.objects.create(
+        order=order,
+        kind=RzutOrderEvent.Kind.REFUND_REQUESTED,
+        context={
+            "amount": str(order.total),
+            "requested_pool_restore": restore_pool,
+            "provider_result": provider_result,
+            "request_id": order.p24_refund_request_id,
+        },
+        **_actor_values(actor),
+    )
+    return RefundResult(outcome=RefundOutcome.REQUESTED, order=order)
+
+
+@transaction.atomic
+def _complete_refund(*, order_id, actor, restore_pool, provider_result):
+    order = RzutOrder.objects.select_for_update().get(pk=order_id)
+    if order.payment_status == RzutOrder.PaymentStatus.REFUNDED:
+        return RefundResult(outcome=RefundOutcome.COMPLETED, order=order)
+    OrderEdition.objects.filter(pk=order.rzut_id).update(
+        allocation_revision=F("allocation_revision") + 1
+    )
+    previous_payment_status = order.payment_status
+    allocation_error = ""
+    actual_pool_decision = None
+    try:
+        with transaction.atomic():
+            order, actual_pool_decision = _cancel_locked_order(
+                order=order,
+                actor=actor,
+                restore_pool=restore_pool,
+                allow_picked_up=True,
+            )
+    except FulfillmentAllocationError as exc:
+        allocation_error = str(exc)
+        order.refresh_from_db()
+        order.requires_attention = True
+        order.attention_message = (
+            "Przelewy24 potwierdziło pełny zwrot, ale nie udało się "
+            "rozliczyć Puli ani anulować Etapu Realizacji: "
+            f"{allocation_error}"
+        )
+    order.payment_status = RzutOrder.PaymentStatus.REFUNDED
+    order.p24_refunded_at = timezone.now()
+    order.p24_refund_error = ""
+    order.p24_refund_result = provider_result
+    order.save(
+        update_fields=[
+            "payment_status",
+            "p24_refunded_at",
+            "p24_refund_error",
+            "p24_refund_result",
+            "fulfillment_stage",
+            "requires_attention",
+            "attention_message",
+            "updated_at",
+        ]
+    )
+    RzutOrderEvent.objects.create(
+        order=order,
+        kind=RzutOrderEvent.Kind.REFUND_SUCCEEDED,
+        context={
+            "amount": str(order.total),
+            "payment_status_from": previous_payment_status,
+            "payment_status_to": RzutOrder.PaymentStatus.REFUNDED,
+            "requested_pool_restore": restore_pool,
+            "pool_restored": actual_pool_decision,
+            "allocation_error": allocation_error,
+            "fulfillment_stage": order.fulfillment_stage,
+            "request_id": order.p24_refund_request_id,
+        },
+        **_actor_values(actor),
+    )
+    outcome = (
+        RefundOutcome.COMPLETED_WITH_WARNING
+        if allocation_error
+        else RefundOutcome.COMPLETED
+    )
+    return RefundResult(
+        outcome=outcome,
+        order=order,
+        error=allocation_error,
+    )
+
+
+def refund_rzut_order(*, order_id, actor, restore_pool):
+    try:
+        prepared = _prepare_refund(order_id)
+    except P24RefundError as exc:
+        return RefundResult(
+            outcome=RefundOutcome.FAILED,
+            order=RzutOrder.objects.get(pk=order_id),
+            error=str(exc),
+        )
+    if prepared.was_previously_requested:
+        try:
+            existing_refund = get_rzut_refund(prepared.request)
+        except (P24RefundError, RequestException) as exc:
+            return _record_refund_failure(
+                order_id=order_id,
+                actor=actor,
+                error=str(exc),
+                restore_pool=restore_pool,
+            )
+        if existing_refund is not None:
+            if existing_refund["completed"]:
+                return _complete_refund(
+                    order_id=order_id,
+                    actor=actor,
+                    restore_pool=restore_pool,
+                    provider_result=existing_refund,
+                )
+            return _record_refund_requested(
+                order_id=order_id,
+                actor=actor,
+                provider_result=existing_refund,
+                restore_pool=restore_pool,
+            )
+    try:
+        provider_result = refund_rzut_transaction(prepared.request)
+    except (P24RefundError, RequestException) as exc:
+        return _record_refund_failure(
+            order_id=order_id,
+            actor=actor,
+            error=str(exc),
+            restore_pool=restore_pool,
+        )
+    return _record_refund_requested(
+        order_id=order_id,
+        actor=actor,
+        provider_result=provider_result,
+        restore_pool=restore_pool,
+    )
 
 
 def deliver_ready_notification(*, order, actor):

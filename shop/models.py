@@ -1068,6 +1068,12 @@ class RzutOrder(models.Model):
         default=FulfillmentStage.NEW,
         verbose_name="Etap Realizacji",
     )
+    cancelled_quantity_restored = models.BooleanField(
+        blank=True,
+        null=True,
+        editable=False,
+        verbose_name="Sztuki z anulowania przywrócone do Puli",
+    )
     internal_note = models.TextField(
         blank=True,
         default="",
@@ -1097,6 +1103,38 @@ class RzutOrder(models.Model):
         null=True,
         unique=True,
         verbose_name="Identyfikator zamówienia P24",
+    )
+    p24_refund_request_id = models.CharField(
+        max_length=45,
+        blank=True,
+        default="",
+        editable=False,
+        verbose_name="Identyfikator żądania zwrotu P24",
+    )
+    p24_refunds_uuid = models.CharField(
+        max_length=35,
+        blank=True,
+        default="",
+        editable=False,
+        verbose_name="Identyfikator paczki zwrotu P24",
+    )
+    p24_refunded_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        editable=False,
+        verbose_name="Przyjęcie pełnego zwrotu P24",
+    )
+    p24_refund_error = models.TextField(
+        blank=True,
+        default="",
+        editable=False,
+        verbose_name="Błąd pełnego zwrotu P24",
+    )
+    p24_refund_result = models.JSONField(
+        blank=True,
+        default=dict,
+        editable=False,
+        verbose_name="Wynik pełnego zwrotu P24",
     )
     data_processing_accepted_at = models.DateTimeField(
         blank=True,
@@ -1242,6 +1280,18 @@ class RzutOrderEvent(models.Model):
         PICKUP_NOTIFICATION_FAILED = (
             "pickup_notification_failed",
             "Błąd wiadomości o zmianie odbioru",
+        )
+        REFUND_SUCCEEDED = (
+            "refund_succeeded",
+            "Pełny zwrot Przelewy24",
+        )
+        REFUND_REQUESTED = (
+            "refund_requested",
+            "Zlecenie pełnego zwrotu Przelewy24",
+        )
+        REFUND_FAILED = (
+            "refund_failed",
+            "Błąd pełnego zwrotu Przelewy24",
         )
 
     order = models.ForeignKey(
